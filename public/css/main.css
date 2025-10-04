@@ -1,0 +1,133 @@
+/* Reset-ish */
+* {
+    box-sizing: border-box
+}
+
+body {
+    margin: 0;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    color: #1f2937;
+    background: #f3f4f6
+}
+
+/* Auth split layout */
+.auth-wrap {
+    display: flex;
+    min-height: 100vh
+}
+
+.auth-left {
+    flex: 1;
+    background: #ccc url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1600&auto=format&fit=crop') center/cover no-repeat
+}
+
+.auth-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff
+}
+
+.auth-card {
+    width: 520px;
+    max-width: 90%;
+}
+
+h1 {
+    font-size: 42px;
+    margin: 0 0 12px
+}
+
+.p-muted {
+    color: #6b7280;
+    margin: 0 0 28px
+}
+
+.label {
+    display: block;
+    font-size: 14px;
+    margin: 14px 0 8px;
+    color: #374151
+}
+
+.input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none
+}
+
+.input:focus {
+    border-color: #93c5fd;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, .15)
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 8px 0 24px
+}
+
+.link {
+    font-size: 12px;
+    color: #6b7280;
+    text-decoration: none
+}
+
+.link:hover {
+    color: #111827
+}
+
+.btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #8ec6df;
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer
+}
+
+.btn:hover {
+    background: #7dbad6
+}
+
+.note {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 14px
+}
+
+.note a {
+    color: #2563eb;
+    text-decoration: none
+}
+
+.note a:hover {
+    text-decoration: underline
+}
+
+.flash {
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin: 10px 0;
+    font-size: 14px
+}
+
+.flash.err {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca
+}
+
+.flash.ok {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0
+}
