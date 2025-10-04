@@ -4,36 +4,52 @@ require __DIR__ . '/includes/db.php';
 
 if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit; }
 
+$me = (int)$_SESSION['profile_id'];
 $conn = db();
 
 // search (optional)
 $q = trim($_GET['q'] ?? '');
-$params = [];
+$like = '%'.$q.'%';
+
 $sql = "
   SELECT
-    p.picture_id, p.profile_id, p.picture_title, p.picture_description, p.picture_url, p.created_at,
+    p.picture_id,
+    p.profile_id,
+    p.picture_title,
+    p.picture_description,
+    p.picture_url,
+    p.created_at,
     pr.display_name,
-    COALESCE(l.cnt,0) AS like_count,
-    COALESCE(c.cnt,0) AS comment_count
+    COALESCE(l.cnt,0)  AS like_count,
+    COALESCE(c.cnt,0)  AS comment_count,
+    CASE WHEN ml.like_id IS NULL THEN 0 ELSE 1 END AS liked_by_me
   FROM pictures p
   JOIN profiles pr ON pr.profile_id = p.profile_id
-  LEFT JOIN (SELECT picture_id, COUNT(*) cnt FROM likes GROUP BY picture_id) l ON l.picture_id = p.picture_id
+  LEFT JOIN (SELECT picture_id, COUNT(*) cnt FROM likes    GROUP BY picture_id) l ON l.picture_id = p.picture_id
   LEFT JOIN (SELECT picture_id, COUNT(*) cnt FROM comments GROUP BY picture_id) c ON c.picture_id = p.picture_id
+  LEFT JOIN likes ml ON ml.picture_id = p.picture_id AND ml.profile_id = ?
 ";
+
+$types = 'i';
+$params = [$me];
+
 if ($q !== '') {
   $sql .= " WHERE p.picture_title LIKE ? OR p.picture_description LIKE ? ";
-  $like = '%'.$q.'%';
-  $params = [$like, $like];
+  $types .= 'ss';
+  $params[] = $like;
+  $params[] = $like;
 }
+
 $sql .= " ORDER BY p.created_at DESC";
 
 $stmt = $conn->prepare($sql);
-if ($params) { $stmt->bind_param('ss', ...$params); }
+$stmt->bind_param($types, ...$params);
 $stmt->execute();
 $res = $stmt->get_result();
 $pictures = [];
 while ($row = $res->fetch_assoc()) { $pictures[] = $row; }
-$stmt->close(); $conn->close();
+$stmt->close(); 
+$conn->close();
 ?>
 <!doctype html>
 <html lang="en">
@@ -66,11 +82,11 @@ $stmt->close(); $conn->close();
   <aside class="sidebar">
     <a class="side-btn" href="./create.php">⭐ Create</a>
     <div class="menu">
-  <a href="./index.php">🏠 Home</a>
-  <a href="./profile.php">👤 My Profile</a>
-  <div class="muted">— — —</div>
-  <a href="./auth/logout.php">↩︎ Logout</a>
-</div>
+      <a href="./index.php">🏠 Home</a>
+      <a href="./profile.php">👤 My Profile</a>
+      <div class="muted">— — —</div>
+      <a href="./auth/logout.php">↩︎ Logout</a>
+    </div>
   </aside>
 
   <!-- Main -->
@@ -89,14 +105,29 @@ $stmt->close(); $conn->close();
           <img src="uploads/<?= htmlspecialchars($p['picture_url']) ?>" alt="">
           <div class="card-body">
             <div class="card-title"><?= htmlspecialchars($p['picture_title']) ?></div>
-            <?php if ($p['picture_description']): ?>
+            <?php if (!empty($p['picture_description'])): ?>
               <div style="color:#6b7280;font-size:13px;margin-top:4px;">
                 <?= htmlspecialchars($p['picture_description']) ?>
               </div>
             <?php endif; ?>
+
+            <!-- Meta with like toggle -->
             <div class="meta">
               <span><?= htmlspecialchars($p['display_name']) ?></span>
-              <span class="counts">❤ <?= (int)$p['like_count'] ?> &nbsp; 💬 <?= (int)$p['comment_count'] ?></span>
+              <span class="counts">
+                <form method="post" action="./actions/toggle_like.php" style="display:inline">
+                  <input type="hidden" name="picture_id" value="<?= (int)$p['picture_id'] ?>">
+                  <button type="submit" style="border:none;background:none;cursor:pointer;font:inherit">
+                    <?php if ((int)$p['liked_by_me'] === 1): ?>
+                      ❤
+                    <?php else: ?>
+                      ♡
+                    <?php endif; ?>
+                    <?= (int)$p['like_count'] ?>
+                  </button>
+                </form>
+                &nbsp; 💬 <?= (int)$p['comment_count'] ?>
+              </span>
             </div>
           </div>
         </article>
