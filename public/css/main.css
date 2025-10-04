@@ -1,16 +1,53 @@
-/* Reset-ish */
+/* =============== Base */
 * {
     box-sizing: border-box
+}
+
+:root {
+    --bg: #f3f4f6;
+    --card: #ffffff;
+    --line: #e5e7eb;
+    --muted: #6b7280;
+    --text: #111827;
+    --brand: #0f172a;
+    --primary: #8ec6df;
+    --primary-hover: #7dbad6;
+}
+
+html,
+body {
+    height: 100%
 }
 
 body {
     margin: 0;
     font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    color: #1f2937;
-    background: #f3f4f6
+    background: var(--bg);
+    color: var(--text)
 }
 
-/* Auth split layout */
+/* =============== Flash */
+.flash {
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin: 12px auto;
+    max-width: 1200px;
+    font-size: 14px
+}
+
+.flash.ok {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0
+}
+
+.flash.err {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca
+}
+
+/* =============== Auth layout (you already used this) */
 .auth-wrap {
     display: flex;
     min-height: 100vh
@@ -31,7 +68,7 @@ body {
 
 .auth-card {
     width: 520px;
-    max-width: 90%;
+    max-width: 90%
 }
 
 h1 {
@@ -40,7 +77,7 @@ h1 {
 }
 
 .p-muted {
-    color: #6b7280;
+    color: var(--muted);
     margin: 0 0 28px
 }
 
@@ -54,7 +91,7 @@ h1 {
 .input {
     width: 100%;
     padding: 14px 16px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--line);
     border-radius: 8px;
     font-size: 15px;
     outline: none
@@ -74,7 +111,7 @@ h1 {
 
 .link {
     font-size: 12px;
-    color: #6b7280;
+    color: var(--muted);
     text-decoration: none
 }
 
@@ -87,7 +124,7 @@ h1 {
     padding: 14px;
     border: none;
     border-radius: 10px;
-    background: #8ec6df;
+    background: var(--primary);
     color: #fff;
     font-weight: 600;
     font-size: 16px;
@@ -95,12 +132,12 @@ h1 {
 }
 
 .btn:hover {
-    background: #7dbad6
+    background: var(--primary-hover)
 }
 
 .note {
     font-size: 12px;
-    color: #6b7280;
+    color: var(--muted);
     margin-top: 14px
 }
 
@@ -113,21 +150,186 @@ h1 {
     text-decoration: underline
 }
 
-.flash {
+/* =============== Home layout */
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between
+}
+
+.brand {
+    font-weight: 900;
+    letter-spacing: .4px
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px
+}
+
+.search {
+    width: 340px;
+    max-width: 48vw;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    outline: none
+}
+
+.cta {
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: var(--primary);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer
+}
+
+.cta:hover {
+    background: var(--primary-hover)
+}
+
+.avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: #c7d2fe;
+    display: inline-block
+}
+
+.shell {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 22px;
+    max-width: 1200px;
+    margin: 22px auto
+}
+
+@media(max-width:960px) {
+    .shell {
+        grid-template-columns: 1fr
+    }
+}
+
+.sidebar {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px;
+    position: sticky;
+    top: 70px;
+    height: fit-content
+}
+
+.side-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    margin-bottom: 10px
+}
+
+.side-btn:hover {
+    background: #f9fafb
+}
+
+.menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     padding: 10px 12px;
-    border-radius: 8px;
-    margin: 10px 0;
-    font-size: 14px
+    border-radius: 10px;
+    color: #374151;
+    text-decoration: none
 }
 
-.flash.err {
-    background: #fee2e2;
-    color: #991b1b;
-    border: 1px solid #fecaca
+.menu a:hover {
+    background: #f3f4f6
 }
 
-.flash.ok {
-    background: #dcfce7;
-    color: #166534;
-    border: 1px solid #bbf7d0
+.menu .muted {
+    color: var(--muted);
+    font-size: 12px;
+    margin: 10px 12px
+}
+
+.pills {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 2px 0 16px
+}
+
+.pill {
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 12px;
+    background: #fff;
+    color: #374151
+}
+
+.feed {
+    column-count: 3;
+    column-gap: 16px
+}
+
+@media(max-width:1180px) {
+    .feed {
+        column-count: 2
+    }
+}
+
+@media(max-width:720px) {
+    .feed {
+        column-count: 1
+    }
+}
+
+.card {
+    break-inside: avoid;
+    margin: 0 0 16px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden
+}
+
+.card img {
+    width: 100%;
+    display: block
+}
+
+.card-body {
+    padding: 10px 12px
+}
+
+.card-title {
+    font-weight: 600
+}
+
+.meta {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 6px
+}
+
+.meta .counts {
+    display: flex;
+    gap: 10px
 }
