@@ -11,6 +11,7 @@ $conn = db();
 $q = trim($_GET['q'] ?? '');
 $like = '%'.$q.'%';
 
+
 $sql = "
   SELECT
     p.picture_id,
@@ -48,7 +49,7 @@ $stmt->execute();
 $res = $stmt->get_result();
 $pictures = [];
 while ($row = $res->fetch_assoc()) { $pictures[] = $row; }
-$stmt->close(); 
+$stmt->close();
 $conn->close();
 ?>
 <!doctype html>
@@ -56,77 +57,78 @@ $conn->close();
 <head>
   <meta charset="utf-8">
   <title>Home · Picturesque</title>
-  <link rel="stylesheet" href="./public/css/main.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./public/css/main.css?v=6">
 </head>
 <body>
-
-<!-- Header -->
-<div class="header">
-  <div class="brand">PICTURESQUE</div>
-  <div class="header-right">
-    <form method="get" action="index.php">
-      <input class="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search">
-    </form>
-    <a href="./create.php"><button class="cta" type="button">Create</button></a>
-    <span class="avatar" title="<?= htmlspecialchars($_SESSION['display_name'] ?? 'You') ?>"></span>
-    <span><?= htmlspecialchars($_SESSION['display_name'] ?? 'You') ?></span>
-    <a class="link" href="./auth/logout.php">Logout</a>
-  </div>
-</div>
 
 <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
-<div class="shell">
+<div class="layout">
   <!-- Sidebar -->
-  <aside class="sidebar">
-    <a class="side-btn" href="./create.php">⭐ Create</a>
-    <div class="menu">
-      <a href="./index.php">🏠 Home</a>
-      <a href="./profile.php">👤 My Profile</a>
-      <div class="muted">— — —</div>
+  <aside class="sidenav">
+    <div class="brand">PICTURESQUE</div>
+
+    <a class="create-btn" href="./create.php">☆ Create</a>
+
+    <nav class="nav">
+      <a href="./index.php">Home</a>
+      <a href="./profile.php">My Profile</a>
+      <div class="rule"></div>
       <a href="./auth/logout.php">↩︎ Logout</a>
-    </div>
+    </nav>
   </aside>
 
-  <!-- Main -->
-  <main>
+  <!-- Content -->
+  <main class="content">
+    <div class="content-top">
+      <form method="get" action="index.php" class="search-wrap">
+        <input class="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search">
+      </form>
+
+      <div class="userbox">
+        <span class="avatar" title="<?= htmlspecialchars($_SESSION['display_name'] ?? 'You') ?>"></span>
+        <span class="username"><?= htmlspecialchars($_SESSION['display_name'] ?? 'You') ?></span>
+      </div>
+    </div>
+
     <div class="pills">
       <span class="pill">Discovery</span>
       <span class="pill">Abstract</span>
+      <span class="pill">Sci-fi</span>
       <span class="pill">Landscape</span>
-      <span class="pill">Portrait</span>
       <span class="pill">+</span>
-    </div>
+    </div>   <!-- Good if we can make dynamic -->
 
     <section class="feed">
       <?php foreach ($pictures as $p): ?>
         <article class="card">
           <img src="uploads/<?= htmlspecialchars($p['picture_url']) ?>" alt="">
           <div class="card-body">
+            <div class="author-row">
+              <span class="mini-avatar"></span>
+              <span class="author"><?= htmlspecialchars($p['display_name']) ?></span>
+            </div>
+
             <div class="card-title"><?= htmlspecialchars($p['picture_title']) ?></div>
+
             <?php if (!empty($p['picture_description'])): ?>
-              <div style="color:#6b7280;font-size:13px;margin-top:4px;">
+              <div class="card-desc">
                 <?= htmlspecialchars($p['picture_description']) ?>
               </div>
             <?php endif; ?>
 
-            <!-- Meta with like toggle -->
             <div class="meta">
-              <span><?= htmlspecialchars($p['display_name']) ?></span>
               <span class="counts">
                 <form method="post" action="./actions/toggle_like.php" style="display:inline">
                   <input type="hidden" name="picture_id" value="<?= (int)$p['picture_id'] ?>">
-                  <button type="submit" style="border:none;background:none;cursor:pointer;font:inherit">
-                    <?php if ((int)$p['liked_by_me'] === 1): ?>
-                      ❤
-                    <?php else: ?>
-                      ♡
-                    <?php endif; ?>
+                  <button type="submit" class="iconbtn">
+                    <?php if ((int)$p['liked_by_me'] === 1): ?>❤<?php else: ?>♡<?php endif; ?>
                     <?= (int)$p['like_count'] ?>
                   </button>
                 </form>
-                &nbsp; 💬 <?= (int)$p['comment_count'] ?>
+                <a class="muted" href="picture.php?id=<?= (int)$p['picture_id'] ?>">💬 <?= (int)$p['comment_count'] ?></a>
               </span>
             </div>
           </div>
@@ -134,7 +136,7 @@ $conn->close();
       <?php endforeach; ?>
 
       <?php if (!$pictures): ?>
-        <p style="color:#6b7280">No pictures yet. Click <b>Create</b> to upload your first photo.</p>
+        <p class="muted">No pictures yet. Click <b>Create</b> to upload your first photo.</p>
       <?php endif; ?>
     </section>
   </main>

@@ -26,6 +26,7 @@ try {
 
   $_SESSION['profile_id']   = (int)$row['profile_id'];
   $_SESSION['display_name'] = $row['display_name'];
+  
   header('Location: ../index.php'); exit;
 } catch (Throwable $e) {
   set_flash('err','Database error: '.$e->getMessage());
