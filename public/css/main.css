@@ -94,7 +94,8 @@ h1 {
     border: 1px solid var(--line);
     border-radius: 8px;
     font-size: 15px;
-    outline: none
+    outline: none;
+    margin-bottom: 16px;
 }
 
 .input:focus {
@@ -128,7 +129,8 @@ h1 {
     color: #fff;
     font-weight: 600;
     font-size: 16px;
-    cursor: pointer
+    cursor: pointer;
+    margin-top: 20px;
 }
 
 .btn:hover {
@@ -138,7 +140,8 @@ h1 {
 .note {
     font-size: 12px;
     color: var(--muted);
-    margin-top: 14px
+    margin-top: 20px;
+    text-align: center;
 }
 
 .note a {
