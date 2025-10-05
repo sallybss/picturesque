@@ -1,4 +1,4 @@
-/* =============== Base */
+/* ================= Base */
 * {
     box-sizing: border-box
 }
@@ -23,15 +23,15 @@ body {
     margin: 0;
     font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     background: var(--bg);
-    color: var(--text)
+    color: var(--text);
 }
 
-/* =============== Flash */
+/* ================= Flash */
 .flash {
     padding: 10px 12px;
     border-radius: 8px;
     margin: 12px auto;
-    max-width: 1200px;
+    max-width: 1280px;
     font-size: 14px
 }
 
@@ -47,7 +47,7 @@ body {
     border: 1px solid #fecaca
 }
 
-/* =============== Auth layout (you already used this) */
+/* ================= Auth */
 .auth-wrap {
     display: flex;
     min-height: 100vh
@@ -153,51 +153,109 @@ h1 {
     text-decoration: underline
 }
 
-/* =============== Home layout */
-.header {
-    position: sticky;
-    top: 0;
-    z-index: 10;
+/* =====================================================================
+   HOME (Mockup: left sidebar + content with search + chips + masonry)
+   ===================================================================== */
+
+/* --- Shell layout --- */
+.layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 20px;
+    max-width: 1280px;
+    margin: 22px auto;
+    padding: 0 10px;
+}
+
+@media(max-width:1000px) {
+    .layout {
+        grid-template-columns: 1fr
+    }
+}
+
+/* --- Sidebar --- */
+.sidenav {
     background: #fff;
-    border-bottom: 1px solid var(--line);
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    position: sticky;
+    top: 20px;
 }
 
 .brand {
     font-weight: 900;
-    letter-spacing: .4px
+    font-size: 20px;
+    letter-spacing: .6px;
+    margin-bottom: 16px
 }
 
-.header-right {
+.create-btn {
+    display: block;
+    text-align: center;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 700;
+    padding: 12px 14px;
+    border-radius: 12px;
+    text-decoration: none;
+    margin-bottom: 14px
+}
+
+.create-btn:hover {
+    background: var(--primary-hover)
+}
+
+.nav a {
     display: flex;
     align-items: center;
-    gap: 12px
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    color: #374151;
+    text-decoration: none
+}
+
+.nav a:hover {
+    background: #f3f4f6
+}
+
+.rule {
+    height: 1px;
+    background: var(--line);
+    margin: 8px 2px
+}
+
+/* --- Content header (inside main) --- */
+.content {
+    min-width: 0
+}
+
+.content-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px
+}
+
+.search-wrap {
+    flex: 1;
+    max-width: 560px
 }
 
 .search {
-    width: 340px;
-    max-width: 48vw;
+    width: 100%;
     padding: 12px 14px;
     border: 1px solid var(--line);
-    border-radius: 10px;
-    outline: none
+    border-radius: 12px;
+    outline: none;
+    background: #fff
 }
 
-.cta {
-    padding: 10px 14px;
-    border-radius: 10px;
-    background: var(--primary);
-    border: none;
-    color: #fff;
-    font-weight: 600;
-    cursor: pointer
-}
-
-.cta:hover {
-    background: var(--primary-hover)
+.userbox {
+    display: flex;
+    align-items: center;
+    gap: 10px
 }
 
 .avatar {
@@ -208,72 +266,16 @@ h1 {
     display: inline-block
 }
 
-.shell {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: 22px;
-    max-width: 1200px;
-    margin: 22px auto
+.username {
+    font-weight: 600
 }
 
-@media(max-width:960px) {
-    .shell {
-        grid-template-columns: 1fr
-    }
-}
-
-.sidebar {
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 16px;
-    position: sticky;
-    top: 70px;
-    height: fit-content
-}
-
-.side-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: #fff;
-    cursor: pointer;
-    margin-bottom: 10px
-}
-
-.side-btn:hover {
-    background: #f9fafb
-}
-
-.menu a {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    color: #374151;
-    text-decoration: none
-}
-
-.menu a:hover {
-    background: #f3f4f6
-}
-
-.menu .muted {
-    color: var(--muted);
-    font-size: 12px;
-    margin: 10px 12px
-}
-
+/* --- Chips --- */
 .pills {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
-    margin: 2px 0 16px
+    margin: 10px 0 18px
 }
 
 .pill {
@@ -285,6 +287,7 @@ h1 {
     color: #374151
 }
 
+/* --- Masonry feed (equal width, natural heights) --- */
 .feed {
     column-count: 3;
     column-gap: 16px
@@ -307,12 +310,15 @@ h1 {
     margin: 0 0 16px;
     background: #fff;
     border: 1px solid var(--line);
-    border-radius: 14px;
-    overflow: hidden
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .04)
 }
 
+/* keep natural image aspect ratio → different heights */
 .card img {
     width: 100%;
+    height: auto;
     display: block
 }
 
@@ -320,19 +326,185 @@ h1 {
     padding: 10px 12px
 }
 
+.author-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px
+}
+
+.mini-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    background: #e5e7eb;
+    display: inline-block
+}
+
+.author {
+    font-size: 12px;
+    color: var(--muted)
+}
+
 .card-title {
-    font-weight: 600
+    font-weight: 700;
+    margin: 2px 0 2px
+}
+
+.card-desc {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 2px
 }
 
 .meta {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
+    align-items: center;
     color: var(--muted);
     font-size: 12px;
-    margin-top: 6px
+    margin-top: 8px
 }
 
-.meta .counts {
+.counts {
     display: flex;
-    gap: 10px
+    gap: 14px;
+    align-items: center
+}
+
+.iconbtn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    padding: 0
+}
+
+.muted {
+    color: var(--muted);
+    text-decoration: none
+}
+
+.muted:hover {
+    text-decoration: underline
+}
+
+/* ================= Create / simple forms shared */
+.form-card {
+    max-width: 740px;
+    margin: 22px auto;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px
+}
+
+.form-row {
+    margin: 10px 0
+}
+
+.label-sm {
+    display: block;
+    color: #374151;
+    font-size: 14px;
+    margin-bottom: 6px
+}
+
+.input-sm,
+textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    outline: none
+}
+
+.btn-primary {
+    padding: 12px 14px;
+    border: none;
+    border-radius: 12px;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover)
+}
+
+/* ===== Profile header ===== */
+.profile-hero {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 18px
+}
+
+.profile-avatar {
+    width: 84px;
+    height: 84px;
+    border-radius: 999px;
+    object-fit: cover;
+    background: #e5e7eb
+}
+
+.profile-info {
+    min-width: 0
+}
+
+.profile-name {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: .2px
+}
+
+.profile-email {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 2px
+}
+
+.profile-stats {
+    display: flex;
+    gap: 16px;
+    color: #374151;
+    margin-top: 8px
+}
+
+.profile-stats b {
+    font-weight: 800
+}
+
+.profile-actions {
+    margin-top: 10px
+}
+
+.section-title {
+    font-size: 16px;
+    color: #374151;
+    margin: 8px 0 10px
+}
+
+.avatar-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.avatar-img {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    object-fit: cover;
+    background: #c7d2fe;
+    display: inline-block;
 }
