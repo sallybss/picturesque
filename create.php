@@ -1,10 +1,14 @@
 <?php
 require __DIR__ . '/includes/flash.php';
-if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit; }
+if (empty($_SESSION['profile_id'])) {
+  header('Location: ./auth/login.php');
+  exit;
+}
 ?>
 
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>Create · Picturesque</title>
@@ -22,7 +26,6 @@ if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit
     <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
     <form method="post" action="./actions/post_picture.php" enctype="multipart/form-data" class="create-form">
-
       <!-- Hidden file input + dropzone with preview -->
       <input id="photo" class="file-input" type="file" name="photo" accept="image/*" required>
 
@@ -31,7 +34,7 @@ if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit
         <div class="dz-empty" id="dzEmpty">
           <svg class="dz-icon" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 16V6m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
-                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
           <p class="dz-text">Drag &amp; drop your photo here or <button type="button" class="dz-link" id="browseBtn">browse</button></p>
         </div>
@@ -66,7 +69,6 @@ if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit
         <input type="hidden" name="tags" id="tagsInput" value="">
       </div>
 
-
       <div class="actions">
         <a href="./index.php" class="btn-ghost wide">Cancel</a>
         <button class="btn-primary wide" type="submit" name="submit">Post</button>
@@ -75,7 +77,6 @@ if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit
   </div>
 
   <script>
-    // Elements
     const input = document.getElementById('photo');
     const dz = document.getElementById('dropzone');
     const dzEmpty = document.getElementById('dzEmpty');
@@ -85,17 +86,25 @@ if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit
 
     // Open file dialog
     browseBtn.addEventListener('click', () => input.click());
-    dz.addEventListener('click', (e) => { if (e.target === dz) input.click(); });
+    dz.addEventListener('click', (e) => {
+      if (e.target === dz) input.click();
+    });
 
     // Handle input change
-    input.addEventListener('change', function () {
+    input.addEventListener('change', function() {
       const file = this.files[0];
       if (file) setFile(file);
     });
 
     // Drag & drop
-    ['dragenter','dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('is-drag'); }));
-    ['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('is-drag'); }));
+    ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => {
+      e.preventDefault();
+      dz.classList.add('is-drag');
+    }));
+    ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => {
+      e.preventDefault();
+      dz.classList.remove('is-drag');
+    }));
     dz.addEventListener('drop', (e) => {
       const file = e.dataTransfer.files[0];
       if (file) setFile(file);
@@ -103,8 +112,16 @@ if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit
 
     // Apply file → preview
     function setFile(file) {
-      if (!file.type.startsWith('image/')) { alert('Please choose an image file.'); clearFile(); return; }
-      if (file.size > 10 * 1024 * 1024) { alert('Max size is 10MB.'); clearFile(); return; }
+      if (!file.type.startsWith('image/')) {
+        alert('Please choose an image file.');
+        clearFile();
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Max size is 10MB.');
+        clearFile();
+        return;
+      }
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -133,7 +150,10 @@ if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit
       dzEmpty.hidden = false;
       dz.classList.remove('has-image');
     }
-    removeBtn.addEventListener('click', (e) => { e.preventDefault(); clearFile(); });
+    removeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      clearFile();
+    });
 
     const chips = document.getElementById('chips');
     const tagsInput = document.getElementById('tagsInput');
@@ -164,9 +184,7 @@ if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit
         syncTags();
       }
     });
-
   </script>
 </body>
-
 
 </html>
