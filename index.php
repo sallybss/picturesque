@@ -7,10 +7,20 @@ if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit
 $me = (int)$_SESSION['profile_id'];
 $conn = db();
 
+//Avatar of the logged-in user (for top-right corner)
+$stmtMe = $conn->prepare("SELECT display_name, avatar_photo FROM profiles WHERE profile_id = ?");
+$stmtMe->bind_param('i', $me);
+$stmtMe->execute();
+$meRow = $stmtMe->get_result()->fetch_assoc();
+$stmtMe->close();
+
+$meAvatarUrl = !empty($meRow['avatar_photo'])
+? 'uploads/' . htmlspecialchars($meRow['avatar_photo'])
+: 'https://placehold.co/28x28?text=%20';
+
 // search (optional)
 $q = trim($_GET['q'] ?? '');
 $like = '%'.$q.'%';
-
 
 $sql = "
   SELECT
@@ -21,6 +31,7 @@ $sql = "
     p.picture_url,
     p.created_at,
     pr.display_name,
+    pr.avatar_photo, 
     COALESCE(l.cnt,0)  AS like_count,
     COALESCE(c.cnt,0)  AS comment_count,
     CASE WHEN ml.like_id IS NULL THEN 0 ELSE 1 END AS liked_by_me
@@ -42,7 +53,6 @@ if ($q !== '') {
 }
 
 $sql .= " ORDER BY p.created_at DESC";
-
 $stmt = $conn->prepare($sql);
 $stmt->bind_param($types, ...$params);
 $stmt->execute();
@@ -51,7 +61,6 @@ $pictures = [];
 while ($row = $res->fetch_assoc()) { $pictures[] = $row; }
 $stmt->close();
 $conn->close();
-
 
 ?>
 <!doctype html>
@@ -113,8 +122,10 @@ $conn->close();
       </form>
 
       <div class="userbox">
-        <span class="avatar" title="<?= htmlspecialchars($_SESSION['display_name'] ?? 'You') ?>"></span>
-        <span class="username"><?= htmlspecialchars($_SESSION['display_name'] ?? 'You') ?></span>
+        <span class="avatar"
+          title="<?= htmlspecialchars($meRow['display_name'] ?? 'You') ?>"
+          style="background-image:url('<?= $meAvatarUrl ?>');"></span>
+        <span class="username"><?= htmlspecialchars($meRow['display_name'] ?? 'You') ?></span>
       </div>
     </div>
 
@@ -136,8 +147,6 @@ $conn->close();
           <path fill="currentColor" d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/>
         </svg>
       </button>
-
-
     </div>
 
     <section class="feed">
@@ -146,7 +155,11 @@ $conn->close();
           <img src="uploads/<?= htmlspecialchars($p['picture_url']) ?>" alt="">
           <div class="card-body">
             <div class="author-row">
-              <span class="mini-avatar"></span>
+              <?php
+              // Build avatar URL: use uploaded file if present, else a tiny placeholder
+               $avatarUrl = !empty($p['avatar_photo']) ? 'uploads/' . htmlspecialchars($p['avatar_photo']) : 'https://placehold.co/24x24?text=%20';
+              ?>
+              <img class="mini-avatar" src="<?= $avatarUrl ?>" alt="<?= htmlspecialchars($p['display_name']) ?> avatar">
               <span class="author"><?= htmlspecialchars($p['display_name']) ?></span>
             </div>
 

@@ -31,7 +31,7 @@ if ($photo['error'] !== UPLOAD_ERR_OK) {
 }
 
 /* --- Force the correct uploads folder (absolute path) --- */
-$uploadDir  = '/Applications/XAMPP/xamppfiles/htdocs/picturesque/picturesque/uploads/'; 
+$uploadDir  = '/Applications/XAMPP/xamppfiles/htdocs/picturesque/uploads/'; 
 $publicPath = 'uploads/'; // what we prepend in <img src="uploads/...">
 
 /* Create folder if missing */
@@ -49,7 +49,7 @@ if (!is_writable($uploadDir)) {
 }
 
 /* Generate safe filename */
-$ext    = pathinfo($photo['name'], PATHINFO_EXTENSION);
+$ext = strtolower(pathinfo($photo['name'], PATHINFO_EXTENSION));
 $fname  = time().'_'.bin2hex(random_bytes(4)).'.'.$ext;
 $target = $uploadDir . $fname;
 

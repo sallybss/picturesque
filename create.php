@@ -5,7 +5,6 @@ if (empty($_SESSION['profile_id'])) {
   exit;
 }
 ?>
-
 <!doctype html>
 <html lang="en">
 

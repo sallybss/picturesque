@@ -268,12 +268,14 @@ h1 {
     gap: 10px
 }
 
-.avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 999px;
-    background: #c7d2fe;
-    display: inline-block
+.avatar{
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  background:#c7d2fe; display:inline-block;
+  background-size: cover;        
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .username {
@@ -779,35 +781,68 @@ background:var(--primary-hover);
 
 .chip.add { font-weight: 700; }
 
-/* ================= Edit Profile (Figma match) ================= */
-.card-title{ margin:0 0 8px; font-size:22px; font-weight:800; }
+/* ================= Edit Profile ================= */
+.card-title{ 
+    margin:0 0 8px; 
+    font-size:22px; 
+    font-weight:800; 
+}
 
 .edit-avatar-row{
-  display:flex; align-items:center; gap:12px;
+  display:flex; 
+  align-items:center; 
+  gap:12px;
   margin:8px 0 18px;
 }
 
 .edit-avatar img{
-  width:96px; height:96px; border-radius:999px; object-fit:cover;
+  width:96px; height:96px; 
+  border-radius:999px; 
+  object-fit:cover;
   background:#e5e7eb;
 }
 
-.avatar-note{ color:var(--muted); font-size:14px; }
+.avatar-note{ 
+    color:var(--muted); 
+    font-size:14px; }
 
 /* File input (visible but subtle) */
 .file-input-vis{
-  padding:8px; border:1px dashed var(--line); border-radius:10px; background:#fff;
+  padding:8px; 
+  border:1px dashed var(--line); 
+  border-radius:10px; 
+  background:#fff;
 }
 
 /* Button row – specific to this page so it won't affect .actions used elsewhere */
 .profile-actions-row{
-  display:flex; align-items:center; gap:12px; margin-top:10px;
+  display:flex; 
+  align-items:center; 
+  gap:12px; 
+  margin-top:10px;
 }
 
 /* Active item in side nav (optional visual cue) */
-.nav a.active{ background:#eef6fa; font-weight:600; }
-
-/* Slightly stronger form card look (keeps your existing .form-card base) */
-.form-card{
-  box-shadow: 0 6px 20px rgba(17,24,39,.06);
+.nav a.active{ 
+    background:#eef6fa; 
+    font-weight:600; 
 }
+
+/* Author avatar */
+.card .cover { 
+    width:100%; 
+    height:auto; 
+    display:block; 
+}
+
+img.mini-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  object-fit: cover;
+  display: inline-block;
+  background: #e5e7eb;
+}
+
+
+
