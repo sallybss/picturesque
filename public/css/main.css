@@ -844,5 +844,16 @@ img.mini-avatar {
   background: #e5e7eb;
 }
 
+.btn-danger{
+  background:#67C1DC; 
+  border:1px solid #67C1DC;
+  color:#FFFFFF; 
+  padding:8px 12px; 
+  border-radius:8px; 
+  font-weight:600; 
+  cursor:pointer;
+  margin-left: 10px;
+}
+.btn-danger:hover{ background:#67C1DC; }
 
 
