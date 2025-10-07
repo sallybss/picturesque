@@ -20,8 +20,12 @@ if ($title === '' || empty($_FILES['photo']['name'])) {
 }
 
 $photo = $_FILES['photo'];
+
+/* --- Safer MIME check --- */
+$finfo   = new finfo(FILEINFO_MIME_TYPE);
+$mime    = $finfo->file($photo['tmp_name']);
 $allowed = ['image/jpeg','image/png','image/gif','image/webp'];
-if (!in_array($photo['type'], $allowed)) {
+if (!in_array($mime, $allowed, true)) {
   set_flash('err','Only JPG/PNG/GIF/WEBP allowed.');
   header('Location: ../create.php'); exit;
 }
@@ -30,9 +34,9 @@ if ($photo['error'] !== UPLOAD_ERR_OK) {
   header('Location: ../create.php'); exit;
 }
 
-/* --- Force the correct uploads folder (absolute path) --- */
-$uploadDir  = '/Applications/XAMPP/xamppfiles/htdocs/picturesque/uploads/'; 
-$publicPath = 'uploads/'; // what we prepend in <img src="uploads/...">
+/* --- Dynamic paths (your app lives in …/picturesque/picturesque) --- */
+$root      = realpath(__DIR__ . '/..');           // …/picturesque/picturesque
+$uploadDir = $root . '/uploads/';                 // …/picturesque/picturesque/uploads/
 
 /* Create folder if missing */
 if (!is_dir($uploadDir)) {
@@ -44,12 +48,19 @@ if (!is_dir($uploadDir)) {
 
 /* Check writability */
 if (!is_writable($uploadDir)) {
-  set_flash('err', 'Uploads folder is not writable: '.$uploadDir.' — On macOS/XAMPP, run: sudo chmod -R 775 '.$uploadDir.' and ensure Apache (daemon/_www) owns it.');
+  set_flash('err', 'Uploads folder is not writable: '.$uploadDir.
+    ' — fix with: sudo chown -R '.$_SERVER['USER'].' "'.$uploadDir.'" && chmod -R 755 "'.$uploadDir.'"');
   header('Location: ../create.php'); exit;
 }
 
 /* Generate safe filename */
-$ext = strtolower(pathinfo($photo['name'], PATHINFO_EXTENSION));
+$extMap = [
+  'image/jpeg' => 'jpg',
+  'image/png'  => 'png',
+  'image/gif'  => 'gif',
+  'image/webp' => 'webp'
+];
+$ext    = $extMap[$mime] ?? strtolower(pathinfo($photo['name'], PATHINFO_EXTENSION));
 $fname  = time().'_'.bin2hex(random_bytes(4)).'.'.$ext;
 $target = $uploadDir . $fname;
 
@@ -59,10 +70,13 @@ if (!move_uploaded_file($photo['tmp_name'], $target)) {
   header('Location: ../create.php'); exit;
 }
 
-/* Save DB row */
+/* Save DB row (store only the filename) */
 $conn = db();
-$stmt = $conn->prepare("INSERT INTO pictures (profile_id, picture_title, picture_description, picture_url) VALUES (?, ?, ?, ?)");
-$relPath = $fname; // only filename in DB, prepend uploads/ in HTML
+$stmt = $conn->prepare("
+  INSERT INTO pictures (profile_id, picture_title, picture_description, picture_url)
+  VALUES (?, ?, ?, ?)
+");
+$relPath = $fname; // only filename in DB
 $stmt->bind_param('isss', $_SESSION['profile_id'], $title, $desc, $relPath);
 $stmt->execute();
 $stmt->close(); 
