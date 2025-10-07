@@ -844,6 +844,8 @@ img.mini-avatar {
   background: #e5e7eb;
 }
 
+
+/* Buttons that are inside the cards from "my profile" */
 .btn-danger{
   background:#67C1DC; 
   border:1px solid #67C1DC;
@@ -855,5 +857,28 @@ img.mini-avatar {
   margin-left: 10px;
 }
 .btn-danger:hover{ background:#67C1DC; }
+
+.meta{ 
+display:flex; 
+align-items:center; 
+gap:8px; 
+}
+
+.spacer{ 
+flex:1 1 auto; 
+}
+
+.btn-ghost{ 
+border:1px solid #e5e7eb; 
+padding:8px 12px; 
+border-radius:8px; 
+background:#fff; 
+cursor:pointer; 
+}
+
+.btn-ghost:hover{ 
+background:#f9fafb; 
+}
+
 
 

@@ -164,7 +164,10 @@ $avatarSrc = !empty($meRow['avatar_photo']) ? 'uploads/' . htmlspecialchars($meR
                   <a class="muted" href="picture.php?id=<?= (int)$p['picture_id'] ?>">💬 <?= (int)$p['comment_count'] ?></a>
                 </span>
 
-                <!-- Delete my post -->
+                <span class="spacer"></span>
+
+                <a class="btn-ghost" href="./edit_picture.php?id=<?= (int)$p['picture_id'] ?>">Edit</a>
+
                 <form method="post"
                   action="./actions/delete_picture.php"
                   onsubmit="return confirm('Delete this photo? This cannot be undone.');"
@@ -182,6 +185,7 @@ $avatarSrc = !empty($meRow['avatar_photo']) ? 'uploads/' . htmlspecialchars($meR
           <p class="muted">You haven’t posted yet. Click <b>Create</b> to upload your first photo.</p>
         <?php endif; ?>
       </section>
+
     </main>
   </div>
 
