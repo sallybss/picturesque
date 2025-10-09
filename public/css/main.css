@@ -496,7 +496,8 @@ textarea {
     background: var(--primary);
     color: #fff;
     font-weight: 700;
-    cursor: pointer
+    cursor: pointer;
+    text-decoration: none;
 }
 
 .btn-primary:hover {
