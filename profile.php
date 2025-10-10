@@ -22,7 +22,8 @@ $sql = "
     pr.display_name,
     pr.email,          -- public email (nullable)
     pr.avatar_photo,   -- path or NULL
-    pr.created_at
+    pr.created_at,
+    pr.role  
   FROM profiles pr
   WHERE pr.profile_id = ?
 ";
@@ -30,6 +31,7 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param('i', $me);
 $stmt->execute();
 $meRow = $stmt->get_result()->fetch_assoc();
+$isAdmin = (($meRow['role'] ?? '') === 'admin'); 
 $stmt->close();
 
 /* stats: pictures, total likes, total comments */
@@ -109,6 +111,10 @@ $avatarSrc = !empty($meRow['avatar_photo']) ? 'uploads/' . htmlspecialchars($meR
           </svg>
           My Profile
         </a>
+
+        <?php if ($isAdmin): ?>
+          <a href="./admin.php" class="<?= $cur === 'admin.php' ? 'active' : '' ?>">🛡️ Admin</a>
+        <?php endif; ?>
 
         <div class="rule"></div>
 

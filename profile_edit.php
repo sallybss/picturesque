@@ -9,12 +9,17 @@ if (empty($_SESSION['profile_id'])) {
 
 $me = (int)$_SESSION['profile_id'];
 $conn = db();
-$stmt = $conn->prepare("SELECT display_name, email, avatar_photo FROM profiles WHERE profile_id = ?");
+$stmt = $conn->prepare("
+  SELECT display_name, email, avatar_photo, role
+  FROM profiles
+  WHERE profile_id = ?
+");
 $stmt->bind_param('i', $me);
 $stmt->execute();
 $meRow = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 $conn->close();
+$isAdmin = (($meRow['role'] ?? '') === 'admin');
 $avatarSrc = !empty($meRow['avatar_photo']) ? 'uploads/' . htmlspecialchars($meRow['avatar_photo']) : 'https://placehold.co/96x96?text=%20';
 ?>
 
@@ -55,6 +60,10 @@ $avatarSrc = !empty($meRow['avatar_photo']) ? 'uploads/' . htmlspecialchars($meR
           </svg>
           My Profile
         </a>
+
+        <?php if ($isAdmin): ?>
+          <a href="./admin.php" class="<?= $cur === 'admin.php' ? 'active' : '' ?>">🛡️ Admin</a>
+        <?php endif; ?>
 
         <div class="rule"></div>
 

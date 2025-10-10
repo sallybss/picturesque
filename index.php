@@ -13,10 +13,11 @@ $publicUploads = $baseUrl . '/uploads/';                         // e.g. /pictur
 /* ========================================================== */
 
 // Avatar of the logged-in user (for top-right corner)
-$stmtMe = $conn->prepare("SELECT display_name, avatar_photo FROM profiles WHERE profile_id = ?");
+$stmtMe = $conn->prepare("SELECT display_name, avatar_photo, role FROM profiles WHERE profile_id = ?");
 $stmtMe->bind_param('i', $me);
 $stmtMe->execute();
 $meRow = $stmtMe->get_result()->fetch_assoc();
+$isAdmin = (($meRow['role'] ?? '') === 'admin'); 
 $stmtMe->close();
 
 $meAvatarUrl = !empty($meRow['avatar_photo'])
@@ -105,6 +106,10 @@ $conn->close();
         </svg>
         My Profile
       </a>
+
+        <?php if ($isAdmin): ?>
+          <a href="./admin.php" class="<?= $cur === 'admin.php' ? 'active' : '' ?>">🛡️ Admin</a>
+        <?php endif; ?>
 
       <div class="rule"></div>
 
