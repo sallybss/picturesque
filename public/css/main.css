@@ -165,9 +165,10 @@ h1 {
     display: grid;
     grid-template-columns: 260px 1fr;
     gap: 20px;
-    max-width: 1280px;
     margin: 32px 30px;
     padding: 0 10px;
+    max-width: none;
+    grid-template-columns: 260px minmax(0, 1fr);
 }
 
 @media(max-width:1000px) {
@@ -352,20 +353,8 @@ h1 {
 
 /* --- Masonry feed (equal width, natural heights) --- */
 .feed {
-    column-count: 3;
+    column-width: 320px;
     column-gap: 16px
-}
-
-@media(max-width:1180px) {
-    .feed {
-        column-count: 2
-    }
-}
-
-@media(max-width:720px) {
-    .feed {
-        column-count: 1
-    }
 }
 
 .card {
