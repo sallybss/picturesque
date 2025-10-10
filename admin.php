@@ -6,7 +6,7 @@ require __DIR__ . '/helpers/admin_guard.php';
 if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit; }
 $me   = (int)$_SESSION['profile_id'];
 $conn = db();
-require_admin($conn, $me); // 🔒 only admins
+require_admin($conn, $me); // only admins
 
 // current user (for avatar/name + sidebar)
 $stmtMe = $conn->prepare("SELECT display_name, avatar_photo, role FROM profiles WHERE profile_id=?");
@@ -21,7 +21,7 @@ $cur = basename($_SERVER['PHP_SELF']); // for active nav item
 $q = trim($_GET['q'] ?? '');
 $like = '%'.$q.'%';
 
-// Load users (basic list; we’ll add actions later)
+// Load users 
 $sql = "
   SELECT
     pr.profile_id,
@@ -63,7 +63,7 @@ $publicUploads = $baseUrl . '/uploads/';
 </head>
 <body>
 <div class="layout">
-  <!-- Sidebar (same as other pages) -->
+  <!-- Sidebar -->
   <aside class="sidenav">
     <div class="brand">PICTURESQUE</div>
     <a class="create-btn" href="./create.php">☆ Create</a>
@@ -118,7 +118,7 @@ $publicUploads = $baseUrl . '/uploads/';
           </div>
 
           <div class="ai-actions">
-            <!-- These forms will work after we add the action files -->
+
             <?php if ((int)$u['profile_id'] !== $me): ?>
               <?php if ($u['status'] === 'blocked'): ?>
                 <form class="inline" method="post" action="./actions/admin_toggle_status.php">
