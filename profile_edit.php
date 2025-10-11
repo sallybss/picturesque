@@ -9,18 +9,24 @@ if (empty($_SESSION['profile_id'])) {
 
 $me = (int)$_SESSION['profile_id'];
 $conn = db();
-$stmt = $conn->prepare("SELECT display_name, email, avatar_photo FROM profiles WHERE profile_id = ?");
+$stmt = $conn->prepare("
+  SELECT display_name, email, avatar_photo, role
+  FROM profiles
+  WHERE profile_id = ?
+");
 $stmt->bind_param('i', $me);
 $stmt->execute();
 $meRow = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 $conn->close();
+$isAdmin = (($meRow['role'] ?? '') === 'admin');
 $avatarSrc = !empty($meRow['avatar_photo']) ? 'uploads/' . htmlspecialchars($meRow['avatar_photo']) : 'https://placehold.co/96x96?text=%20';
 ?>
 
+<?php $cur = basename($_SERVER['PHP_SELF']); ?>
+
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <title>Edit Profile · Picturesque</title>
@@ -36,24 +42,32 @@ $avatarSrc = !empty($meRow['avatar_photo']) ? 'uploads/' . htmlspecialchars($meR
     <!-- Sidebar -->
     <aside class="sidenav">
       <div class="brand">PICTURESQUE</div>
+
       <a class="create-btn" href="./create.php">☆ Create</a>
 
       <nav class="nav">
-        <a href="./index.php" class="active">
+        <a href="./index.php" class="<?= $cur === 'index.php'   ? 'active' : '' ?>">
           <svg class="ico" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
             <path d="M219.31,108.68l-80-80a16,16,0,0,0-22.62,0l-80,80A15.87,15.87,0,0,0,32,120v96a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V160h32v56a8,8,0,0,0,8,8h64a8,8,0,0,0,8-8V120A15.87,15.87,0,0,0,219.31,108.68ZM208,208H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48V120l80-80,80,80Z"></path>
           </svg>
           Home
           <span class="badge">5</span> <!-- notification optional, can remove -->
         </a>
-        <a href="./profile.php">
+
+        <a href="./profile.php" class="<?= in_array($cur, ['profile.php', 'profile_edit.php']) ? 'active' : '' ?>">
           <svg class="ico" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
             <path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"></path>
           </svg>
           My Profile
         </a>
+
+        <?php if ($isAdmin): ?>
+          <a href="./admin.php" class="<?= $cur === 'admin.php' ? 'active' : '' ?>">🛡️ Admin</a>
+        <?php endif; ?>
+
         <div class="rule"></div>
-        <a href="./settings.php">
+
+        <a href="./settings.php" class="<?= $cur === 'settings.php'   ? 'active' : '' ?>">
           <span class="icon">⚙️</span>
           Settings
         </a>
@@ -65,6 +79,7 @@ $avatarSrc = !empty($meRow['avatar_photo']) ? 'uploads/' . htmlspecialchars($meR
         </a>
       </nav>
     </aside>
+
 
     <main class="content">
       <div class="form-card">
@@ -216,7 +231,7 @@ $avatarSrc = !empty($meRow['avatar_photo']) ? 'uploads/' . htmlspecialchars($meR
 
     avatarRemove.addEventListener('click', (e) => {
       e.preventDefault();
-      clearAvatarFile(false); 
+      clearAvatarFile(false);
     });
   </script>
 </body>
