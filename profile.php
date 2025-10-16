@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/includes/flash.php';
 require __DIR__ . '/includes/db.php';
-require __DIR__ . '/includes/sidebar.php'; // ✅ added for reusable sidebar
+require __DIR__ . '/includes/sidebar.php';
 
 if (empty($_SESSION['profile_id'])) {
   header('Location: ./auth/login.php');
@@ -22,7 +22,7 @@ $sql = "
     pr.display_name,
     pr.email,
     pr.avatar_photo,
-    pr.created_at
+    pr.created_at 
   FROM profiles pr
   WHERE pr.profile_id = ?
 ";
@@ -90,12 +90,8 @@ $avatarSrc = !empty($meRow['avatar_photo'])
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
   <div class="layout">
-    <!-- ✅ Sidebar component -->
-    <?php
-      render_sidebar([
-        'isAdmin'   => $isAdmin,
-      ]);
-    ?>
+    <!-- Sidebar component -->
+    <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
 
     <!-- Content -->
     <main class="content">

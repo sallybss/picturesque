@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/includes/flash.php';
 require __DIR__ . '/includes/db.php';
-require __DIR__ . '/includes/sidebar.php'; // ✅ added
+require __DIR__ . '/includes/sidebar.php';
 
 if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit; }
 
@@ -14,11 +14,13 @@ $publicUploads = $baseUrl . '/uploads/';
 /* ========================================================== */
 
 // Avatar of the logged-in user (for top-right corner)
-$stmtMe = $conn->prepare("SELECT display_name, avatar_photo FROM profiles WHERE profile_id = ?");
+$stmtMe = $conn->prepare("SELECT display_name, avatar_photo, role FROM profiles WHERE profile_id = ?");
 $stmtMe->bind_param('i', $me);
 $stmtMe->execute();
 $meRow = $stmtMe->get_result()->fetch_assoc();
 $stmtMe->close();
+
+$isAdmin = (strtolower(trim($meRow['role'] ?? '')) === 'admin');
 
 $meAvatarUrl = !empty($meRow['avatar_photo'])
   ? $publicUploads . htmlspecialchars($meRow['avatar_photo'])
@@ -82,8 +84,8 @@ $conn->close();
 <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
 <div class="layout">
-  <!-- ✅ Sidebar component -->
-  <?php render_sidebar(['isAdmin' => false]); ?>
+  <!-- Sidebar component -->
+  <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
 
   <!-- Content -->
   <main class="content">
