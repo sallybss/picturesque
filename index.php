@@ -77,6 +77,11 @@ $conn->close();
   <title>Home · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css?v=6">
+  <style>
+    /* make the top-right userbox link-y without changing your existing layout */
+    a.userbox { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; }
+    a.userbox:hover { opacity: .85; }
+  </style>
 </head>
 <body>
 
@@ -94,12 +99,13 @@ $conn->close();
         <input class="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search">
       </form>
 
-      <div class="userbox">
+      <!-- 🔗 now clickable to your profile -->
+      <a href="./profile.php" class="userbox" title="Go to my profile">
         <span class="avatar"
           title="<?= htmlspecialchars($meRow['display_name'] ?? 'You') ?>"
           style="background-image:url('<?= $meAvatarUrl ?>');"></span>
         <span class="username"><?= htmlspecialchars($meRow['display_name'] ?? 'You') ?></span>
-      </div>
+      </a>
     </div>
 
     <div class="controls-row">

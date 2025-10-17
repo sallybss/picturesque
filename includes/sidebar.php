@@ -60,6 +60,10 @@ if ($isAdmin) {
   // About (everyone)
   $active = ($cur === 'about.php') ? 'active' : '';
   echo '<a href="./about.php" class="'.$active.'">About</a>';
+  
+    // Contact (everyone)
+    $active = ($cur === 'contact.php') ? 'active' : '';
+    echo '<a href="./contact.php" class="'.$active.'">Contact</a>';
 
   // Logout
   echo '<a href="./auth/logout.php">
