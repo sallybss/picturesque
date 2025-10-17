@@ -9,7 +9,11 @@ if ($picture_id <= 0) { header('Location: ./index.php'); exit; }
 
 $conn = db();
 
-/* Fetch the picture + author + counts */
+/* Dynamic base for uploads (works in subfolder) */
+$baseUrl       = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+$publicUploads = $baseUrl . '/uploads/';
+
+/* Picture + author + counts */
 $sql = "
   SELECT
     p.picture_id, p.profile_id, p.picture_title, p.picture_description, p.picture_url, p.created_at,
@@ -21,6 +25,7 @@ $sql = "
   LEFT JOIN (SELECT picture_id, COUNT(*) cnt FROM likes    GROUP BY picture_id) l ON l.picture_id = p.picture_id
   LEFT JOIN (SELECT picture_id, COUNT(*) cnt FROM comments GROUP BY picture_id) c ON c.picture_id = p.picture_id
   WHERE p.picture_id = ?
+  LIMIT 1
 ";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param('i', $picture_id);
@@ -30,19 +35,93 @@ $stmt->close();
 
 if (!$pic) { $conn->close(); header('Location: ./index.php'); exit; }
 
-/* Fetch comments with author names */
-$cs = $conn->prepare("
-  SELECT cm.comment_id, cm.comment_content, cm.created_at, pr.display_name
-  FROM comments cm
-  JOIN profiles pr ON pr.profile_id = cm.profile_id
-  WHERE cm.picture_id = ?
-  ORDER BY cm.created_at ASC
+/* ====== COMMENTS (threaded) ====== */
+
+/* CHANGE HERE IF NEEDED: if your column is named `parent_comment` (no _id), set to 'parent_comment' */
+$parentField = 'parent_comment_id';
+
+$stmt = $conn->prepare("
+  SELECT
+    c.comment_id,
+    c.{$parentField} AS parent_id,
+    c.comment_content,
+    c.created_at,
+    c.profile_id,
+    p.display_name,
+    p.avatar_photo
+  FROM comments c
+  JOIN profiles p ON p.profile_id = c.profile_id
+  WHERE c.picture_id = ?
+  ORDER BY c.created_at ASC
 ");
-$cs->bind_param('i', $picture_id);
-$cs->execute();
-$comments = $cs->get_result()->fetch_all(MYSQLI_ASSOC);
-$cs->close();
+$stmt->bind_param('i', $picture_id);
+$stmt->execute();
+$res = $stmt->get_result();
+
+/* Build an in-memory tree */
+$byId = [];
+while ($row = $res->fetch_assoc()) {
+  $row['children'] = [];
+  $byId[(int)$row['comment_id']] = $row;
+}
+$stmt->close();
 $conn->close();
+
+$rootComments = [];
+foreach ($byId as $id => &$node) {
+  $pid = $node['parent_id'];
+  if ($pid === null) {
+    $rootComments[] = &$node;
+  } else {
+    if (isset($byId[(int)$pid])) {
+      $byId[(int)$pid]['children'][] = &$node;
+    } else {
+      $rootComments[] = &$node; // fallback (shouldn't happen with FK)
+    }
+  }
+}
+unset($node);
+
+/* Recursive renderer */
+function render_comment($c, $depth, $picture_id, $publicUploads) {
+  $avatar = !empty($c['avatar_photo'])
+    ? $publicUploads . htmlspecialchars($c['avatar_photo'])
+    : 'https://placehold.co/24x24?text=%20';
+  $indent = min($depth, 4); // cap indent visually
+  ?>
+  <div class="comment" id="c-<?= (int)$c['comment_id'] ?>" style="margin-left: <?= $indent * 16 ?>px">
+    <div class="c-head" style="display:flex;align-items:center;gap:8px">
+      <img class="c-avatar" src="<?= $avatar ?>" alt="" style="width:24px;height:24px;border-radius:50%;object-fit:cover">
+      <b class="c-name"><?= htmlspecialchars($c['display_name']) ?></b>
+      <span class="c-time" style="color:#6b7280;font-size:12px"><?= htmlspecialchars(substr($c['created_at'], 0, 16)) ?></span>
+    </div>
+
+    <div class="c-body" style="margin:6px 0 4px"><?= nl2br(htmlspecialchars($c['comment_content'])) ?></div>
+
+    <div class="c-actions">
+      <button type="button" class="link js-reply" data-target="rf-<?= (int)$c['comment_id'] ?>" style="background:none;border:0;color:#6b7280;cursor:pointer;font-size:12px;padding:0">Reply</button>
+    </div>
+
+    <!-- Inline reply form (hidden by default) -->
+    <form id="rf-<?= (int)$c['comment_id'] ?>" class="reply-form" method="post" action="./actions/post_comment.php" style="display:none; margin-top:8px;">
+      <input type="hidden" name="picture_id" value="<?= (int)$picture_id ?>">
+      <input type="hidden" name="parent_comment_id" value="<?= (int)$c['comment_id'] ?>">
+      <textarea name="comment_content" rows="2" class="input" placeholder="Write a reply…" required style="width:100%;padding:12px;border:1px solid #e5e7eb;border-radius:10px;outline:none"></textarea>
+      <div style="margin-top:8px">
+        <button type="submit" class="btn" name="submit" style="padding:8px 12px;border:none;border-radius:10px;background:#8ec6df;color:#fff;font-weight:600;cursor:pointer">Reply</button>
+      </div>
+    </form>
+
+    <?php if (!empty($c['children'])): ?>
+      <div class="c-children">
+        <?php foreach ($c['children'] as $child) {
+          render_comment($child, $depth + 1, $picture_id, $publicUploads);
+        } ?>
+      </div>
+    <?php endif; ?>
+  </div>
+  <?php
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -75,7 +154,7 @@ $conn->close();
 <div class="wrap">
   <!-- Left: image + info -->
   <div class="card">
-    <img src="uploads/<?= htmlspecialchars($pic['picture_url']) ?>" alt="">
+    <img src="<?= $publicUploads . htmlspecialchars($pic['picture_url']) ?>" alt="">
     <div class="pad">
       <h2 style="margin:0"><?= htmlspecialchars($pic['picture_title']) ?></h2>
       <?php if (!empty($pic['picture_description'])): ?>
@@ -98,7 +177,7 @@ $conn->close();
       <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
       <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
-      <!-- Add comment -->
+      <!-- Root comment form -->
       <form method="post" action="./actions/post_comment.php">
         <input type="hidden" name="picture_id" value="<?= (int)$pic['picture_id'] ?>">
         <textarea name="comment_content" rows="3" class="input" placeholder="Write a comment..." required></textarea>
@@ -107,25 +186,28 @@ $conn->close();
         </div>
       </form>
 
-      <!-- List comments -->
-      <div style="margin-top:14px">
-        <?php if (!$comments): ?>
+      <!-- Threaded comments -->
+      <div id="comments" style="margin-top:14px">
+        <?php if (!$rootComments): ?>
           <p class="muted">No comments yet. Be the first!</p>
         <?php else: ?>
-          <?php foreach ($comments as $c): ?>
-            <div class="comment">
-              <div style="font-weight:600"><?= htmlspecialchars($c['display_name']) ?></div>
-              <div style="margin-top:4px"><?= nl2br(htmlspecialchars($c['comment_content'])) ?></div>
-              <div class="muted" style="margin-top:4px; font-size:12px">
-                <?= htmlspecialchars($c['created_at']) ?>
-              </div>
-            </div>
-          <?php endforeach; ?>
+          <?php foreach ($rootComments as $root) { render_comment($root, 0, $picture_id, $publicUploads); } ?>
         <?php endif; ?>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Tiny JS to toggle inline reply forms -->
+<script>
+document.addEventListener('click', function (e) {
+  const btn = e.target.closest('.js-reply');
+  if (!btn) return;
+  const id = btn.getAttribute('data-target');
+  const el = document.getElementById(id);
+  if (el) el.style.display = (!el.style.display || el.style.display === 'none') ? 'block' : 'none';
+});
+</script>
 
 </body>
 </html>

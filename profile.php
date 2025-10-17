@@ -11,18 +11,21 @@ if (empty($_SESSION['profile_id'])) {
 $me   = (int)$_SESSION['profile_id'];
 $conn = db();
 
-/* Base URL for images (works in XAMPP subfolder) */
+/* Base URLs for assets (works in XAMPP subfolder paths) */
 $baseUrl       = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\'); // e.g. /picturesque/picturesque
 $publicUploads = $baseUrl . '/uploads/';
+$publicImages  = $baseUrl . '/images/';
 
-/* --- Load my profile (NO role column) --- */
+/* --- Load my profile (NOW includes role + cover_photo) --- */
 $sql = "
   SELECT
     pr.profile_id,
     pr.display_name,
     pr.email,
     pr.avatar_photo,
-    pr.created_at 
+    pr.cover_photo,
+    pr.role,           -- << added
+    pr.created_at
   FROM profiles pr
   WHERE pr.profile_id = ?
 ";
@@ -32,8 +35,8 @@ $stmt->execute();
 $meRow = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-/* Admin OFF for now */
-$isAdmin = false;
+/* Compute admin from DB role */
+$isAdmin = (($meRow['role'] ?? 'user') === 'admin');
 
 /* stats: pictures, total likes, total comments */
 $stats = ['pictures' => 0, 'likes' => 0, 'comments' => 0];
@@ -75,6 +78,9 @@ $avatarSrc = !empty($meRow['avatar_photo'])
   ? $publicUploads . htmlspecialchars($meRow['avatar_photo'])
   : 'https://placehold.co/96x96?text=%20';
 
+$coverSrc = !empty($meRow['cover_photo'])
+  ? $publicUploads . htmlspecialchars($meRow['cover_photo'])
+  : $publicImages . 'default-cover.jpg'; // put a file at /images/default-cover.jpg
 ?>
 <!doctype html>
 <html lang="en">
@@ -82,7 +88,14 @@ $avatarSrc = !empty($meRow['avatar_photo'])
   <meta charset="utf-8">
   <title>My Profile · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="./public/css/main.css?v=7">
+  <link rel="stylesheet" href="./public/css/main.css?v=9">
+  <style>
+    /* Minimal cover styling (you can move to main.css) */
+    .profile-cover{position:relative;height:200px;border-radius:12px;overflow:hidden;margin-bottom:16px;background:#f2f3f5}
+    .profile-cover .cover-image{width:100%;height:100%;object-fit:cover;display:block}
+    .profile-cover .cover-actions{position:absolute;right:12px;bottom:12px;display:flex;gap:8px}
+    .btn-ghost.small{background:rgba(255,255,255,.9);padding:6px 10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+  </style>
 </head>
 
 <body>
@@ -95,6 +108,28 @@ $avatarSrc = !empty($meRow['avatar_photo'])
 
     <!-- Content -->
     <main class="content">
+
+      <!-- Cover banner (with Change & Reset like LinkedIn) -->
+      <div class="profile-cover">
+        <img src="<?= $coverSrc ?>" alt="Cover Photo" class="cover-image">
+
+        <div class="cover-actions">
+          <!-- Change Cover -->
+          <form method="post" action="./actions/update_cover.php" enctype="multipart/form-data">
+            <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+            <input id="coverInput" type="file" name="cover" accept="image/*" hidden onchange="this.form.submit()">
+            <label for="coverInput" class="btn-ghost small">Change Cover</label>
+          </form>
+
+          <!-- Reset to default (nulls the field so fallback shows) -->
+          <form method="post" action="./actions/update_cover.php">
+            <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+            <input type="hidden" name="action" value="reset">
+            <button type="submit" class="btn-ghost small">Reset</button>
+          </form>
+        </div>
+      </div>
+
       <!-- Profile header -->
       <section class="profile-hero">
         <img class="profile-avatar" src="<?= $avatarSrc ?>" alt="">
@@ -108,8 +143,9 @@ $avatarSrc = !empty($meRow['avatar_photo'])
             <span><b><?= (int)$stats['likes'] ?></b> Likes</span>
             <span><b><?= (int)$stats['comments'] ?></b> Comments</span>
           </div>
-          <div class="profile-actions">
+          <div class="profile-actions" style="display:flex; gap:8px; flex-wrap:wrap">
             <a class="btn-primary" href="./profile_edit.php">Edit Profile</a>
+            <a class="btn-ghost" href="./profile_settings.php">Profile Settings</a>
           </div>
         </div>
       </section>

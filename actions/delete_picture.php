@@ -10,7 +10,7 @@ $me   = (int)$_SESSION['profile_id'];
 $pid  = isset($_POST['picture_id']) ? (int)$_POST['picture_id'] : 0;
 $csrf = $_POST['csrf'] ?? null;
 
-if ($pid <= 0 || !csrf_check($csrf)) {
+if ($pid <= 0 || !check_csrf($csrf)) {   // ← fixed here
   set_flash('err', 'Invalid request.');
   header('Location: ../profile.php'); exit;
 }
@@ -33,19 +33,17 @@ if (!$row) {
 $conn->begin_transaction();
 
 try {
-  // comments
+  // If you have ON DELETE CASCADE FKs for comments/likes, you can skip these two deletes.
   $stmt = $conn->prepare("DELETE FROM comments WHERE picture_id = ?");
   $stmt->bind_param('i', $pid);
   $stmt->execute();
   $stmt->close();
 
-  // likes
   $stmt = $conn->prepare("DELETE FROM likes WHERE picture_id = ?");
   $stmt->bind_param('i', $pid);
   $stmt->execute();
   $stmt->close();
 
-  // picture record (ownership double-checked in WHERE)
   $stmt = $conn->prepare("DELETE FROM pictures WHERE picture_id = ? AND profile_id = ?");
   $stmt->bind_param('ii', $pid, $me);
   $stmt->execute();
@@ -62,7 +60,7 @@ try {
 $conn->close();
 
 /* 3) Remove the file from /uploads (ignore if missing) */
-$filename = basename($row['picture_url']); 
+$filename = basename($row['picture_url']);
 $filePath = __DIR__ . '/../uploads/' . $filename;
 if (is_file($filePath)) { @unlink($filePath); }
 
