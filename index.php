@@ -3,17 +3,20 @@ require __DIR__ . '/includes/flash.php';
 require __DIR__ . '/includes/db.php';
 require __DIR__ . '/includes/sidebar.php';
 
-if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit; }
+/* Guests see the public gallery */
+if (empty($_SESSION['profile_id'])) {
+  header('Location: ./home_guest.php');
+  exit;
+}
 
 $me = (int)$_SESSION['profile_id'];
 $conn = db();
 
-/* ========= NEW: build dynamic base URL for assets ========= */
+/* Build dynamic base URL for assets (works in subfolders) */
 $baseUrl       = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
 $publicUploads = $baseUrl . '/uploads/';
-/* ========================================================== */
 
-// Avatar of the logged-in user (for top-right corner)
+/* Top-right avatar/name + role */
 $stmtMe = $conn->prepare("SELECT display_name, avatar_photo, role FROM profiles WHERE profile_id = ?");
 $stmtMe->bind_param('i', $me);
 $stmtMe->execute();
@@ -26,10 +29,35 @@ $meAvatarUrl = !empty($meRow['avatar_photo'])
   ? $publicUploads . htmlspecialchars($meRow['avatar_photo'])
   : 'https://placehold.co/28x28?text=%20';
 
-// search (optional)
-$q = trim($_GET['q'] ?? '');
-$like = '%'.$q.'%';
+/* ==========================================================
+   Search text + People search (runs when there's a query)
+   ========================================================== */
+$q        = trim($_GET['q'] ?? '');
+$qUser    = ltrim($q, '@');          // allow typing "@name"
+$like     = '%'.$q.'%';
+$likeUser = '%'.$qUser.'%';
 
+$people = [];
+if ($q !== '') {
+  // If you later add a 'username' column and want strict username support,
+  // this already handles it (display_name OR username).
+  $stmtPeople = $conn->prepare("
+    SELECT profile_id, display_name, avatar_photo, username
+    FROM profiles
+    WHERE display_name LIKE ? OR username LIKE ?
+    ORDER BY display_name
+    LIMIT 20
+  ");
+  $stmtPeople->bind_param('ss', $like, $likeUser);
+  $stmtPeople->execute();
+  $people = $stmtPeople->get_result()->fetch_all(MYSQLI_ASSOC);
+  $stmtPeople->close();
+}
+
+/* ==========================================================
+   Pictures query — now searches title, description, AND uploader
+   (display_name). Typing @name works as well.
+   ========================================================== */
 $sql = "
   SELECT
     p.picture_id,
@@ -45,30 +73,38 @@ $sql = "
     CASE WHEN ml.like_id IS NULL THEN 0 ELSE 1 END AS liked_by_me
   FROM pictures p
   JOIN profiles pr ON pr.profile_id = p.profile_id
-  LEFT JOIN (SELECT picture_id, COUNT(*) cnt FROM likes GROUP BY picture_id) l ON l.picture_id = p.picture_id
+  LEFT JOIN (SELECT picture_id, COUNT(*) cnt FROM likes    GROUP BY picture_id) l ON l.picture_id = p.picture_id
   LEFT JOIN (SELECT picture_id, COUNT(*) cnt FROM comments GROUP BY picture_id) c ON c.picture_id = p.picture_id
   LEFT JOIN likes ml ON ml.picture_id = p.picture_id AND ml.profile_id = ?
 ";
 
-$types = 'i';
+$types  = 'i';
 $params = [$me];
 
 if ($q !== '') {
-  $sql .= " WHERE p.picture_title LIKE ? OR p.picture_description LIKE ? ";
-  $types .= 'ss';
-  $params[] = $like;
-  $params[] = $like;
+  // also match uploader's display_name (supports "@name")
+  $sql   .= " WHERE (p.picture_title LIKE ? OR p.picture_description LIKE ? OR pr.display_name LIKE ?) ";
+  $types .= 'sss';
+  $params[] = $like;      // title
+  $params[] = $like;      // description
+  $params[] = $likeUser;  // display name (without leading '@')
 }
 
 $sql .= " ORDER BY p.created_at DESC";
+
 $stmt = $conn->prepare($sql);
 $stmt->bind_param($types, ...$params);
 $stmt->execute();
 $res = $stmt->get_result();
+
 $pictures = [];
 while ($row = $res->fetch_assoc()) { $pictures[] = $row; }
 $stmt->close();
 $conn->close();
+
+/* cache-bust css */
+$cssPath = __DIR__ . '/public/css/main.css';
+$ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 ?>
 <!doctype html>
 <html lang="en">
@@ -76,11 +112,25 @@ $conn->close();
   <meta charset="utf-8">
   <title>Home · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="./public/css/main.css?v=6">
+  <link rel="stylesheet" href="./public/css/main.css?v=<?= $ver ?>">
   <style>
-    /* make the top-right userbox link-y without changing your existing layout */
+    /* Make the top-right userbox clickable without changing layout */
     a.userbox { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px; }
     a.userbox:hover { opacity: .85; }
+
+    /* Minimal styling for the People search strip */
+    .section-title{ font-size:16px; font-weight:800; margin: 4px 0 8px; color:#111827; }
+    .people-row{ display:flex; gap:12px; flex-wrap:wrap; margin:6px 0 16px; }
+    .people-row .person{
+      display:flex; align-items:center; gap:10px;
+      padding:8px 10px; background:#fff; border:1px solid var(--line);
+      border-radius:12px; text-decoration:none; color:#111827;
+    }
+    .people-row .person:hover{ background:#f9fafb; }
+    .people-row .person img{
+      width:28px; height:28px; border-radius:999px; object-fit:cover; background:#e5e7eb;
+    }
+    .people-row .person span{ font-weight:600; font-size:14px; }
   </style>
 </head>
 <body>
@@ -89,17 +139,17 @@ $conn->close();
 <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
 <div class="layout">
-  <!-- Sidebar component -->
+  <!-- Sidebar -->
   <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
 
   <!-- Content -->
   <main class="content">
     <div class="content-top">
       <form method="get" action="index.php" class="search-wrap">
-        <input class="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search">
+        <input class="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search photos or username">
       </form>
 
-      <!-- 🔗 now clickable to your profile -->
+      <!-- Clickable avatar/name -> profile -->
       <a href="./profile.php" class="userbox" title="Go to my profile">
         <span class="avatar"
           title="<?= htmlspecialchars($meRow['display_name'] ?? 'You') ?>"
@@ -118,6 +168,23 @@ $conn->close();
       </div>
       <button class="filter-btn" type="button">Filter</button>
     </div>
+
+    <!-- People matches (only when searching) -->
+    <?php if ($q !== '' && !empty($people)): ?>
+      <h2 class="section-title">People</h2>
+      <div class="people-row">
+        <?php foreach ($people as $u):
+          $avatar = !empty($u['avatar_photo'])
+            ? $publicUploads . htmlspecialchars($u['avatar_photo'])
+            : 'https://placehold.co/56x56?text=%20';
+        ?>
+          <a class="person" href="profile.php?id=<?= (int)$u['profile_id'] ?>">
+            <img src="<?= $avatar ?>" alt="">
+            <span><?= htmlspecialchars($u['display_name']) ?></span>
+          </a>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
 
     <section class="feed">
       <?php foreach ($pictures as $p): ?>

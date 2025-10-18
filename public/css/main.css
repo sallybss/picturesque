@@ -1410,3 +1410,229 @@ input[type="file"] {
         grid-template-columns: 1fr;
     }
 }
+
+/* ===== Guest gate (public home overlay) ===== */
+
+.guest-feed {
+    position: relative;
+    padding-bottom: 180px;
+    /* space for the CTA */
+}
+
+.guest-gate {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin-top: -140px;
+    /* pull the fade over the feed a bit */
+}
+
+.guest-fade {
+    height: 140px;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(243, 244, 246, 0), rgba(243, 244, 246, 1));
+    border-radius: 0 0 16px 16px;
+}
+
+.gate-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .06);
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+}
+
+.gate-star {
+    font-size: 20px;
+    line-height: 1;
+    opacity: .85;
+}
+
+.gate-text {
+    margin: 0;
+    color: #374151;
+}
+
+.gate-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.gate-actions .btn-primary,
+.gate-actions .btn-ghost {
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.gate-actions .btn-ghost {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: #374151;
+}
+
+.gate-actions .btn-ghost:hover {
+    background: #f9fafb;
+}
+
+@media (max-width: 720px) {
+    .gate-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .gate-actions {
+        justify-content: center;
+    }
+}
+
+/* Guest Discover (public) */
+body.guest-locked {
+    overflow: hidden;
+}
+
+.guest-main {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 20px;
+    padding: 32px 30px;
+}
+
+@media (max-width: 1000px) {
+    .guest-main {
+        grid-template-columns: 1fr;
+    }
+}
+
+.guest-content {
+    min-width: 0;
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    /* search, pills, feed, cta */
+    gap: 12px;
+}
+
+.feed-locked {
+    position: relative;
+    overflow: hidden;
+}
+
+.feed-locked::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 120px;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(243, 244, 246, 0) 0%, rgba(243, 244, 246, 1) 95%);
+}
+
+/* ===== Guest Discover — Figma-style bottom blur CTA ===== */
+
+/* ===== Guest Discover – seamless fog blend (Figma style) ===== */
+.guest-cta {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 40px 24px 32px;
+
+    /* smoother, softer gradient fade */
+    background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.5) 25%,
+            rgba(255, 255, 255, 0.85) 60%,
+            rgba(255, 255, 255, 0.97) 90%,
+            rgba(255, 255, 255, 1) 100%);
+
+    backdrop-filter: blur(2px) saturate(130%);
+    -webkit-backdrop-filter: blur(18px) saturate(130%);
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+}
+
+/* soft feather extension so no harsh line appears */
+.guest-cta::before {
+    content: "";
+    position: absolute;
+    left: -60px;
+    right: -60px;
+    top: -160px;
+    bottom: 0;
+    background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.35) 30%,
+            rgba(255, 255, 255, 0.8) 70%,
+            rgba(255, 255, 255, 1) 100%);
+    filter: blur(18px);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Text */
+.guest-cta .note-guest {
+    color: #374151;
+    font-size: 15px;
+    font-weight: 500;
+    white-space: nowrap;
+    margin-right: 10px;
+}
+
+/* Buttons */
+.guest-cta .btn-ghost,
+.guest-cta .btn-primary {
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+}
+
+.guest-cta .btn-ghost {
+    border: 1.5px solid var(--line);
+    background: rgba(255, 255, 255, 0.4);
+    color: #374151;
+    transition: background 0.2s ease;
+}
+
+.guest-cta .btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.guest-cta .btn-primary {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    transition: background 0.2s ease;
+}
+
+.guest-cta .btn-primary:hover {
+    background: var(--primary-hover);
+}
+
+/* Buttons side-by-side on desktop, stack on mobile */
+@media (max-width: 700px) {
+    .guest-cta {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+        padding: 36px 16px 24px;
+    }
+
+    .guest-cta .note-guest {
+        white-space: normal;
+        margin-right: 0;
+    }
+}

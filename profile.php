@@ -8,6 +8,9 @@ if (empty($_SESSION['profile_id'])) {
   exit;
 }
 
+$profileId = isset($_GET['id']) ? (int)$_GET['id'] : (int)($_SESSION['profile_id'] ?? 0);
+if ($profileId <= 0) { header('Location: ./auth/login.php'); exit; }
+
 $me   = (int)$_SESSION['profile_id'];
 $conn = db();
 
