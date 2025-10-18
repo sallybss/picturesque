@@ -192,15 +192,15 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
           <img src="<?= $publicUploads . htmlspecialchars($p['picture_url']) ?>" alt="">
 
           <div class="card-body">
-            <div class="author-row">
-              <?php
-                $avatarUrl = !empty($p['avatar_photo'])
-                  ? $publicUploads . htmlspecialchars($p['avatar_photo'])
-                  : 'https://placehold.co/24x24?text=%20';
-              ?>
-              <img class="mini-avatar" src="<?= $avatarUrl ?>" alt="<?= htmlspecialchars($p['display_name']) ?> avatar">
-              <span class="author"><?= htmlspecialchars($p['display_name']) ?></span>
-            </div>
+          <a class="author-row" href="profile.php?id=<?= (int)$p['profile_id'] ?>" style="text-decoration:none; color:inherit;">
+  <?php
+    $avatarUrl = !empty($p['avatar_photo'])
+      ? $publicUploads . htmlspecialchars($p['avatar_photo'])
+      : 'https://placehold.co/24x24?text=%20';
+  ?>
+  <img class="mini-avatar" src="<?= $avatarUrl ?>" alt="<?= htmlspecialchars($p['display_name']) ?> avatar">
+  <span class="author"><?= htmlspecialchars($p['display_name']) ?></span>
+</a>
 
             <div class="card-title"><?= htmlspecialchars($p['picture_title']) ?></div>
 
