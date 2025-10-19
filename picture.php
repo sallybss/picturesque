@@ -122,7 +122,7 @@ function render_comment($c, $depth, $picture_id, $publicUploads) {
   <meta charset="utf-8">
   <title><?= htmlspecialchars($pic['picture_title']) ?> · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="./public/css/main.css?v=1">
+  <link rel="stylesheet" href="./public/css/main.css?v=12">
 </head>
 <body>
 

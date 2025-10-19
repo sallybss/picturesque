@@ -8,20 +8,18 @@ if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit
 $me   = (int)$_SESSION['profile_id'];
 $conn = db();
 
-/* admin check */
 $stmt = $conn->prepare("SELECT role FROM profiles WHERE profile_id=?");
 $stmt->bind_param('i', $me);
 $stmt->execute();
 $meRow = $stmt->get_result()->fetch_assoc();
 $stmt->close();
+
 $isAdmin = (($meRow['role'] ?? 'user') === 'admin');
 if (!$isAdmin) { header('Location: ./index.php'); exit; }
 
-/* paths */
 $baseUrl       = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
 $publicUploads = $baseUrl . '/uploads/';
 
-/* fetch about page */
 $stmt = $conn->prepare("SELECT page_id, title, content, image_path FROM pages WHERE slug='about' LIMIT 1");
 $stmt->execute();
 $page = $stmt->get_result()->fetch_assoc();
@@ -30,69 +28,59 @@ $stmt->close();
 $pageId     = (int)($page['page_id'] ?? 0);
 $title      = $page['title']   ?? 'About Picturesque';
 $content    = $page['content'] ?? '';
-$image_path = $page['image_path'] ?? null;
-$imgUrl     = $image_path ? ($publicUploads . htmlspecialchars($image_path)) : null;
+$imagePath  = $page['image_path'] ?? null;
 
-/* handle post */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!check_csrf($_POST['csrf'] ?? null)) {
-    set_flash('err','Invalid CSRF token.');
-    header('Location: ./settings.php'); exit;
+    set_flash('err', 'Invalid CSRF token.'); header('Location: ./settings.php'); exit;
   }
 
   $newTitle   = trim($_POST['title'] ?? '');
   $newContent = trim($_POST['content'] ?? '');
-  $resetImg   = !empty($_POST['reset_image']); // comes from hidden field "1" when X pressed
+  $resetImg   = !empty($_POST['reset_image']);
 
   if ($newTitle === '' || $newContent === '') {
-    set_flash('err','Title and content are required.');
-    header('Location: ./settings.php'); exit;
+    set_flash('err','Title and content are required.'); header('Location: ./settings.php'); exit;
   }
 
-  $newFilename = $image_path;          // keep old by default
-  if ($resetImg) $newFilename = null;  // user clicked X (remove)
+  $newImagePath = $imagePath;
+  if ($resetImg) $newImagePath = null;
 
-  // optional new upload
   if (!empty($_FILES['image']['name'])) {
-    $file = $_FILES['image'];
-    $ok   = ['image/jpeg','image/png','image/webp','image/gif'];
-    if (!in_array($file['type'], $ok)) {
-      set_flash('err','Please upload JPG, PNG, WEBP, or GIF.');
-      header('Location: ./settings.php'); exit;
-    }
-    if ($file['size'] > 6*1024*1024) {
-      set_flash('err','Image too large (max 6MB).');
-      header('Location: ./settings.php'); exit;
-    }
-    $ext  = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $f = $_FILES['image'];
+    $ok = ['image/jpeg','image/png','image/webp','image/gif'];
+    if (!in_array($f['type'], $ok)) { set_flash('err','Upload JPG, PNG, WEBP or GIF.'); header('Location: ./settings.php'); exit; }
+    if ($f['size'] > 6*1024*1024)   { set_flash('err','Image too large (max 6MB).');   header('Location: ./settings.php'); exit; }
+
+    $ext  = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
     $name = 'about_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
     $dest = __DIR__ . '/uploads/' . $name;
-    if (!move_uploaded_file($file['tmp_name'], $dest)) {
-      set_flash('err','Upload failed.');
-      header('Location: ./settings.php'); exit;
+
+    if (!move_uploaded_file($f['tmp_name'], $dest)) {
+      set_flash('err','Upload failed.'); header('Location: ./settings.php'); exit;
     }
-    $newFilename = $name;
+    $newImagePath = $name;
   }
 
   if ($pageId > 0) {
     $stmt = $conn->prepare("UPDATE pages SET title=?, content=?, image_path=?, updated_by=?, updated_at=NOW() WHERE page_id=?");
-    $stmt->bind_param('sssii', $newTitle, $newContent, $newFilename, $me, $pageId);
+    $stmt->bind_param('sssii', $newTitle, $newContent, $newImagePath, $me, $pageId);
   } else {
     $slug = 'about';
     $stmt = $conn->prepare("INSERT INTO pages (slug, title, content, image_path, updated_by) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param('ssssi', $slug, $newTitle, $newContent, $newFilename, $me);
+    $stmt->bind_param('ssssi', $slug, $newTitle, $newContent, $newImagePath, $me);
   }
-  $stmt->execute(); $stmt->close();
+  $stmt->execute();
+  $stmt->close();
 
-  set_flash('ok','About page updated successfully.');
+  set_flash('ok','About page updated.');
   header('Location: ./settings.php'); exit;
 }
 
 $conn->close();
 
-/* cache-bust main.css automatically */
-$cssPath = __DIR__ . '/public/css/main.css';
-$ver = file_exists($cssPath) ? filemtime($cssPath) : time();
+$imgUrl = $imagePath ? ($publicUploads . htmlspecialchars($imagePath)) : null;
+$cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/public/css/main.css') : time();
 ?>
 <!doctype html>
 <html lang="en">
@@ -100,11 +88,11 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
   <meta charset="utf-8">
   <title>Admin Settings · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="./public/css/main.css?v=<?= $ver ?>">
+  <link rel="stylesheet" href="./public/css/main.css?v=<?= $cssVer ?>">
 </head>
 <body>
 
-<?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
+<?php if ($m = get_flash('ok')):  ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
 <div class="layout">
@@ -113,7 +101,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
   <main class="content">
     <div class="settings-wrap">
       <h1 class="page-title">Admin Settings</h1>
-      <p class="sub">Edit the content of the About page below.</p>
+      <p class="sub">Edit the About page.</p>
 
       <form class="about-card" method="post" action="settings.php" enctype="multipart/form-data">
         <div class="pad form-grid">
@@ -129,7 +117,6 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 
           <div class="label">Page Image</div>
           <div class="row">
-            <!-- Preview + remove X -->
             <div class="image-preview-wrapper">
               <img id="preview" class="preview"
                    src="<?= $imgUrl ?: 'https://placehold.co/800x260?text=No+image' ?>"
@@ -138,9 +125,8 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
                 <button type="button" class="remove-image" id="removeImageBtn" title="Remove image">×</button>
               <?php endif; ?>
             </div>
-            <input type="hidden" name="reset_image" id="resetImage" value="">
 
-            <!-- File picker -->
+            <input type="hidden" name="reset_image" id="resetImage" value="">
             <div class="filebar">
               <label for="img" class="filebtn">Choose image…</label>
               <input id="img" type="file" name="image" accept="image/*">
@@ -166,29 +152,26 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
   const removeBtn  = document.getElementById('removeImageBtn');
   const resetInput = document.getElementById('resetImage');
 
-  // live preview on file choose
   if (fileInput) {
     fileInput.addEventListener('change', e => {
       const f = e.target.files && e.target.files[0];
       if (!f) return;
       preview.src = URL.createObjectURL(f);
-      if (resetInput) resetInput.value = ""; // new image chosen => don't reset
+      if (resetInput) resetInput.value = "";
       if (removeBtn)  removeBtn.style.display = 'none';
     });
   }
 
-  // remove current image (set reset flag)
   if (removeBtn) {
     removeBtn.addEventListener('click', e => {
       e.preventDefault();
       preview.src = 'https://placehold.co/800x260?text=No+image';
       if (resetInput) resetInput.value = "1";
       removeBtn.style.display = 'none';
-      // also clear any selected file
       if (fileInput) fileInput.value = "";
     });
   }
 </script>
 
 </body>
-</html> 
+</html>
