@@ -1,26 +1,29 @@
 <?php
-// profile_settings.php
 require __DIR__ . '/includes/flash.php';
 require __DIR__ . '/includes/db.php';
 require __DIR__ . '/includes/sidebar.php';
 
-if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit; }
+if (empty($_SESSION['profile_id'])) {
+  header('Location: ./auth/login.php');
+  exit;
+}
 
-$me   = (int)$_SESSION['profile_id'];
-$conn = db();
-
-/* Figure out if this user is admin (for sidebar only) */
-$stmt = $conn->prepare("SELECT login_email, password_hash, role FROM profiles WHERE profile_id=?");
+$me      = (int)$_SESSION['profile_id'];
+$conn    = db();
+$stmt    = $conn->prepare("SELECT login_email, role FROM profiles WHERE profile_id = ?");
 $stmt->bind_param('i', $me);
 $stmt->execute();
-$row = $stmt->get_result()->fetch_assoc();
+$row     = $stmt->get_result()->fetch_assoc();
 $stmt->close();
-
-if (!$row) { $conn->close(); header('Location: ./index.php'); exit; }
-$isAdmin = (isset($row['role']) && $row['role'] === 'admin');
-$currentEmail = $row['login_email'];
-
 $conn->close();
+
+if (!$row) { header('Location: ./index.php'); exit; }
+
+$isAdmin      = ($row['role'] ?? '') === 'admin';
+$currentEmail = $row['login_email'] ?? '';
+
+$baseUrl = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+$cssBase = $baseUrl . '/public/css';
 ?>
 <!doctype html>
 <html lang="en">
@@ -28,55 +31,56 @@ $conn->close();
   <meta charset="utf-8">
   <title>Profile Settings · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="./public/css/main.css?v=14">
-  <style>
-    .settings-card{max-width:560px;background:#fff;border:1px solid #e5e7eb;border-radius:14px;margin:24px auto;overflow:hidden}
-    .pad{padding:16px}
-    .label{display:block;margin:10px 0 6px;font-weight:600}
-    .input,.password{width:100%;padding:12px;border:1px solid #e5e7eb;border-radius:10px}
-    .btn-primary{padding:10px 14px;border:none;border-radius:10px;background:#8ec6df;color:#fff;font-weight:600;cursor:pointer}
-    .btn-primary:hover{background:#7dbad6}
-    .muted{color:#6b7280}
-  </style>
+  <link rel="stylesheet" href="./public/css/main.css?v=1">
 </head>
 <body>
+  <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
+  <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
-<?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
-<?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
+  <div class="layout">
+    <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
 
-<div class="layout">
-  <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
+    <main class="content">
+      <div class="settings-wrap">
+        <h1 class="page-title">Profile Settings</h1>
+        <p class="sub">Update your login email and password.</p>
 
-  <main class="content">
-    <h1 style="margin-top:8px">Profile Settings</h1>
-    <p class="muted" style="margin-bottom:16px">Update your login email and password.</p>
+        <div class="about-card">
+          <div class="pad">
+            <form method="post" action="./actions/update_credentials.php" autocomplete="off">
+              <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
 
-    <div class="settings-card">
-      <form class="pad" method="post" action="./actions/update_credentials.php" autocomplete="off">
-        <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+              <div class="row">
+                <label class="label" for="login_email">Login Email</label>
+                <input class="input" id="login_email" type="email" name="login_email" value="<?= htmlspecialchars($currentEmail) ?>" required>
+              </div>
 
-        <label class="label">Login Email</label>
-        <input class="input" type="email" name="login_email" value="<?= htmlspecialchars($currentEmail) ?>" required>
+              <div class="row sub"><b>Change Password</b></div>
 
-        <hr style="border:none;border-top:1px solid #e5e7eb;margin:18px 0">
+              <div class="row">
+                <label class="label" for="current_password">Current Password</label>
+                <input class="input" id="current_password" type="password" name="current_password" placeholder="Enter current password if changing password">
+              </div>
 
-        <div class="muted" style="margin-bottom:8px"><b>Change Password</b></div>
+              <div class="row">
+                <label class="label" for="new_password">New Password</label>
+                <input class="input" id="new_password" type="password" name="new_password" placeholder="Minimum 8 characters">
+              </div>
 
-        <label class="label">Current Password</label>
-        <input class="password" type="password" name="current_password" placeholder="Enter current password if changing password">
+              <div class="row">
+                <label class="label" for="confirm_password">Confirm New Password</label>
+                <input class="input" id="confirm_password" type="password" name="confirm_password" placeholder="Repeat new password">
+              </div>
 
-        <label class="label">New Password</label>
-        <input class="password" type="password" name="new_password" placeholder="Minimum 8 characters">
-
-        <label class="label">Confirm New Password</label>
-        <input class="password" type="password" name="confirm_password" placeholder="Repeat new password">
-
-        <div style="margin-top:16px">
-          <button class="btn-primary" type="submit">Save Changes</button>
+              <div class="btns">
+                <button class="btn-primary" type="submit">Save Changes</button>
+              </div>
+            </form>
+          </div>
         </div>
-      </form>
-    </div>
-  </main>
-</div>
+
+      </div>
+    </main>
+  </div>
 </body>
 </html>
