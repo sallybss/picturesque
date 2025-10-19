@@ -1,18 +1,20 @@
 <?php
 require __DIR__ . '/includes/flash.php';
-require __DIR__ . '/includes/db.php';
+require_once __DIR__ . '/includes/db.php';
 
-if (empty($_SESSION['profile_id'])) {
-  header('Location: ./auth/login.php'); exit;
-}
+if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit; }
 
-$me = (int)$_SESSION['profile_id'];
+$me  = (int)$_SESSION['profile_id'];
 $pid = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($pid <= 0) { set_flash('err','Invalid picture.'); header('Location: ./profile.php'); exit; }
 
+
 $conn = db();
-/* Load my picture */
-$stmt = $conn->prepare("SELECT picture_id, picture_title, picture_description, picture_url FROM pictures WHERE picture_id = ? AND profile_id = ?");
+$stmt = $conn->prepare("
+  SELECT picture_id, picture_title, picture_description, picture_url
+  FROM pictures
+  WHERE picture_id = ? AND profile_id = ?
+");
 $stmt->bind_param('ii', $pid, $me);
 $stmt->execute();
 $pic = $stmt->get_result()->fetch_assoc();
@@ -21,7 +23,6 @@ $conn->close();
 
 if (!$pic) { set_flash('err','Picture not found or not yours.'); header('Location: ./profile.php'); exit; }
 
-/* Dynamic uploads base (like you used elsewhere) */
 $baseUrl       = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
 $publicUploads = $baseUrl . '/uploads/';
 $currentImgUrl = $publicUploads . htmlspecialchars($pic['picture_url']);
@@ -31,6 +32,7 @@ $currentImgUrl = $publicUploads . htmlspecialchars($pic['picture_url']);
 <head>
   <meta charset="utf-8">
   <title>Edit · Picturesque</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css">
 </head>
 <body>
@@ -47,11 +49,9 @@ $currentImgUrl = $publicUploads . htmlspecialchars($pic['picture_url']);
       <input type="hidden" name="picture_id" value="<?= (int)$pic['picture_id'] ?>">
       <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
 
-      <!-- Hidden file input + dropzone with preview (preloaded with current image) -->
       <input id="photo" class="file-input" type="file" name="photo" accept="image/*">
 
       <div class="dropzone" id="dropzone">
-        <!-- Empty state (hidden on load because we show current image) -->
         <div class="dz-empty" id="dzEmpty">
           <svg class="dz-icon" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 16V6m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
@@ -60,10 +60,10 @@ $currentImgUrl = $publicUploads . htmlspecialchars($pic['picture_url']);
           <p class="dz-text">Drag &amp; drop a new photo or <button type="button" class="dz-link" id="browseBtn">browse</button></p>
         </div>
 
-        <!-- Preview state -->
         <img id="preview" class="dz-preview" alt="Selected image preview" hidden>
         <button type="button" class="dz-remove" id="removeBtn" aria-label="Remove image" hidden>×</button>
       </div>
+
       <p class="muted" style="margin-top:6px;">Leave image empty to keep the current photo.</p>
 
       <div class="form-row">
@@ -76,7 +76,6 @@ $currentImgUrl = $publicUploads . htmlspecialchars($pic['picture_url']);
         <textarea class="input textarea" name="desc" rows="5"><?= htmlspecialchars($pic['picture_description']) ?></textarea>
       </div>
 
-      <!-- Tags  -->
       <div class="form-row">
         <label class="label">Tags</label>
         <div class="chips" id="chips">
@@ -96,16 +95,15 @@ $currentImgUrl = $publicUploads . htmlspecialchars($pic['picture_url']);
   </div>
 
   <script>
-    const input     = document.getElementById('photo');
-    const dz        = document.getElementById('dropzone');
-    const dzEmpty   = document.getElementById('dzEmpty');
-    const preview   = document.getElementById('preview');
+    const input = document.getElementById('photo');
+    const dz = document.getElementById('dropzone');
+    const dzEmpty = document.getElementById('dzEmpty');
+    const preview = document.getElementById('preview');
     const removeBtn = document.getElementById('removeBtn');
     const browseBtn = document.getElementById('browseBtn');
-
-    // Preload current image into preview
     const originalUrl = "<?= $currentImgUrl ?>";
-    (function initPreview(){
+
+    (function () {
       preview.src = originalUrl;
       preview.hidden = false;
       removeBtn.hidden = false;
@@ -113,42 +111,24 @@ $currentImgUrl = $publicUploads . htmlspecialchars($pic['picture_url']);
       dz.classList.add('has-image');
     })();
 
-    // Open file dialog
     browseBtn.addEventListener('click', () => input.click());
     dz.addEventListener('click', (e) => { if (e.target === dz) input.click(); });
 
-    // Handle input change
-    input.addEventListener('change', function() {
+    input.addEventListener('change', function () {
       const file = this.files[0];
       if (file) setFile(file);
     });
 
-    // Drag & drop
-    ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => {
-      e.preventDefault();
-      dz.classList.add('is-drag');
-    }));
-    ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => {
-      e.preventDefault();
-      dz.classList.remove('is-drag');
-    }));
+    ['dragenter','dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('is-drag'); }));
+    ['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('is-drag'); }));
     dz.addEventListener('drop', (e) => {
       const file = e.dataTransfer.files[0];
       if (file) setFile(file);
     });
 
-    // Apply file → preview
     function setFile(file) {
-      if (!file.type.startsWith('image/')) {
-        alert('Please choose an image file.');
-        clearFile(); 
-        return;
-      }
-      if (file.size > 10 * 1024 * 1024) {
-        alert('Max size is 10MB.');
-        clearFile();
-        return;
-      }
+      if (!file.type.startsWith('image/')) { alert('Please choose an image file.'); return; }
+      if (file.size > 10 * 1024 * 1024) { alert('Max size is 10MB.'); return; }
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -160,15 +140,11 @@ $currentImgUrl = $publicUploads . htmlspecialchars($pic['picture_url']);
       };
       reader.readAsDataURL(file);
 
-      // ensure dropped file is attached to the input
-      if (!input.files.length || input.files[0] !== file) {
-        const dt = new DataTransfer();
-        dt.items.add(file);
-        input.files = dt.files;
-      }
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      input.files = dt.files;
     }
 
-    // Remove selected new image → revert to original 
     function clearFile() {
       input.value = '';
       preview.src = originalUrl;
@@ -177,16 +153,16 @@ $currentImgUrl = $publicUploads . htmlspecialchars($pic['picture_url']);
       dzEmpty.hidden = true;
       dz.classList.add('has-image');
     }
+
     removeBtn.addEventListener('click', (e) => { e.preventDefault(); clearFile(); });
 
-    // ---- Tags  ----
-    const chips    = document.getElementById('chips');
-    const tagsInput= document.getElementById('tagsInput');
-    const addBtn   = document.getElementById('addTag');
+    const chips = document.getElementById('chips');
+    const tagsInput = document.getElementById('tagsInput');
+    const addBtn = document.getElementById('addTag');
 
     function syncTags() {
       const selected = [...chips.querySelectorAll('.chip.is-selected')]
-        .map(c => c.textContent.trim())
+        .map(b => b.textContent.trim())
         .filter(t => t !== '+');
       tagsInput.value = selected.join(',');
     }
@@ -209,7 +185,6 @@ $currentImgUrl = $publicUploads . htmlspecialchars($pic['picture_url']);
         syncTags();
       }
     });
-
   </script>
 </body>
 </html>
