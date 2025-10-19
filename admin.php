@@ -2,30 +2,25 @@
 require __DIR__ . '/includes/flash.php';
 require __DIR__ . '/includes/db.php';
 require __DIR__ . '/includes/admin_guard.php';
-require __DIR__ . '/includes/sidebar.php'; // ✅ import reusable sidebar
+require __DIR__ . '/includes/sidebar.php';
 
-if (empty($_SESSION['profile_id'])) {
-    header('Location: ./auth/login.php');
-    exit;
-}
+if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit; }
 
 $me   = (int)$_SESSION['profile_id'];
 $conn = db();
-require_admin($conn, $me); // only admins
+require_admin($conn, $me);
 
-// current user (for avatar/name + sidebar)
-$stmtMe = $conn->prepare("SELECT display_name, avatar_photo, role FROM profiles WHERE profile_id=?");
-$stmtMe->bind_param('i', $me);
-$stmtMe->execute();
-$meRow   = $stmtMe->get_result()->fetch_assoc();
-$isAdmin = (isset($meRow['role']) && $meRow['role'] === 'admin');
-$stmtMe->close();
+$stmt = $conn->prepare("SELECT display_name, avatar_photo, role FROM profiles WHERE profile_id=?");
+$stmt->bind_param('i', $me);
+$stmt->execute();
+$meRow = $stmt->get_result()->fetch_assoc();
+$stmt->close();
 
-// Optional search by email/name
+$isAdmin = (($meRow['role'] ?? 'user') === 'admin');
+
 $q    = trim($_GET['q'] ?? '');
 $like = '%' . $q . '%';
 
-// Load users 
 $sql = "
   SELECT
     pr.profile_id,
@@ -36,28 +31,27 @@ $sql = "
     pr.role,
     pr.status,
     pr.created_at,
-    (SELECT COUNT(*) FROM pictures p WHERE p.profile_id=pr.profile_id) AS posts
+    (SELECT COUNT(*) FROM pictures p WHERE p.profile_id = pr.profile_id) AS posts
   FROM profiles pr
 ";
-$types  = '';
-$params = [];
+$types = '';
+$args  = [];
+
 if ($q !== '') {
-    $sql    .= " WHERE pr.login_email LIKE ? OR pr.display_name LIKE ? ";
-    $types  .= 'ss';
-    $params[] = $like;
-    $params[] = $like;
+  $sql   .= " WHERE pr.login_email LIKE ? OR pr.display_name LIKE ? ";
+  $types .= 'ss';
+  $args[] = $like;
+  $args[] = $like;
 }
+
 $sql .= " ORDER BY pr.created_at DESC";
 
 $stmt = $conn->prepare($sql);
-if ($types) {
-    $stmt->bind_param($types, ...$params);
-}
+if ($types) { $stmt->bind_param($types, ...$args); }
 $stmt->execute();
 $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-// base URL for uploads
 $baseUrl       = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
 $publicUploads = $baseUrl . '/uploads/';
 ?>
@@ -70,14 +64,15 @@ $publicUploads = $baseUrl . '/uploads/';
   <link rel="stylesheet" href="./public/css/main.css?v=8">
 </head>
 <body>
+  <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
+  <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
+
   <div class="layout">
-    <!-- ✅ Sidebar (reusable) -->
     <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
 
-    <!-- Main content -->
     <main class="content">
       <div class="content-top">
-        <h1 class="page-title" style="margin:0">Overview</h1>
+        <h1 class="page-title">Overview</h1>
 
         <form class="search-wrap" method="get" action="admin.php">
           <input class="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search users">
@@ -93,11 +88,7 @@ $publicUploads = $baseUrl . '/uploads/';
 
       <div class="admin-list">
         <?php foreach ($users as $u): ?>
-          <?php
-            $a = !empty($u['avatar_photo'])
-              ? $publicUploads . htmlspecialchars($u['avatar_photo'])
-              : 'https://placehold.co/32x32?text=%20';
-          ?>
+          <?php $a = !empty($u['avatar_photo']) ? $publicUploads . htmlspecialchars($u['avatar_photo']) : 'https://placehold.co/32x32?text=%20'; ?>
           <div class="admin-item">
             <div class="ai-left">
               <img class="ai-avatar" src="<?= $a ?>" alt="">
@@ -118,7 +109,6 @@ $publicUploads = $baseUrl . '/uploads/';
 
             <div class="ai-actions">
               <?php if ((int)$u['profile_id'] !== $me && ($u['role'] ?? 'user') !== 'admin'): ?>
-                <!-- Block / Unblock -->
                 <form class="inline" method="post" action="./actions/admin_toggle_status.php">
                   <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                   <input type="hidden" name="profile_id" value="<?= (int)$u['profile_id'] ?>">
@@ -127,16 +117,13 @@ $publicUploads = $baseUrl . '/uploads/';
                   </button>
                 </form>
 
-                <!-- Delete user -->
-                <form class="inline" method="post" action="./actions/admin_delete_user.php"
-                      onsubmit="return confirm('Delete this user and all their posts/likes/comments? This cannot be undone.');">
+                <form class="inline" method="post" action="./actions/admin_delete_user.php" onsubmit="return confirm('Delete this user and all their posts/likes/comments? This cannot be undone.');">
                   <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                   <input type="hidden" name="profile_id" value="<?= (int)$u['profile_id'] ?>">
                   <button class="btn-danger pill" type="submit">Delete</button>
                 </form>
               <?php endif; ?>
 
-              <!-- View posts -->
               <a class="btn-ghost pill" href="./admin_user_posts.php?id=<?= (int)$u['profile_id'] ?>">View posts</a>
             </div>
           </div>
