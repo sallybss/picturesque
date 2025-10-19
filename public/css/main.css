@@ -1659,3 +1659,5 @@ body.guest-locked {
     .profile-cover .cover-image{width:100%;height:100%;object-fit:cover;display:block}
     .profile-cover .cover-actions{position:absolute;right:12px;bottom:12px;display:flex;gap:8px}
     .btn-ghost.small{background:rgba(255,255,255,.9);padding:6px 10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+
+.wrap{max-width:1000px;margin:24px auto;display:grid;grid-template-columns:1fr 380px;gap:24px} @media(max-width:1000px){.wrap{grid-template-columns:1fr}} .card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden} .muted{color:#6b7280} .counts{color:#6b7280;font-size:13px} .comment{border-top:1px solid #e5e7eb;padding:12px 0} .input, textarea{width:100%;padding:12px;border:1px solid #e5e7eb;border-radius:10px;outline:none} .btn{padding:10px 14px;border:none;border-radius:10px;background:#8ec6df;color:#fff;font-weight:600;cursor:pointer} .btn:hover{background:#7dbad6} .topbar{display:flex;justify-content:space-between;align-items:center;margin:10px 0 16px} a.link{color:#2563eb;text-decoration:none}
