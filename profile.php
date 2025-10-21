@@ -1,95 +1,39 @@
 <?php
 require __DIR__ . '/includes/flash.php';
-require __DIR__ . '/includes/db.php';
 require __DIR__ . '/includes/sidebar.php';
+require __DIR__ . '/includes/db_class.php';
+require __DIR__ . '/includes/auth_class.php';
+require __DIR__ . '/includes/paths_class.php';
+require __DIR__ . '/includes/profile_repository.php';
+require __DIR__ . '/includes/picture_repository.php';
 
-if (empty($_SESSION['profile_id'])) {
-  header('Location: ./auth/login.php');
-  exit;
-}
+$me = Auth::requireUserOrRedirect('./auth/login.php');
 
-$profileId = isset($_GET['id']) ? (int)$_GET['id'] : (int)($_SESSION['profile_id'] ?? 0);
+$profileId = isset($_GET['id']) ? (int)$_GET['id'] : $me;
 if ($profileId <= 0) { header('Location: ./auth/login.php'); exit; }
 
-$me   = (int)$_SESSION['profile_id'];
-$conn = db();
+$paths = new Paths();
 
-$baseUrl       = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-$publicUploads = $baseUrl . '/uploads/';
-$publicImages  = $baseUrl . '/images/';
+$profiles = new ProfileRepository();
+$meRow = $profiles->getHeader($me);
+$iAmAdmin = (($meRow['role'] ?? 'user') === 'admin');
 
-$stmt = $conn->prepare("SELECT role FROM profiles WHERE profile_id = ?");
-$stmt->bind_param('i', $me);
-$stmt->execute();
-$myRow = $stmt->get_result()->fetch_assoc();
-$stmt->close();
-$iAmAdmin = (($myRow['role'] ?? 'user') === 'admin');
-
-$stmt = $conn->prepare("
-  SELECT profile_id, display_name, email, avatar_photo, cover_photo, role, created_at
-  FROM profiles
-  WHERE profile_id = ?
-");
-$stmt->bind_param('i', $profileId);
-$stmt->execute();
-$viewRow = $stmt->get_result()->fetch_assoc();
-$stmt->close();
+$viewRow = $profiles->getById($profileId);
 if (!$viewRow) { header('Location: ./auth/login.php'); exit; }
 
-$stmt = $conn->prepare("SELECT COUNT(*) AS cnt FROM pictures WHERE profile_id = ?");
-$stmt->bind_param('i', $profileId);
-$stmt->execute();
-$picturesCount = (int)($stmt->get_result()->fetch_assoc()['cnt'] ?? 0);
-$stmt->close();
-
-$stmt = $conn->prepare("
-  SELECT COUNT(*) AS cnt
-  FROM likes l
-  JOIN pictures p ON p.picture_id = l.picture_id
-  WHERE p.profile_id = ?
-");
-$stmt->bind_param('i', $profileId);
-$stmt->execute();
-$likesCount = (int)($stmt->get_result()->fetch_assoc()['cnt'] ?? 0);
-$stmt->close();
-
-$stmt = $conn->prepare("
-  SELECT COUNT(*) AS cnt
-  FROM comments c
-  JOIN pictures p ON p.picture_id = c.picture_id
-  WHERE p.profile_id = ?
-");
-$stmt->bind_param('i', $profileId);
-$stmt->execute();
-$commentsCount = (int)($stmt->get_result()->fetch_assoc()['cnt'] ?? 0);
-$stmt->close();
-
-$stmt = $conn->prepare("
-  SELECT
-    p.picture_id, p.picture_title, p.picture_description, p.picture_url, p.created_at,
-    COALESCE(l.cnt,0) AS like_count,
-    COALESCE(c.cnt,0) AS comment_count
-  FROM pictures p
-  LEFT JOIN (SELECT picture_id, COUNT(*) cnt FROM likes GROUP BY picture_id) l ON l.picture_id = p.picture_id
-  LEFT JOIN (SELECT picture_id, COUNT(*) cnt FROM comments GROUP BY picture_id) c ON c.picture_id = p.picture_id
-  WHERE p.profile_id = ?
-  ORDER BY p.created_at DESC
-");
-$stmt->bind_param('i', $profileId);
-$stmt->execute();
-$res = $stmt->get_result();
-$myPics = [];
-while ($row = $res->fetch_assoc()) { $myPics[] = $row; }
-$stmt->close();
-$conn->close();
+$picturesRepo  = new PictureRepository();
+$picturesCount = $picturesRepo->countByProfile($profileId);
+$likesCount    = $picturesRepo->likesCountForProfilePictures($profileId);
+$commentsCount = $picturesRepo->commentsCountForProfilePictures($profileId);
+$myPics        = $picturesRepo->listByProfile($profileId);
 
 $avatarSrc = !empty($viewRow['avatar_photo'])
-  ? $publicUploads . htmlspecialchars($viewRow['avatar_photo'])
+  ? $paths->uploads . htmlspecialchars($viewRow['avatar_photo'])
   : 'https://placehold.co/96x96?text=%20';
 
 $coverSrc = !empty($viewRow['cover_photo'])
-  ? $publicUploads . htmlspecialchars($viewRow['cover_photo'])
-  : $publicImages . 'default-cover.jpg';
+  ? $paths->uploads . htmlspecialchars($viewRow['cover_photo'])
+  : $paths->images . 'default-cover.jpg';
 ?>
 <!doctype html>
 <html lang="en">
@@ -151,7 +95,7 @@ $coverSrc = !empty($viewRow['cover_photo'])
       <section class="feed">
         <?php foreach ($myPics as $p): ?>
           <article class="card">
-            <img src="<?= $publicUploads . htmlspecialchars($p['picture_url']) ?>" alt="">
+            <img src="<?= $paths->uploads . htmlspecialchars($p['picture_url']) ?>" alt="">
             <div class="card-body">
               <div class="card-title"><?= htmlspecialchars($p['picture_title']) ?></div>
               <?php if (!empty($p['picture_description'])): ?>

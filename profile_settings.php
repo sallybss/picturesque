@@ -1,29 +1,19 @@
 <?php
 require __DIR__ . '/includes/flash.php';
-require __DIR__ . '/includes/db.php';
 require __DIR__ . '/includes/sidebar.php';
+require __DIR__ . '/includes/db_class.php';
+require __DIR__ . '/includes/auth_class.php';
+require __DIR__ . '/includes/profile_repository.php';
 
-if (empty($_SESSION['profile_id'])) {
-  header('Location: ./auth/login.php');
-  exit;
-}
+$me = Auth::requireUserOrRedirect('./auth/login.php');
 
-$me      = (int)$_SESSION['profile_id'];
-$conn    = db();
-$stmt    = $conn->prepare("SELECT login_email, role FROM profiles WHERE profile_id = ?");
-$stmt->bind_param('i', $me);
-$stmt->execute();
-$row     = $stmt->get_result()->fetch_assoc();
-$stmt->close();
-$conn->close();
-
+$profiles = new ProfileRepository();
+$row = $profiles->getLoginEmailAndRole($me);
 if (!$row) { header('Location: ./index.php'); exit; }
 
-$isAdmin      = ($row['role'] ?? '') === 'admin';
+$isAdmin = ($row['role'] ?? '') === 'admin';
 $currentEmail = $row['login_email'] ?? '';
 
-$baseUrl = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-$cssBase = $baseUrl . '/public/css';
 ?>
 <!doctype html>
 <html lang="en">

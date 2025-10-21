@@ -1,59 +1,25 @@
 <?php
 require __DIR__ . '/includes/flash.php';
-require __DIR__ . '/includes/db.php';
-require __DIR__ . '/includes/admin_guard.php';
 require __DIR__ . '/includes/sidebar.php';
+require __DIR__ . '/includes/db_class.php';
+require __DIR__ . '/includes/auth_class.php';
+require __DIR__ . '/includes/paths_class.php';
+require __DIR__ . '/includes/profile_repository.php';
 
-if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit; }
+$me = Auth::requireAdminOrRedirect('./index.php');
 
-$me   = (int)$_SESSION['profile_id'];
-$conn = db();
-require_admin($conn, $me);
 
-$stmt = $conn->prepare("SELECT display_name, avatar_photo, role FROM profiles WHERE profile_id=?");
-$stmt->bind_param('i', $me);
-$stmt->execute();
-$meRow = $stmt->get_result()->fetch_assoc();
-$stmt->close();
+$paths = new Paths();
 
+$profiles = new ProfileRepository();
+$meRow = $profiles->getHeader($me);
 $isAdmin = (($meRow['role'] ?? 'user') === 'admin');
+if (!$isAdmin) { header('Location: ./index.php'); exit; }
 
-$q    = trim($_GET['q'] ?? '');
-$like = '%' . $q . '%';
+$q = trim($_GET['q'] ?? '');
+$users = $profiles->searchUsersWithStats($q);
 
-$sql = "
-  SELECT
-    pr.profile_id,
-    pr.display_name,
-    pr.login_email,
-    pr.email,
-    pr.avatar_photo,
-    pr.role,
-    pr.status,
-    pr.created_at,
-    (SELECT COUNT(*) FROM pictures p WHERE p.profile_id = pr.profile_id) AS posts
-  FROM profiles pr
-";
-$types = '';
-$args  = [];
-
-if ($q !== '') {
-  $sql   .= " WHERE pr.login_email LIKE ? OR pr.display_name LIKE ? ";
-  $types .= 'ss';
-  $args[] = $like;
-  $args[] = $like;
-}
-
-$sql .= " ORDER BY pr.created_at DESC";
-
-$stmt = $conn->prepare($sql);
-if ($types) { $stmt->bind_param($types, ...$args); }
-$stmt->execute();
-$users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
-
-$baseUrl       = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-$publicUploads = $baseUrl . '/uploads/';
+$publicUploads = $paths->uploads;
 ?>
 <!doctype html>
 <html lang="en">
@@ -68,7 +34,7 @@ $publicUploads = $baseUrl . '/uploads/';
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
   <div class="layout">
-    <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
+    <?php render_sidebar(['isAdmin' => true]); ?>
 
     <main class="content">
       <div class="content-top">

@@ -1,34 +1,26 @@
 <?php
 require __DIR__ . '/../includes/flash.php';
-require __DIR__ . '/../includes/db.php';
-require __DIR__ . '/../includes/admin_guard.php';
+require __DIR__ . '/../includes/db_class.php';
+require __DIR__ . '/../includes/auth_class.php';
+require __DIR__ . '/../includes/profile_repository.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: ../admin.php'); exit; }
-if (!csrf_check($_POST['csrf'] ?? null)) { set_flash('err','Invalid CSRF token.'); header('Location: ../admin.php'); exit; }
+if (!check_csrf($_POST['csrf'] ?? null)) { set_flash('err','Invalid CSRF token.'); header('Location: ../admin.php'); exit; }
+
+$me = Auth::requireAdminOrRedirect('../index.php');
 
 $targetId = (int)($_POST['profile_id'] ?? 0);
-$me       = (int)($_SESSION['profile_id'] ?? 0);
 if ($targetId <= 0) { set_flash('err','Missing user.'); header('Location: ../admin.php'); exit; }
 
-$conn = db();
-require_admin($conn, $me);
+$profiles = new ProfileRepository();
 
-$stmt = $conn->prepare("SELECT role FROM profiles WHERE profile_id=?");
-$stmt->bind_param('i', $targetId);
-$stmt->execute();
-$stmt->bind_result($role);
-$found = $stmt->fetch();
-$stmt->close();
+$targetRole = $profiles->getRole($targetId);
+if ($targetRole === null) { set_flash('err','User not found.'); header('Location: ../admin.php'); exit; }
+if ($targetId === $me) { set_flash('err','You cannot delete yourself.'); header('Location: ../admin.php'); exit; }
+if (strtolower($targetRole) === 'admin') { set_flash('err','You cannot delete another admin.'); header('Location: ../admin.php'); exit; }
 
-if (!$found) { $conn->close(); set_flash('err','User not found.'); header('Location: ../admin.php'); exit; }
-if ($targetId === $me) { $conn->close(); set_flash('err','You cannot delete yourself.'); header('Location: ../admin.php'); exit; }
-if (strtolower($role) === 'admin') { $conn->close(); set_flash('err','You cannot delete another admin.'); header('Location: ../admin.php'); exit; }
-
-$del = $conn->prepare("DELETE FROM profiles WHERE profile_id=?");
-$del->bind_param('i', $targetId);
-$del->execute();
-$del->close();
-$conn->close();
+$profiles->deleteById($targetId);
 
 set_flash('ok','User deleted.');
-header('Location: ../admin.php'); exit;
+header('Location: ../admin.php'); 
+exit;

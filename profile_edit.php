@@ -1,29 +1,21 @@
 <?php
 require __DIR__ . '/includes/flash.php';
-require __DIR__ . '/includes/db.php';
 require __DIR__ . '/includes/sidebar.php';
+require __DIR__ . '/includes/db_class.php';
+require __DIR__ . '/includes/auth_class.php';
+require __DIR__ . '/includes/paths_class.php';
+require __DIR__ . '/includes/profile_repository.php';
 
-if (empty($_SESSION['profile_id'])) {
-  header('Location: ./auth/login.php');
-  exit;
-}
+$me = Auth::requireUserOrRedirect('./auth/login.php');
 
-$baseUrl       = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-$publicUploads = $baseUrl . '/uploads/';
-$cssBase       = $baseUrl . '/public/css';
+$paths = new Paths();
 
-$me   = (int)$_SESSION['profile_id'];
-$conn = db();
-
-$stmt = $conn->prepare("SELECT display_name, email, avatar_photo, role FROM profiles WHERE profile_id = ?");
-$stmt->bind_param('i', $me);
-$stmt->execute();
-$meRow = $stmt->get_result()->fetch_assoc();
-$stmt->close();
-$conn->close();
+$profiles = new ProfileRepository();
+$meRow = $profiles->getById($me);
+if (!$meRow) { header('Location: ./index.php'); exit; }
 
 $isAdmin   = isset($meRow['role']) && strtolower($meRow['role']) === 'admin';
-$avatarSrc = !empty($meRow['avatar_photo']) ? $publicUploads . htmlspecialchars($meRow['avatar_photo']) : 'https://placehold.co/96x96?text=%20';
+$avatarSrc = !empty($meRow['avatar_photo']) ? $paths->uploads . htmlspecialchars($meRow['avatar_photo']) : 'https://placehold.co/96x96?text=%20';
 ?>
 <!doctype html>
 <html lang="en">
@@ -45,7 +37,7 @@ $avatarSrc = !empty($meRow['avatar_photo']) ? $publicUploads . htmlspecialchars(
         <h2 class="card-title">Edit Profile</h2>
 
         <div class="edit-avatar-row">
-        <div class="edit-avatar"><img src="<?= $avatarSrc ?>" alt="Avatar" class="avatar-preview"></div>
+          <div class="edit-avatar"><img src="<?= $avatarSrc ?>" alt="Avatar" class="avatar-preview"></div>
           <span class="avatar-note">Upload a new avatar (JPG/PNG/WEBP)</span>
         </div>
 

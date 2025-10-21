@@ -1,31 +1,22 @@
 <?php
 require __DIR__ . '/includes/flash.php';
-require_once __DIR__ . '/includes/db.php';
+require __DIR__ . '/includes/db_class.php';
+require __DIR__ . '/includes/auth_class.php';
+require __DIR__ . '/includes/paths_class.php';
+require __DIR__ . '/includes/picture_repository.php';
 
-if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit; }
+$me  = Auth::requireUserOrRedirect('./auth/login.php');
 
-$me  = (int)$_SESSION['profile_id'];
 $pid = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($pid <= 0) { set_flash('err','Invalid picture.'); header('Location: ./profile.php'); exit; }
 
+$paths = new Paths();
 
-$conn = db();
-$stmt = $conn->prepare("
-  SELECT picture_id, picture_title, picture_description, picture_url
-  FROM pictures
-  WHERE picture_id = ? AND profile_id = ?
-");
-$stmt->bind_param('ii', $pid, $me);
-$stmt->execute();
-$pic = $stmt->get_result()->fetch_assoc();
-$stmt->close();
-$conn->close();
-
+$pictures = new PictureRepository();
+$pic = $pictures->getEditableByOwner($pid, $me);
 if (!$pic) { set_flash('err','Picture not found or not yours.'); header('Location: ./profile.php'); exit; }
 
-$baseUrl       = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-$publicUploads = $baseUrl . '/uploads/';
-$currentImgUrl = $publicUploads . htmlspecialchars($pic['picture_url']);
+$currentImgUrl = $paths->uploads . htmlspecialchars($pic['picture_url']);
 ?>
 <!doctype html>
 <html lang="en">
@@ -48,6 +39,7 @@ $currentImgUrl = $publicUploads . htmlspecialchars($pic['picture_url']);
     <form method="post" action="./actions/update_picture.php" enctype="multipart/form-data" class="create-form">
       <input type="hidden" name="picture_id" value="<?= (int)$pic['picture_id'] ?>">
       <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+      <input type="hidden" name="reset_image" id="resetImage" value="">
 
       <input id="photo" class="file-input" type="file" name="photo" accept="image/*">
 
@@ -101,6 +93,7 @@ $currentImgUrl = $publicUploads . htmlspecialchars($pic['picture_url']);
     const preview = document.getElementById('preview');
     const removeBtn = document.getElementById('removeBtn');
     const browseBtn = document.getElementById('browseBtn');
+    const resetInput = document.getElementById('resetImage');
     const originalUrl = "<?= $currentImgUrl ?>";
 
     (function () {
@@ -143,15 +136,18 @@ $currentImgUrl = $publicUploads . htmlspecialchars($pic['picture_url']);
       const dt = new DataTransfer();
       dt.items.add(file);
       input.files = dt.files;
+
+      if (resetInput) resetInput.value = "";
     }
 
     function clearFile() {
       input.value = '';
-      preview.src = originalUrl;
-      preview.hidden = false;
-      removeBtn.hidden = false;
-      dzEmpty.hidden = true;
-      dz.classList.add('has-image');
+      preview.src = '';
+      preview.hidden = true;
+      removeBtn.hidden = true;
+      dzEmpty.hidden = false;
+      dz.classList.remove('has-image');
+      if (resetInput) resetInput.value = "1";
     }
 
     removeBtn.addEventListener('click', (e) => { e.preventDefault(); clearFile(); });

@@ -1,31 +1,25 @@
 <?php
 require __DIR__ . '/includes/flash.php';
-require __DIR__ . '/includes/db.php';
 require __DIR__ . '/includes/sidebar.php';
+require __DIR__ . '/includes/db_class.php';
+require __DIR__ . '/includes/auth_class.php';
+require __DIR__ . '/includes/paths_class.php';
+require __DIR__ . '/includes/profile_repository.php';
+require __DIR__ . '/includes/pages_repository.php';
 
-if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit; }
+$me = Auth::requireUserOrRedirect('./auth/login.php');
 
-$me   = (int)$_SESSION['profile_id'];
-$conn = db();
+$paths = new Paths();
 
-$stmt = $conn->prepare("SELECT role FROM profiles WHERE profile_id=?");
-$stmt->bind_param('i', $me);
-$stmt->execute();
-$row = $stmt->get_result()->fetch_assoc();
-$isAdmin = (($row['role'] ?? '') === 'admin');
-$stmt->close();
+$profiles = new ProfileRepository();
+$meRow = $profiles->getHeader($me);
+$isAdmin = (($meRow['role'] ?? 'user') === 'admin');
 
-$baseUrl       = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-$publicUploads = $baseUrl . '/uploads/';
+$pages = new PagesRepository();
+$page = $pages->getAbout() ?: ['title' => 'About Picturesque', 'content' => 'Welcome to Picturesque!', 'image_path' => null];
 
-$stmt = $conn->prepare("SELECT title, content, image_path FROM pages WHERE slug='about' LIMIT 1");
-$stmt->execute();
-$page = $stmt->get_result()->fetch_assoc() ?: ['title' => 'About Picturesque', 'content' => 'Welcome to Picturesque!', 'image_path' => null];
-$stmt->close();
-$conn->close();
-
-$title = $page['title'];
-$img   = !empty($page['image_path']) ? ($publicUploads . htmlspecialchars($page['image_path'])) : null;
+$title = $page['title'] ?? 'About Picturesque';
+$img = !empty($page['image_path']) ? ($paths->uploads . htmlspecialchars($page['image_path'])) : null;
 
 $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/public/css/main.css') : time();
 ?>
@@ -47,7 +41,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
     <main class="content">
       <section class="about">
         <h1><?= htmlspecialchars($title) ?></h1>
-        <p class="lead"><?= nl2br(htmlspecialchars($page['content'])) ?></p>
+        <p class="lead"><?= nl2br(htmlspecialchars($page['content'] ?? '')) ?></p>
         <?php if ($img): ?>
           <img src="<?= $img ?>" alt="About image" class="about-image">
         <?php endif; ?>

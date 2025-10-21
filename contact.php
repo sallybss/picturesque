@@ -1,21 +1,17 @@
 <?php
 require __DIR__ . '/includes/flash.php';
-require __DIR__ . '/includes/db.php';
 require __DIR__ . '/includes/sidebar.php';
+require __DIR__ . '/includes/db_class.php';
+require __DIR__ . '/includes/auth_class.php';
+require __DIR__ . '/includes/profile_repository.php';
 
-if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit; }
+$me = Auth::requireUserOrRedirect('./auth/login.php');
 
-$me   = (int)$_SESSION['profile_id'];
-$conn = db();
+$profiles = new ProfileRepository();
+$meRow = $profiles->getById($me);
+if (!$meRow) { header('Location: ./index.php'); exit; }
 
-$stmt = $conn->prepare("SELECT role, display_name, email FROM profiles WHERE profile_id=?");
-$stmt->bind_param('i', $me);
-$stmt->execute();
-$meRow = $stmt->get_result()->fetch_assoc();
-$stmt->close();
-$conn->close();
-
-$isAdmin      = (strtolower(trim($meRow['role'] ?? '')) === 'admin');
+$isAdmin      = strtolower(trim($meRow['role'] ?? '')) === 'admin';
 $prefillName  = $meRow['display_name'] ?? '';
 $prefillEmail = $meRow['email'] ?? '';
 

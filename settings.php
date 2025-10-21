@@ -1,34 +1,28 @@
 <?php
 require __DIR__ . '/includes/flash.php';
-require __DIR__ . '/includes/db.php';
 require __DIR__ . '/includes/sidebar.php';
+require __DIR__ . '/includes/db_class.php';
+require __DIR__ . '/includes/auth_class.php';
+require __DIR__ . '/includes/paths_class.php';
+require __DIR__ . '/includes/profile_repository.php';
+require __DIR__ . '/includes/pages_repository.php';
 
-if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit; }
+$me = Auth::requireAdminOrRedirect('./index.php');
 
-$me   = (int)$_SESSION['profile_id'];
-$conn = db();
+$paths = new Paths();
 
-$stmt = $conn->prepare("SELECT role FROM profiles WHERE profile_id=?");
-$stmt->bind_param('i', $me);
-$stmt->execute();
-$meRow = $stmt->get_result()->fetch_assoc();
-$stmt->close();
-
+$profiles = new ProfileRepository();
+$meRow = $profiles->getHeader($me);
 $isAdmin = (($meRow['role'] ?? 'user') === 'admin');
 if (!$isAdmin) { header('Location: ./index.php'); exit; }
 
-$baseUrl       = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-$publicUploads = $baseUrl . '/uploads/';
+$pages = new PagesRepository();
+$page  = $pages->getAbout();
 
-$stmt = $conn->prepare("SELECT page_id, title, content, image_path FROM pages WHERE slug='about' LIMIT 1");
-$stmt->execute();
-$page = $stmt->get_result()->fetch_assoc();
-$stmt->close();
-
-$pageId     = (int)($page['page_id'] ?? 0);
-$title      = $page['title']   ?? 'About Picturesque';
-$content    = $page['content'] ?? '';
-$imagePath  = $page['image_path'] ?? null;
+$pageId    = (int)($page['page_id'] ?? 0);
+$title     = $page['title']   ?? 'About Picturesque';
+$content   = $page['content'] ?? '';
+$imagePath = $page['image_path'] ?? null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!check_csrf($_POST['csrf'] ?? null)) {
@@ -63,23 +57,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 
   if ($pageId > 0) {
-    $stmt = $conn->prepare("UPDATE pages SET title=?, content=?, image_path=?, updated_by=?, updated_at=NOW() WHERE page_id=?");
-    $stmt->bind_param('sssii', $newTitle, $newContent, $newImagePath, $me, $pageId);
+    $pages->updateAbout($pageId, $newTitle, $newContent, $newImagePath, $me);
   } else {
-    $slug = 'about';
-    $stmt = $conn->prepare("INSERT INTO pages (slug, title, content, image_path, updated_by) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param('ssssi', $slug, $newTitle, $newContent, $newImagePath, $me);
+    $pages->insertAbout($newTitle, $newContent, $newImagePath, $me);
   }
-  $stmt->execute();
-  $stmt->close();
 
   set_flash('ok','About page updated.');
   header('Location: ./settings.php'); exit;
 }
 
-$conn->close();
-
-$imgUrl = $imagePath ? ($publicUploads . htmlspecialchars($imagePath)) : null;
+$imgUrl = $imagePath ? ($paths->uploads . htmlspecialchars($imagePath)) : null;
 $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/public/css/main.css') : time();
 ?>
 <!doctype html>

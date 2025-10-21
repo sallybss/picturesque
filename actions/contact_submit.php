@@ -1,11 +1,14 @@
 <?php
 require __DIR__ . '/../includes/flash.php';
-require __DIR__ . '/../includes/db.php';
+require __DIR__ . '/../includes/db_class.php';
+require __DIR__ . '/../includes/auth_class.php';
+require __DIR__ . '/../includes/contact_repository.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: ../contact.php'); exit; }
-if (!csrf_check($_POST['csrf'] ?? null))  { set_flash('err','Invalid request.'); header('Location: ../contact.php'); exit; }
+if (!check_csrf($_POST['csrf'] ?? null))  { set_flash('err','Invalid request.'); header('Location: ../contact.php'); exit; }
 
-$me      = isset($_SESSION['profile_id']) ? (int)$_SESSION['profile_id'] : null;
+$me = Auth::requireUserOrRedirect('../auth/login.php');
+
 $name    = trim($_POST['name']    ?? '');
 $company = trim($_POST['company'] ?? '');
 $email   = trim($_POST['email']   ?? '');
@@ -17,15 +20,9 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL))                           { set_
 
 $ip = $_SERVER['REMOTE_ADDR'] ?? null;
 
-$conn = db();
-$stmt = $conn->prepare("
-  INSERT INTO contact_messages (profile_id, name, email, company, subject, message, ip)
-  VALUES (?, ?, ?, ?, ?, ?, ?)
-");
-$stmt->bind_param('issssss', $me, $name, $email, $company, $subject, $message, $ip);
-$stmt->execute();
-$stmt->close();
-$conn->close();
+$repo = new ContactRepository();
+$repo->create($me, $name, $email, $company, $subject, $message, $ip);
 
 set_flash('ok','Thank you! Your message was sent.');
-header('Location: ../contact.php'); exit;
+header('Location: ../contact.php'); 
+exit;

@@ -1,14 +1,17 @@
-<?php require __DIR__ . '/../includes/flash.php'; ?>
+<?php
+require __DIR__ . '/../includes/flash.php';
+?>
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <title>Sign In · Picturesque</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="../public/css/main.css?v=2">
 </head>
 <body>
   <div class="auth-wrap">
-  <div class="auth-left" style="--auth-bg:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80');"></div>
+    <div class="auth-left" style="--auth-bg:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80');"></div>
 
     <div class="auth-right">
       <div class="auth-card">
@@ -22,7 +25,9 @@
           <div class="flash ok"><?= htmlspecialchars($m) ?></div>
         <?php endif; ?>
 
-        <form method="post" action="../actions/post_login.php">
+        <form method="post" action="../actions/post_login.php" autocomplete="off">
+          <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+
           <label class="label">Email</label>
           <input class="input" type="email" name="login_email" placeholder="noelwilson@gmail.com" required>
 

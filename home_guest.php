@@ -1,16 +1,12 @@
 <?php
-// home_guest.php — public discover page (no login required)
 require __DIR__ . '/includes/flash.php';
-require __DIR__ . '/includes/db.php';
 require __DIR__ . '/includes/sidebar.php';
+require __DIR__ . '/includes/db_class.php';
+require __DIR__ . '/includes/paths_class.php';
 
-$conn = db();
+$paths = new Paths();
+$publicUploads = $paths->uploads;
 
-/* Build base URL for images in subfolder setups */
-$baseUrl       = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-$publicUploads = $baseUrl . '/uploads/';
-
-/* Load latest pictures with author meta */
 $sql = "
   SELECT
     p.picture_id,
@@ -30,12 +26,10 @@ $sql = "
   ORDER BY p.created_at DESC
   LIMIT 120
 ";
-$res = $conn->query($sql);
+$res = DB::get()->query($sql);
 $pictures = [];
 while ($row = $res->fetch_assoc()) $pictures[] = $row;
-$conn->close();
 
-/* cache-bust css */
 $cssPath = __DIR__ . '/public/css/main.css';
 $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 ?>
@@ -54,16 +48,14 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 
 <div class="guest-main">
   <?php
-    // Guest sidebar: Home/About/Contact + Login/Register
     render_sidebar([
       'isAdmin'   => false,
       'isGuest'   => true,
-      'homeCount' => count($pictures)
+      'homeCount' => count($pictures),
     ]);
   ?>
 
   <main class="guest-content">
-    <!-- top row: search + sign-in -->
     <div class="content-top">
       <form method="get" action="home_guest.php" class="search-wrap">
         <input class="search" name="q" placeholder="Search" disabled title="Sign in to use search">
@@ -71,7 +63,6 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
       <a class="btn-ghost pill" href="./auth/login.php" style="text-decoration:none">Sign in</a>
     </div>
 
-    <!-- second row: pills + disabled filter -->
     <div class="controls-row">
       <div class="pills">
         <span class="pill">Discovery</span>
@@ -87,7 +78,6 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
       </button>
     </div>
 
-    <!-- third row: short, non-scrollable teaser feed -->
     <section class="feed feed-locked">
       <?php foreach ($pictures as $p): ?>
         <article class="card">
@@ -117,9 +107,8 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
       <?php endforeach; ?>
     </section>
 
-    <!-- fourth row: sticky CTA with soft fade -->
     <div class="guest-cta">
-      <span class="note-guest"> To have full access to the gallery, please log in or create an account.</span>
+      <span class="note-guest">To have full access to the gallery, please log in or create an account.</span>
       <a class="btn-ghost" href="./auth/register.php">Register</a>
       <a class="btn-primary" href="./auth/login.php">Sign in</a>
     </div>

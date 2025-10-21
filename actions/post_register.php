@@ -1,14 +1,15 @@
 <?php
 require __DIR__ . '/../includes/flash.php';
-require __DIR__ . '/../includes/db.php';
+require __DIR__ . '/../includes/db_class.php';
+require __DIR__ . '/../includes/profile_repository.php';
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-  header('Location: ../auth/register.php'); exit;
-}
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: ../auth/register.php'); exit; }
 
 $email = trim($_POST['login_email'] ?? '');
 $name  = trim($_POST['display_name'] ?? '');
-$pass  = $_POST['password'] ?? '';
+$pass  = (string)($_POST['password'] ?? '');
+
+if (!check_csrf($_POST['csrf'] ?? null)) { set_flash('err','Invalid request.'); header('Location: ../auth/register.php'); exit; }
 
 if ($email === '' || $name === '' || $pass === '') {
   set_flash('err', 'Please fill all fields.');
@@ -23,30 +24,19 @@ if (strlen($pass) < 8) {
   header('Location: ../auth/register.php'); exit;
 }
 
-$conn = db();
-/* check for existing email */
-$chk = $conn->prepare('SELECT profile_id FROM profiles WHERE login_email=?');
-$chk->bind_param('s', $email);
-$chk->execute(); $chk->store_result();
-if ($chk->num_rows > 0) {
-  $chk->close(); $conn->close();
+$profiles = new ProfileRepository();
+
+if ($profiles->loginEmailExists($email)) {
   set_flash('err', 'Email already registered.');
   header('Location: ../auth/register.php'); exit;
 }
-$chk->close();
 
-/* create account */
 $hash = password_hash($pass, PASSWORD_DEFAULT);
-$ins  = $conn->prepare('INSERT INTO profiles (login_email, password_hash, display_name, role, status) VALUES (?, ?, ?, "user", "active")');
-$ins->bind_param('sss', $email, $hash, $name);
-$ins->execute();
+$newId = $profiles->createUser($email, $name, $hash);
 
-$_SESSION['profile_id']   = (int)$ins->insert_id;
+$_SESSION['profile_id']   = $newId;
 $_SESSION['display_name'] = $name;
 $_SESSION['role']         = 'user';
-
-$ins->close();
-$conn->close();
 
 set_flash('ok', 'Account created. You are signed in.');
 header('Location: ../index.php'); exit;

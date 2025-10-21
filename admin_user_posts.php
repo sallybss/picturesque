@@ -1,45 +1,32 @@
 <?php
-require __DIR__ . '/includes/flash.php';
-require __DIR__ . '/includes/db.php';
-require __DIR__ . '/includes/admin_guard.php';
-require __DIR__ . '/includes/sidebar.php';
+require_once __DIR__ . '/includes/flash.php';
+require_once __DIR__ . '/includes/sidebar.php';
+require_once __DIR__ . '/includes/db_class.php';
+require_once __DIR__ . '/includes/auth_class.php';
+require_once __DIR__ . '/includes/paths_class.php';
+require_once __DIR__ . '/includes/profile_repository.php';   // <-- add this
+require_once __DIR__ . '/includes/picture_repository.php';
 
-if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit; }
 
-$me     = (int)$_SESSION['profile_id'];
+$me = Auth::requireAdminOrRedirect('./index.php');
+
 $userId = (int)($_GET['id'] ?? 0);
 if ($userId <= 0) { set_flash('err', 'Missing user id.'); header('Location: ./admin.php'); exit; }
 
-$conn = db();
-require_admin($conn, $me);
+$paths = new Paths();
 
-$u = $conn->prepare("SELECT display_name, email FROM profiles WHERE profile_id=?");
-$u->bind_param('i', $userId);
-$u->execute();
-$user = $u->get_result()->fetch_assoc();
-$u->close();
+$profiles = new ProfileRepository();
+$meRow = $profiles->getHeader($me);
+$isAdmin = (($meRow['role'] ?? 'user') === 'admin');
+if (!$isAdmin) { set_flash('err', 'Admins only.'); header('Location: ./index.php'); exit; }
 
+$user = $profiles->getById($userId);
 if (!$user) { set_flash('err', 'User not found.'); header('Location: ./admin.php'); exit; }
 
-$p = $conn->prepare("
-  SELECT
-    p.picture_id, p.picture_title, p.picture_description, p.picture_url, p.created_at,
-    COALESCE(l.cnt,0) AS like_count,
-    COALESCE(c.cnt,0) AS comment_count
-  FROM pictures p
-  LEFT JOIN (SELECT picture_id, COUNT(*) cnt FROM likes    GROUP BY picture_id) l ON l.picture_id = p.picture_id
-  LEFT JOIN (SELECT picture_id, COUNT(*) cnt FROM comments GROUP BY picture_id) c ON c.picture_id = p.picture_id
-  WHERE p.profile_id = ?
-  ORDER BY p.created_at DESC
-");
-$p->bind_param('i', $userId);
-$p->execute();
-$posts = $p->get_result()->fetch_all(MYSQLI_ASSOC);
-$p->close();
-$conn->close();
+$pictures = new PictureRepository();
+$posts = $pictures->listByProfile($userId);
 
-$baseUrl       = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-$publicUploads = $baseUrl . '/uploads/';
+$publicUploads = $paths->uploads;
 ?>
 <!doctype html>
 <html lang="en">

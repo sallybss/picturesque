@@ -1,23 +1,29 @@
 <?php
 require __DIR__ . '/includes/flash.php';
-require __DIR__ . '/includes/db.php';
-require __DIR__ . '/includes/admin_guard.php';
 require __DIR__ . '/includes/sidebar.php';
+require __DIR__ . '/includes/db_class.php';
+require __DIR__ . '/includes/auth_class.php';
+require __DIR__ . '/includes/paths_class.php';
+require __DIR__ . '/includes/profile_repository.php';
+require __DIR__ . '/includes/pages_repository.php';
 
-if (empty($_SESSION['profile_id'])) { header('Location: ./auth/login.php'); exit; }
+$me = Auth::requireAdminOrRedirect('./index.php');
 
-$me   = (int)$_SESSION['profile_id'];
-$conn = db();
-require_admin($conn, $me);
 
-$baseUrl       = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-$publicUploads = $baseUrl . '/uploads/';
+$paths = new Paths();
 
-$stmt = $conn->prepare("SELECT title, content, image_path FROM pages WHERE slug='about' LIMIT 1");
-$stmt->execute();
-$page = $stmt->get_result()->fetch_assoc() ?: ['title' => 'About', 'content' => '', 'image_path' => null];
-$stmt->close();
-$conn->close();
+$profiles = new ProfileRepository();
+$meRow = $profiles->getHeader($me);
+$isAdmin = (($meRow['role'] ?? 'user') === 'admin');
+if (!$isAdmin) { header('Location: ./index.php'); exit; }
+
+$pages = new PagesRepository();
+$page  = $pages->getAbout();
+$title = $page['title'] ?? 'About';
+$content = $page['content'] ?? '';
+$imagePath = $page['image_path'] ?? null;
+
+$publicUploads = $paths->uploads;
 ?>
 <!doctype html>
 <html lang="en">
@@ -43,19 +49,19 @@ $conn->close();
 
           <div class="form-row">
             <label class="label">Title</label>
-            <input class="input" type="text" name="title" value="<?= htmlspecialchars($page['title']) ?>" required>
+            <input class="input" type="text" name="title" value="<?= htmlspecialchars($title) ?>" required>
           </div>
 
           <div class="form-row">
             <label class="label">Content</label>
-            <textarea class="input textarea" name="content" rows="6" required><?= htmlspecialchars($page['content']) ?></textarea>
+            <textarea class="input textarea" name="content" rows="6" required><?= htmlspecialchars($content) ?></textarea>
           </div>
 
           <div class="form-row">
             <label class="label">Image (optional)</label>
-            <?php if (!empty($page['image_path'])): ?>
+            <?php if (!empty($imagePath)): ?>
               <div class="image-preview-wrapper" style="margin-bottom:10px">
-                <img class="preview" src="<?= $publicUploads . htmlspecialchars($page['image_path']) ?>" alt="About image">
+                <img class="preview" src="<?= $publicUploads . htmlspecialchars($imagePath) ?>" alt="About image">
               </div>
             <?php endif; ?>
             <input class="file-input-vis" type="file" name="image" accept="image/*">
