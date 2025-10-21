@@ -4,11 +4,12 @@
 <head>
   <meta charset="utf-8">
   <title>Sign In · Picturesque</title>
-  <link rel="stylesheet" href="../public/css/main.css">
+  <link rel="stylesheet" href="../public/css/main.css?v=2">
 </head>
 <body>
   <div class="auth-wrap">
-    <div class="auth-left"></div>
+  <div class="auth-left" style="--auth-bg:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80');"></div>
+
     <div class="auth-right">
       <div class="auth-card">
         <h1>Sign In</h1>
@@ -33,7 +34,8 @@
             <a class="link" href="#">Forgot Password?</a>
           </div>
 
-          <button class="btn" type="submit">Sign In</button>
+          <button class="btn btn-primary" type="submit">Sign In</button>
+
           <p class="note">New User? <a href="./register.php">Sign Up</a></p>
         </form>
       </div>

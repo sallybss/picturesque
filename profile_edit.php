@@ -45,7 +45,7 @@ $avatarSrc = !empty($meRow['avatar_photo']) ? $publicUploads . htmlspecialchars(
         <h2 class="card-title">Edit Profile</h2>
 
         <div class="edit-avatar-row">
-          <div class="edit-avatar"><img src="<?= $avatarSrc ?>" alt="Avatar"></div>
+        <div class="edit-avatar"><img src="<?= $avatarSrc ?>" alt="Avatar" class="avatar-preview"></div>
           <span class="avatar-note">Upload a new avatar (JPG/PNG/WEBP)</span>
         </div>
 

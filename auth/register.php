@@ -4,11 +4,12 @@
 <head>
   <meta charset="utf-8">
   <title>Sign Up · Picturesque</title>
-  <link rel="stylesheet" href="../public/css/main.css">
+  <link rel="stylesheet" href="../public/css/main.css?v=2">
 </head>
 <body>
   <div class="auth-wrap">
-    <div class="auth-left"></div>
+  <div class="auth-left" style="--auth-bg:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80');"></div>
+
     <div class="auth-right">
       <div class="auth-card">
         <h1>Create Account</h1>
@@ -28,7 +29,8 @@
           <label class="label">Password</label>
           <input class="input" type="password" name="password" required>
 
-          <button class="btn" type="submit">Sign Up</button>
+          <button class="btn btn-primary" type="submit">Sign Up</button>
+
           <p class="note">Already have an account? <a href="./login.php">Sign In</a></p>
         </form>
       </div>
