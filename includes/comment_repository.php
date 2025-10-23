@@ -3,20 +3,20 @@ require_once __DIR__ . '/db_class.php';
 
 class CommentRepository {
     public function listForPictureWithAuthors(int $pictureId): array {
-        $parentField = 'parent_comment_id';
         $sql = "
-          SELECT
-            c.comment_id,
-            c.{$parentField} AS parent_id,
-            c.comment_content,
-            c.created_at,
-            c.profile_id,
-            p.display_name,
-            p.avatar_photo
-          FROM comments c
-          JOIN profiles p ON p.profile_id = c.profile_id
-          WHERE c.picture_id = ?
-          ORDER BY c.created_at ASC
+            SELECT
+              c.comment_id,
+              c.picture_id,
+              c.profile_id,
+              c.parent_comment_id AS parent_id,
+              c.comment_content,             
+              c.created_at,
+              p.display_name,
+              p.avatar_photo
+            FROM comments c
+            JOIN profiles p ON p.profile_id = c.profile_id
+            WHERE c.picture_id = ?
+            ORDER BY c.created_at ASC
         ";
         $stmt = DB::get()->prepare($sql);
         $stmt->bind_param('i', $pictureId);
