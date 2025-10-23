@@ -1,8 +1,5 @@
 <?php
-require __DIR__ . '/includes/flash.php';
-require __DIR__ . '/includes/sidebar.php';
-require __DIR__ . '/includes/db_class.php';
-require __DIR__ . '/includes/paths_class.php';
+require_once __DIR__ . '/includes/init.php';
 
 $paths = new Paths();
 $publicUploads = $paths->uploads;

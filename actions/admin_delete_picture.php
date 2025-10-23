@@ -1,8 +1,5 @@
 <?php
-require __DIR__ . '/../includes/flash.php';
-require __DIR__ . '/../includes/db_class.php';
-require __DIR__ . '/../includes/auth_class.php';
-require __DIR__ . '/../includes/picture_repository.php';
+require_once __DIR__ . '/../includes/init.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: ../admin.php'); exit; }
 if (!check_csrf($_POST['csrf'] ?? null)) { set_flash('err','Invalid CSRF token.'); header('Location: ../admin.php'); exit; }

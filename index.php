@@ -1,13 +1,5 @@
 <?php
-require __DIR__ . '/includes/flash.php';
-require __DIR__ . '/includes/sidebar.php';
-require __DIR__ . '/includes/db_class.php';
-require __DIR__ . '/includes/auth_class.php';
-require __DIR__ . '/includes/paths_class.php';
-require __DIR__ . '/includes/profile_repository.php';
-require __DIR__ . '/includes/search_repository.php';
-require __DIR__ . '/includes/picture_repository.php';
-
+require_once __DIR__ . '/includes/init.php';
 
 $me = Auth::requireUserOrRedirect('./home_guest.php');
 

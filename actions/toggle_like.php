@@ -1,8 +1,5 @@
 <?php
-require __DIR__ . '/../includes/flash.php';
-require __DIR__ . '/../includes/db_class.php';
-require __DIR__ . '/../includes/auth_class.php';
-require __DIR__ . '/../includes/like_repository.php';
+require_once __DIR__ . '/../includes/init.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: ../index.php'); exit; }
 if (!check_csrf($_POST['csrf'] ?? null))   { header('Location: ../index.php'); exit; }

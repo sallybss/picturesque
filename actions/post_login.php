@@ -1,8 +1,7 @@
 <?php
 session_start();
-require __DIR__ . '/../includes/flash.php';
-require __DIR__ . '/../includes/db_class.php';
-require __DIR__ . '/../includes/profile_repository.php';
+require_once __DIR__ . '/../includes/init.php';
+
 
 $email = trim($_POST['login_email'] ?? '');
 $pass  = $_POST['password'] ?? '';

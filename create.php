@@ -1,9 +1,5 @@
 <?php
-require __DIR__ . '/includes/flash.php';
-require __DIR__ . '/includes/db_class.php';
-require __DIR__ . '/includes/auth_class.php';
-require __DIR__ . '/includes/paths_class.php';
-
+require_once __DIR__ . '/includes/init.php';
 $me = Auth::requireUserOrRedirect('./auth/login.php');
 
 $paths = new Paths();
