@@ -1492,6 +1492,14 @@ body.guest-locked {
 .flex-row{display:flex}
 .btn-ghost{border:1px solid #e5e7eb;background:#fff;border-radius:10px;padding:.4rem .7rem}
 
+.btn-link{font-size:.9rem; text-decoration:none; padding:0 .25rem}
+.btn-danger{border:1px solid #fee2e2; background:#fee2e2; color:#991b1b; border-radius:10px; padding:.4rem .7rem}
+.btn-danger:hover{background:#fecaca}
+.cats-table code {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
 
 
 /* =========================================================
