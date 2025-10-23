@@ -15,11 +15,17 @@ $meAvatarUrl = !empty($meRow['avatar_photo'])
   : 'https://placehold.co/28x28?text=%20';
 
 $q = trim($_GET['q'] ?? '');
+
+$cat = trim($_GET['cat'] ?? '');
+require __DIR__ . '/includes/categories_repository.php';
+$catsRepo = new CategoriesRepository();
+$cats = $catsRepo->listActive();
+
 $search = new SearchRepository();
 $people = $q !== '' ? $search->peopleByDisplayNameLike('%' . ltrim($q, '@') . '%') : [];
 
 $picturesRepo = new PictureRepository();
-$pictures = $picturesRepo->feed($me, $q);
+$pictures = $picturesRepo->feed($me, $q, $cat);
 
 $cssPath = __DIR__ . '/public/css/main.css';
 $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
@@ -57,15 +63,21 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
       </div>
 
       <div class="controls-row">
-        <div class="pills">
-          <span class="pill">Discovery</span>
-          <span class="pill">Abstract</span>
-          <span class="pill">Sci-fi</span>
-          <span class="pill">Landscape</span>
-          <span class="pill">+</span>
-        </div>
-        <button class="filter-btn" type="button">Filter</button>
-      </div>
+  <div class="pills">
+    <a class="pill<?= $cat==='' ? ' is-selected' : '' ?>" href="index.php<?= $q!=='' ? ('?q='.urlencode($q)) : '' ?>">All</a>
+    <?php foreach ($cats as $c): ?>
+      <?php
+    
+        $href = 'index.php?cat='.urlencode($c['slug']).($q!=='' ? '&q='.urlencode($q) : '');
+      ?>
+      <a class="pill<?= $cat === $c['slug'] ? ' is-selected' : '' ?>" href="<?= $href ?>">
+        <?= htmlspecialchars($c['name']) ?>
+      </a>
+    <?php endforeach; ?>
+  </div>
+  <button class="filter-btn" type="button">Filter</button>
+</div>
+
 
       <?php if ($q !== '' && !empty($people)): ?>
         <h2 class="section-title">People</h2>

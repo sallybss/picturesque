@@ -1,5 +1,10 @@
 <?php
 require_once __DIR__ . '/includes/init.php';
+require __DIR__.'/includes/categories_repository.php';
+
+$catsRepo = new CategoriesRepository();
+$cats = $catsRepo->listActive();
+
 $me = Auth::requireUserOrRedirect('./auth/login.php');
 
 $paths = new Paths();
@@ -51,15 +56,18 @@ $paths = new Paths();
       </div>
 
       <div class="form-row">
-        <label class="label">Tags</label>
-        <div class="chips" id="chips">
-          <button type="button" class="chip">Abstract</button>
-          <button type="button" class="chip">Sci-fi</button>
-          <button type="button" class="chip">Landscape</button>
-          <button type="button" class="chip add" id="addTag">+</button>
-        </div>
-        <input type="hidden" name="tags" id="tagsInput" value="">
-      </div>
+  <label class="label">Category</label>
+  <select class="input" name="category_id" required>
+    <option value="">Choose a category…</option>
+    <?php foreach ($cats as $c): ?>
+      <option value="<?= (int)$c['category_id'] ?>"
+        <?= isset($picture) && (int)$picture['category_id']===(int)$c['category_id'] ? 'selected' : '' ?>>
+        <?= htmlspecialchars($c['name']) ?>
+      </option>
+    <?php endforeach; ?>
+  </select>
+</div>
+
 
       <div class="actions">
         <a href="./profile.php" class="btn-ghost wide">Cancel</a>

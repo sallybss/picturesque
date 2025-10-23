@@ -10,6 +10,21 @@ $title = trim($_POST['picture_title'] ?? $_POST['title'] ?? '');
 $desc  = trim($_POST['picture_description'] ?? $_POST['desc'] ?? '');
 $file  = $_FILES['photo'] ?? null;
 
+$catId = (int)($_POST['category_id'] ?? 0);
+if ($catId <= 0) {
+  set_flash('err', 'Please choose a category.');
+  header('Location: ../create.php'); exit;
+}
+
+$okCat = false;
+$st = DB::get()->prepare("SELECT 1 FROM categories WHERE category_id=? AND active=1");
+$st->bind_param('i', $catId); $st->execute();
+$okCat = (bool)$st->get_result()->fetch_row(); $st->close();
+if (!$okCat) {
+  set_flash('err', 'Invalid category.');
+  header('Location: ../create.php'); exit;
+}
+
 if ($title === '' || !$file || empty($file['name'])) {
   set_flash('err', 'Please select a photo and enter a title.');
   header('Location: ../create.php'); exit;
@@ -47,7 +62,7 @@ if (!move_uploaded_file($file['tmp_name'], $dest)) {
 }
 
 $repo = new PictureRepository();
-$repo->create($me, $title, $desc, $name);
+$repo->create($me, $title, $desc, $name, $catId);
 
 set_flash('ok', 'Picture posted!');
 header('Location: ../index.php'); exit;

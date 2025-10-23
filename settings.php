@@ -1,5 +1,9 @@
 <?php
 require_once __DIR__ . '/includes/init.php';
+require __DIR__ . '/includes/categories_repository.php';
+require __DIR__ . '/includes/helpers.php';
+
+$catsRepo = new CategoriesRepository();
 
 $me = Auth::requireAdminOrRedirect('./index.php');
 
@@ -21,6 +25,33 @@ $imagePath = $page['image_path'] ?? null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!check_csrf($_POST['csrf'] ?? null)) {
     set_flash('err', 'Invalid CSRF token.'); header('Location: ./settings.php'); exit;
+  }
+  $action = trim($_POST['action'] ?? '');
+
+  if ($action === 'add_cat') {
+    $name = trim($_POST['name'] ?? '');
+    if ($name === '') { set_flash('err','Category name required.'); header('Location: ./settings.php#cats'); exit; }
+    $slug = slugify($name);
+
+    try {
+      $st = DB::get()->prepare("INSERT INTO categories (category_name, slug, active) VALUES (?, ?, 1)");
+      $st->bind_param('ss', $name, $slug);
+      $st->execute(); $st->close();
+      set_flash('ok','Category added.');
+    } catch (mysqli_sql_exception $e) {
+      set_flash('err','Could not add (duplicate name/slug?).');
+    }
+    header('Location: ./settings.php#cats'); exit;
+  }
+
+  if ($action === 'toggle_cat') {
+    $id = (int)($_POST['category_id'] ?? 0);
+    if ($id <= 0) { set_flash('err','Bad id.'); header('Location: ./settings.php#cats'); exit; }
+
+    $st = DB::get()->prepare("UPDATE categories SET active = 1 - active WHERE category_id=?");
+    $st->bind_param('i', $id); $st->execute(); $st->close();
+    set_flash('ok','Toggled.');
+    header('Location: ./settings.php#cats'); exit;
   }
 
   $newTitle   = trim($_POST['title'] ?? '');
@@ -60,6 +91,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   header('Location: ./settings.php'); exit;
 }
 
+$cats = DB::get()->query("
+  SELECT category_id, category_name, slug, active
+  FROM categories
+  ORDER BY active DESC, category_name
+")->fetch_all(MYSQLI_ASSOC);
+
 $imgUrl = $imagePath ? ($paths->uploads . htmlspecialchars($imagePath)) : null;
 $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/public/css/main.css') : time();
 ?>
@@ -83,6 +120,53 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
     <div class="settings-wrap">
       <h1 class="page-title">Admin Settings</h1>
       <p class="sub">Edit the About page.</p>
+
+<!-- Categories card -->
+<section id="cats" class="card pad" style="margin-bottom:1rem">
+  <h2 class="section-title" style="margin-bottom:.75rem">Categories</h2>
+
+  <!-- Add category (standalone form) -->
+  <form class="flex-row" method="post" action="settings.php" style="gap:.5rem; align-items:center; margin-bottom:1rem">
+    <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+    <input type="hidden" name="action" value="add_cat">
+    <label class="label" style="margin:0">Name</label>
+    <input class="input" name="name" placeholder="e.g. Night" required style="max-width:260px">
+    <button class="btn-primary" type="submit">Add</button>
+  </form>
+
+  <!-- List (each row has its own tiny form; no nesting) -->
+  <table class="cats-table">
+    <tr>
+      <th>ID</th><th>Name</th><th>Slug</th><th>Status</th><th>Toggle</th>
+    </tr>
+    <?php foreach ($cats as $c): ?>
+      <tr>
+        <td><?= (int)$c['category_id'] ?></td>
+        <td><?= htmlspecialchars($c['category_name']) ?></td>
+        <td><code><?= htmlspecialchars($c['slug']) ?></code></td>
+        <td>
+          <?php if ((int)$c['active'] === 1): ?>
+            <span class="badge badge-green">Active</span>
+          <?php else: ?>
+            <span class="badge badge-gray">Hidden</span>
+          <?php endif; ?>
+        </td>
+        <td>
+          <form method="post" action="settings.php" style="display:inline">
+            <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+            <input type="hidden" name="action" value="toggle_cat">
+            <input type="hidden" name="category_id" value="<?= (int)$c['category_id'] ?>">
+            <button class="btn-ghost" type="submit">
+              <?= (int)$c['active'] ? 'Hide' : 'Show' ?>
+            </button>
+          </form>
+        </td>
+      </tr>
+    <?php endforeach; ?>
+  </table>
+</section>
+
+
 
       <form class="about-card" method="post" action="settings.php" enctype="multipart/form-data">
         <div class="pad form-grid">

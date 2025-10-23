@@ -10,14 +10,25 @@ $title = trim($_POST['title'] ?? '');
 $desc  = trim($_POST['desc'] ?? '');
 $reset = !empty($_POST['reset_image']);
 
-if ($pid <= 0 || $title === '') {
-  set_flash('err','Invalid form.');
+$catId = (int)($_POST['category_id'] ?? 0);
+if ($pid <= 0 || $title === '' || $catId <= 0) {
+  set_flash('err','Invalid form (missing title or category).');
   header('Location: ../edit_picture.php?id='.$pid); exit;
 }
 
+$st = DB::get()->prepare("SELECT 1 FROM categories WHERE category_id=? AND active=1");
+$st->bind_param('i', $catId);
+$st->execute();
+if (!$st->get_result()->fetch_row()) {
+  $st->close();
+  set_flash('err','Invalid category.');
+  header('Location: ../edit_picture.php?id='.$pid); exit;
+}
+$st->close();
+
 $repo = new PictureRepository();
 $old  = $repo->getUrlIfOwned($pid, $me);
-if ($old === null && $old !== '') {
+if ($old === null) { // fixed minor check
   set_flash('err','Picture not found or not yours.');
   header('Location: ../profile.php'); exit;
 }
@@ -30,7 +41,7 @@ $newFilename = null;
 if ($reset && empty($_FILES['photo']['name'])) {
     $repo->clearImage($pid, $me);
     if ($old && is_file($uploadDir . $old)) { @unlink($uploadDir . $old); }
-    $repo->updateOwned($pid, $me, $title, $desc, null);
+    $repo->updateOwned($pid, $me, $title, $desc, null, $catId);
     set_flash('ok','Picture updated.');
     header('Location: ../profile.php'); exit;
 }
@@ -59,7 +70,7 @@ if (!empty($_FILES['photo']['name'])) {
     $newFilename = $name;
 }
 
-$repo->updateOwned($pid, $me, $title, $desc, $newFilename);
+$repo->updateOwned($pid, $me, $title, $desc, $newFilename, $catId);
 
 set_flash('ok','Picture updated.');
 header('Location: ../profile.php'); exit;
