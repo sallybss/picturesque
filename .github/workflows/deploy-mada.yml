@@ -1,0 +1,31 @@
+name: Deploy Mada's Branch
+
+on:
+  push:
+    branches: [ mada ]
+  workflow_dispatch: 
+
+jobs:
+  ftp-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Upload Mada's branch to Simply.com
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /public_html/mada/
+          protocol: ftp
+          port: 21
+          local-dir: ./
+          log-level: verbose
+          exclude: |
+            **/uploads/**
+            **/.git*
+            **/.github/**
+            **/node_modules/**
+            **/includes/env.php
