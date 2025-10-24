@@ -2,17 +2,19 @@ name: Deploy to Simply.com via FTP
 
 on:
   push:
-    branches:
-      - main  # deploys when main branch is updated
+    branches: [ main ]
 
 jobs:
   ftp-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Upload to Simply.com via FTP
+      # Try FTPS first (Explicit TLS). Some hosts drop the data socket; we catch & fallback.
+      - name: Deploy via FTPS (explicit TLS)
+        id: ftps
+        continue-on-error: true
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -20,8 +22,32 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: ${{ secrets.FTP_PATH }}
           protocol: ftps
+          port: 21
+          state-name: .ftp-deploy-sync-state.json
           local-dir: ./
+          log-level: verbose
           exclude: |
             **/.git*
-            **/.github*
+            **/.github/**
             **/node_modules/**
+            **/.DS_Store
+
+      # If FTPS fails (ECONNRESET, TLS weirdness), fall back to plain FTP
+      - name: Deploy via FTP (fallback)
+        if: steps.ftps.outcome == 'failure'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_PATH }}
+          protocol: ftp
+          port: 21
+          state-name: .ftp-deploy-sync-state.json
+          local-dir: ./
+          log-level: verbose
+          exclude: |
+            **/.git*
+            **/.github/**
+            **/node_modules/**
+            **/.DS_Store
