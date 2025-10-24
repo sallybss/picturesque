@@ -1570,6 +1570,15 @@ body.guest-locked {
 }
 
 
+.filter-select {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  background-color: #fff !important;
+}
+
+
+
 .iconbtn.danger {
   background: #fee2e2;
   color: #b91c1c;
