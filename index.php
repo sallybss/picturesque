@@ -43,8 +43,6 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
   <title>Home · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css?v=<?= $ver ?>">
-<link rel="stylesheet" href="./public/css/custom.css?v=<?= time() ?>">
-
 </head>
 
 <body>
