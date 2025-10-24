@@ -42,14 +42,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
   <meta charset="utf-8">
   <title>Home · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="./public/css/main.css?v=<?= $ver ?>">
-<style>
-.filter-select {
-  border: 3px solid hotpink !important;
-}
-</style>
-
-
+  <link rel="stylesheet" href="./mada/public/css/main.css?v=<?= $ver ?>">
 </head>
 
 <body>
