@@ -40,7 +40,6 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 </head>
 <body class="guest-locked">
 
-<h2 style="color: hotpink; text-align:center;">Mada branch test - it works!</h2>
 <h2 style="color:hotpink;text-align:center">Mada branch test</h2>
 
 
