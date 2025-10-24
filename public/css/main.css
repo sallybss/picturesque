@@ -1499,12 +1499,64 @@ body.guest-locked {
   color: #64748b;
   font-size: 0.85rem;
 }
+/* =======================
+   FILTER DROPDOWN STYLES
+   ======================= */
 
-.filter-form select {
-  border-radius: 999px;
-  padding: 8px 12px;
-  margin-left: 8px;
+.filter-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
+
+.filter-label {
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.filter-select-wrap {
+  position: relative;
+}
+
+.filter-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  padding: 8px 30px 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+/* Dropdown arrow */
+.filter-select-wrap::after {
+  content: "▾";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: #6b7280;
+  pointer-events: none;
+}
+
+.filter-select:hover {
+  border-color: #cbd5e1;
+  background-color: #f9fafb;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(147,197,253,0.3);
+}
+
 
 
 .iconbtn.danger {

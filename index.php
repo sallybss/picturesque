@@ -64,32 +64,34 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
       </div>
 
       <div class="controls-row">
-  <div class="pills">
-    <a class="pill<?= $cat === '' ? ' is-selected' : '' ?>" href="index.php<?= $q !== '' ? ('?q=' . urlencode($q)) : '' ?>">All</a>
-    <?php foreach ($cats as $c): ?>
-      <?php $href = 'index.php?cat=' . urlencode($c['slug']) . ($q !== '' ? '&q=' . urlencode($q) : ''); ?>
-      <a class="pill<?= $cat === $c['slug'] ? ' is-selected' : '' ?>" href="<?= $href ?>">
-        <?= htmlspecialchars($c['name']) ?>
-      </a>
-    <?php endforeach; ?>
-  </div>
+        <div class="pills">
+          <a class="pill<?= $cat === '' ? ' is-selected' : '' ?>" href="index.php<?= $q !== '' ? ('?q=' . urlencode($q)) : '' ?>">All</a>
+          <?php foreach ($cats as $c): ?>
+            <?php $href = 'index.php?cat=' . urlencode($c['slug']) . ($q !== '' ? '&q=' . urlencode($q) : ''); ?>
+            <a class="pill<?= $cat === $c['slug'] ? ' is-selected' : '' ?>" href="<?= $href ?>">
+              <?= htmlspecialchars($c['name']) ?>
+            </a>
+          <?php endforeach; ?>
+        </div>
 
-  <!-- dropdown lives here -->
-  <form class="filter-form" method="get" action="index.php" style="display:flex;align-items:center">
-    <?php if ($q !== ''): ?>
-      <input type="hidden" name="q" value="<?= htmlspecialchars($q) ?>">
-    <?php endif; ?>
-    <?php if ($cat !== ''): ?>
-      <input type="hidden" name="cat" value="<?= htmlspecialchars($cat) ?>">
-    <?php endif; ?>
+        <!-- Clean dropdown -->
+        <form class="filter-form" method="get" action="index.php">
+          <?php if ($q !== ''): ?>
+            <input type="hidden" name="q" value="<?= htmlspecialchars($q) ?>">
+          <?php endif; ?>
+          <?php if ($cat !== ''): ?>
+            <input type="hidden" name="cat" value="<?= htmlspecialchars($cat) ?>">
+          <?php endif; ?>
 
-    <select name="sort" class="input" style="width:auto;margin:0" onchange="this.form.submit()">
-      <option value="new" <?= $sort === 'new' ? 'selected' : '' ?>>Newest → Oldest</option>
-      <option value="old" <?= $sort === 'old' ? 'selected' : '' ?>>Oldest → Newest</option>
-    </select>
-  </form>
-</div>
-
+          <label for="sort" class="filter-label">Sort by:</label>
+          <div class="filter-select-wrap">
+            <select name="sort" id="sort" class="filter-select" onchange="this.form.submit()">
+              <option value="new" <?= $sort === 'new' ? 'selected' : '' ?>>Newest → Oldest</option>
+              <option value="old" <?= $sort === 'old' ? 'selected' : '' ?>>Oldest → Newest</option>
+            </select>
+          </div>
+        </form>
+      </div>
 
 
       <?php if ($q !== '' && !empty($people)): ?>
