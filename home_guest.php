@@ -40,6 +40,9 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 </head>
 <body class="guest-locked">
 
+<h2 style="color: hotpink; text-align:center;">Mada branch test - it works!</h2>
+
+
 <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
