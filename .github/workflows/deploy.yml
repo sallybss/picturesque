@@ -14,10 +14,10 @@ jobs:
       - name: Upload to Simply.com (FTP)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ${{ secrets.FTP_SERVER }}  
-          username: ${{ secrets.FTP_USERNAME }} 
+          server: ${{ secrets.FTP_SERVER }}     # linux26.unoeuro.com
+          username: ${{ secrets.FTP_USERNAME }} # picturesque.dk
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ${{ secrets.FTP_PATH }} 
+          server-dir: ${{ secrets.FTP_PATH }}   # /public_html
           protocol: ftp
           port: 21
           state-name: .ftp-deploy-sync-state.json
