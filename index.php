@@ -42,7 +42,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
   <meta charset="utf-8">
   <title>Home · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="./public/css/main.css?v=12">
+  <link rel="stylesheet" href="./public/css/main.css?v=<?= $ver ?>">
 </head>
 
 <body>
