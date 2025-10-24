@@ -43,6 +43,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
   <title>Home · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css?v=<?= $ver ?>">
+<?php /* Debug: */ echo "<!-- using CSS: ./public/css/main.css?v=$ver (path: " . realpath(__DIR__.'/public/css/main.css') . ") -->"; ?>
 
 </head>
 
