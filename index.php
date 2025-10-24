@@ -17,6 +17,11 @@ $meAvatarUrl = !empty($meRow['avatar_photo'])
 $q = trim($_GET['q'] ?? '');
 
 $cat = trim($_GET['cat'] ?? '');
+$sort = $_GET['sort'] ?? 'new';
+if (!in_array($sort, ['new', 'old'], true)) {
+  $sort = 'new';
+}
+
 require __DIR__ . '/includes/categories_repository.php';
 $catsRepo = new CategoriesRepository();
 $cats = $catsRepo->listActive();
@@ -25,7 +30,7 @@ $search = new SearchRepository();
 $people = $q !== '' ? $search->peopleByDisplayNameLike('%' . ltrim($q, '@') . '%') : [];
 
 $picturesRepo = new PictureRepository();
-$pictures = $picturesRepo->feed($me, $q, $cat);
+$pictures = $picturesRepo->feed($me, $q, $cat, $sort);
 
 $cssPath = __DIR__ . '/public/css/main.css';
 $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
@@ -50,10 +55,6 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 
     <main class="content">
       <div class="content-top">
-        <form method="get" action="index.php" class="search-wrap">
-          <input class="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search photos or username">
-        </form>
-
         <a href="./profile.php" class="userbox" title="Go to my profile">
           <span class="avatar"
             title="<?= htmlspecialchars($meRow['display_name'] ?? 'You') ?>"
@@ -64,19 +65,31 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 
       <div class="controls-row">
   <div class="pills">
-    <a class="pill<?= $cat==='' ? ' is-selected' : '' ?>" href="index.php<?= $q!=='' ? ('?q='.urlencode($q)) : '' ?>">All</a>
+    <a class="pill<?= $cat === '' ? ' is-selected' : '' ?>" href="index.php<?= $q !== '' ? ('?q=' . urlencode($q)) : '' ?>">All</a>
     <?php foreach ($cats as $c): ?>
-      <?php
-    
-        $href = 'index.php?cat='.urlencode($c['slug']).($q!=='' ? '&q='.urlencode($q) : '');
-      ?>
+      <?php $href = 'index.php?cat=' . urlencode($c['slug']) . ($q !== '' ? '&q=' . urlencode($q) : ''); ?>
       <a class="pill<?= $cat === $c['slug'] ? ' is-selected' : '' ?>" href="<?= $href ?>">
         <?= htmlspecialchars($c['name']) ?>
       </a>
     <?php endforeach; ?>
   </div>
-  <button class="filter-btn" type="button">Filter</button>
+
+  <!-- dropdown lives here -->
+  <form class="filter-form" method="get" action="index.php" style="display:flex;align-items:center">
+    <?php if ($q !== ''): ?>
+      <input type="hidden" name="q" value="<?= htmlspecialchars($q) ?>">
+    <?php endif; ?>
+    <?php if ($cat !== ''): ?>
+      <input type="hidden" name="cat" value="<?= htmlspecialchars($cat) ?>">
+    <?php endif; ?>
+
+    <select name="sort" class="input" style="width:auto;margin:0" onchange="this.form.submit()">
+      <option value="new" <?= $sort === 'new' ? 'selected' : '' ?>>Newest → Oldest</option>
+      <option value="old" <?= $sort === 'old' ? 'selected' : '' ?>>Oldest → Newest</option>
+    </select>
+  </form>
 </div>
+
 
 
       <?php if ($q !== '' && !empty($people)): ?>

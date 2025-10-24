@@ -3,8 +3,15 @@ require_once __DIR__ . '/db_class.php';
 
 class PictureRepository
 {
-    public function feed(int $viewerId, ?string $q = null, ?string $catSlug = null): array
+    public function feed(
+        int $viewerId,
+        ?string $q = null,
+        ?string $catSlug = null,
+        string $sort = 'new'     
+    ): array
     {
+        $orderBy = ($sort === 'old') ? 'p.created_at ASC' : 'p.created_at DESC';
+
         $sql = "
       SELECT
         p.picture_id          AS pic_id,
@@ -18,7 +25,7 @@ class PictureRepository
         COALESCE(l.cnt, 0)    AS like_count,
         COALESCE(c.cnt, 0)    AS comment_count,
         CASE WHEN ml.like_id IS NULL THEN 0 ELSE 1 END AS liked_by_me,
-        cg.category_name              AS category_name,
+        cg.category_name      AS category_name,
         cg.slug               AS category_slug
       FROM pictures p
       JOIN profiles pr ON pr.profile_id = p.profile_id
@@ -29,13 +36,13 @@ class PictureRepository
       WHERE 1=1
     ";
 
-        $types = 'i';
+        $types  = 'i';
         $params = [$viewerId];
 
         if ($q !== null && $q !== '') {
             $like = '%' . $q . '%';
             $likeUser = '%' . ltrim($q, '@') . '%';
-            $sql .= " AND (p.picture_title LIKE ? OR p.picture_description LIKE ? OR pr.display_name LIKE ?) ";
+            $sql   .= " AND (p.picture_title LIKE ? OR p.picture_description LIKE ? OR pr.display_name LIKE ?) ";
             $types .= 'sss';
             $params[] = $like;
             $params[] = $like;
@@ -43,12 +50,12 @@ class PictureRepository
         }
 
         if ($catSlug !== null && $catSlug !== '') {
-            $sql .= " AND cg.slug = ? ";
+            $sql   .= " AND cg.slug = ? ";
             $types .= 's';
             $params[] = $catSlug;
         }
 
-        $sql .= " ORDER BY p.created_at DESC";
+        $sql .= " ORDER BY $orderBy";
 
         $st = DB::get()->prepare($sql);
         $st->bind_param($types, ...$params);
@@ -57,7 +64,6 @@ class PictureRepository
         $st->close();
         return $rows;
     }
-
 
     public function getOneWithCountsAndAuthor(int $pictureId): ?array
     {

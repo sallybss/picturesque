@@ -139,7 +139,7 @@ textarea {
     border-radius: 10px;
     font-weight: 600;
     cursor: pointer;
-    background: #e5e7eb;
+    background: #235ccf;
     color: #111;
 }
 
@@ -163,7 +163,7 @@ textarea {
 }
 
 .btn-danger {
-    background: #67C1DC;
+    background: #167f9f;
     border: 1px solid #67C1DC;
     color: #fff
 }
@@ -1499,6 +1499,13 @@ body.guest-locked {
   color: #64748b;
   font-size: 0.85rem;
 }
+
+.filter-form select {
+  border-radius: 999px;
+  padding: 8px 12px;
+  margin-left: 8px;
+}
+
 
 .iconbtn.danger {
   background: #fee2e2;
