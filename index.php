@@ -34,7 +34,9 @@ $pictures = $picturesRepo->feed($me, $q, $cat, $sort);
 
 $featuredRepo = new FeaturedRepository();
 $hot = $featuredRepo->listForWeek();
-
+$hotIds     = array_column($hot, 'pic_id');
+$hotIdsSet  = array_fill_keys($hotIds, true);
+$hotCount   = count($hotIds);
 
 $base = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 $cssFile = __DIR__ . '/public/css/main.css';
@@ -66,7 +68,6 @@ $cssVer  = @filemtime($cssFile) ?: time();
     <main class="content">
       <div class="content-top">
         <form method="get" action="index.php" class="search-wrap">
-          <!-- preserve current cat/sort when searching -->
           <?php if ($cat !== ''): ?>
             <input type="hidden" name="cat" value="<?= htmlspecialchars($cat) ?>">
           <?php endif; ?>
@@ -182,10 +183,25 @@ $cssVer  = @filemtime($cssFile) ?: time();
             <img src="<?= $coverUrl ?>" alt="">
 
             <div class="card-body">
-              <a class="author-row" href="profile.php?id=<?= (int)$p['pic_profile_id'] ?>" style="text-decoration:none; color:inherit;">
-                <img class="mini-avatar" src="<?= $avatarUrl ?>" alt="<?= htmlspecialchars($p['author_name']) ?> avatar">
-                <span class="author"><?= htmlspecialchars($p['author_name']) ?></span>
-              </a>
+              <?php if ($isAdmin):
+                $isHot = isset($hotIdsSet[$p['pic_id']]);
+                $disablePin = (!$isHot && $hotCount >= 10);
+              ?>
+                <form method="post" action="./actions/toggle_feature.php" style="display:inline">
+                  <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+                  <input type="hidden" name="picture_id" value="<?= (int)$p['pic_id'] ?>">
+                  <input type="hidden" name="return_to" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
+
+                  <?php if ($isHot): ?>
+                    <input type="hidden" name="mode" value="unpin">
+                    <button type="submit" class="pill" style="margin-top:6px;">🔥 Unpin</button>
+                  <?php else: ?>
+                    <button type="submit" class="pill" style="margin-top:6px;" <?= $disablePin ? 'disabled' : '' ?>>
+                      📌 Pin to Hot
+                    </button>
+                  <?php endif; ?>
+                </form>
+              <?php endif; ?>
 
               <div class="card-title"><?= htmlspecialchars($p['pic_title']) ?></div>
 

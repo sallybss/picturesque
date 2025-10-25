@@ -1518,6 +1518,50 @@ body.guest-locked {
 }
 
 
+/* --- Hot this week --- */
+.hot-row {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 8px 2px 16px;
+  scroll-snap-type: x mandatory;
+}
+
+.hot-card {
+  flex: 0 0 320px;         
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  scroll-snap-align: start;
+  box-shadow: 0 4px 18px rgba(0,0,0,.08);
+  background: #fff;
+}
+
+.hot-card img {
+  display: block;
+  width: 100%;
+  height: 180px;           
+  object-fit: cover;      
+}
+
+.hot-title {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  background: rgba(0,0,0,.55);
+  color: #fff;
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 10px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 18px 0 10px;
+}
+
 
 .iconbtn.danger {
   background: #fee2e2;
