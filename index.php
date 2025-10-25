@@ -32,18 +32,32 @@ $people = $q !== '' ? $search->peopleByDisplayNameLike('%' . ltrim($q, '@') . '%
 $picturesRepo = new PictureRepository();
 $pictures = $picturesRepo->feed($me, $q, $cat, $sort);
 
-$base    = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-$cssFile = __DIR__ . '/public/css/main.css';
-$cssVer  = file_exists($cssFile) ? filemtime($cssFile) : time();
 
+$scriptBase = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');       
+$candidates = [
+    $scriptBase . '/public/css/main.css',  // /picturesque/public/css/main.css (local)
+    '/public/css/main.css',                // /public/css/main.css (server root)
+];
+
+
+$cssHref = $candidates[0];
+$cssFs   = $_SERVER['DOCUMENT_ROOT'] . $cssHref;
+if (!is_file($cssFs)) {
+    $cssHref = $candidates[1];
+    $cssFs   = $_SERVER['DOCUMENT_ROOT'] . $cssHref;
+}
+$cssVer = @filemtime($cssFs) ?: time();
 ?>
+
+
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <title>Home · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="<?= $base ?>/public/css/main.css?v=<?= $cssVer ?>">
+<link rel="stylesheet" href="<?= htmlspecialchars($cssHref) ?>?v=<?= $cssVer ?>">
 
 </head>
 
