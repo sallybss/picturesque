@@ -36,7 +36,7 @@ $featuredRepo = new FeaturedRepository();
 $hot = $featuredRepo->listForWeek();
 
 
-$base = rtrim(str_replace('\\','/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+$base = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 $cssFile = __DIR__ . '/public/css/main.css';
 $cssVer  = @filemtime($cssFile) ?: time();
 
@@ -44,12 +44,13 @@ $cssVer  = @filemtime($cssFile) ?: time();
 ?>
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>Home · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link rel="stylesheet" href="<?= $base ?>/public/css/main.css?v=<?= $cssVer ?>">
+  <link rel="stylesheet" href="<?= $base ?>/public/css/main.css?v=<?= $cssVer ?>">
 
 
 </head>
@@ -64,6 +65,18 @@ $cssVer  = @filemtime($cssFile) ?: time();
 
     <main class="content">
       <div class="content-top">
+        <form method="get" action="index.php" class="search-wrap">
+          <!-- preserve current cat/sort when searching -->
+          <?php if ($cat !== ''): ?>
+            <input type="hidden" name="cat" value="<?= htmlspecialchars($cat) ?>">
+          <?php endif; ?>
+          <?php if ($sort !== ''): ?>
+            <input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>">
+          <?php endif; ?>
+
+          <input class="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search photos or username">
+        </form>
+
         <a href="./profile.php" class="userbox" title="Go to my profile">
           <span class="avatar"
             title="<?= htmlspecialchars($meRow['display_name'] ?? 'You') ?>"
@@ -72,16 +85,33 @@ $cssVer  = @filemtime($cssFile) ?: time();
         </a>
       </div>
 
+
       <div class="controls-row">
         <div class="pills">
-          <a class="pill<?= $cat === '' ? ' is-selected' : '' ?>" href="index.php<?= $q !== '' ? ('?q=' . urlencode($q)) : '' ?>">All</a>
+          <?php
+          // build helper for query strings
+          $qs = function (array $params) {
+            return http_build_query(array_filter($params, fn($v) => $v !== '' && $v !== null));
+          };
+          ?>
+
+          <a class="pill<?= $cat === '' ? ' is-selected' : '' ?>"
+            href="index.php?<?= $qs(['q' => $q, 'sort' => $sort]) ?>">All</a>
+
           <?php foreach ($cats as $c): ?>
-            <?php $href = 'index.php?cat=' . urlencode($c['slug']) . ($q !== '' ? '&q=' . urlencode($q) : ''); ?>
+            <?php
+            $href = 'index.php?' . $qs([
+              'cat'  => $c['slug'],
+              'q'    => $q,
+              'sort' => $sort,
+            ]);
+            ?>
             <a class="pill<?= $cat === $c['slug'] ? ' is-selected' : '' ?>" href="<?= $href ?>">
               <?= htmlspecialchars($c['name']) ?>
             </a>
           <?php endforeach; ?>
         </div>
+
 
         <!-- Clean dropdown -->
         <form class="filter-form" method="get" action="index.php">
@@ -121,21 +151,21 @@ $cssVer  = @filemtime($cssFile) ?: time();
 
 
       <!-- after your controls row, before the main feed -->
-<?php if (!empty($hot)): ?>
-  <h2 class="section-title">🔥 Hot this week</h2>
-  <div class="hot-row">
-    <?php foreach ($hot as $p):
-      $cover = !empty($p['pic_url'])
-        ? $paths->uploads . htmlspecialchars($p['pic_url'])
-        : './public/img/placeholder-photo.jpg';
-    ?>
-      <a class="hot-card" href="picture.php?id=<?= (int)$p['pic_id'] ?>">
-        <img src="<?= $cover ?>" alt="">
-        <span class="hot-title"><?= htmlspecialchars($p['pic_title'] ?? 'Untitled') ?></span>
-      </a>
-    <?php endforeach; ?>
-  </div>
-<?php endif; ?>
+      <?php if (!empty($hot)): ?>
+        <h2 class="section-title">🔥 Hot this week</h2>
+        <div class="hot-row">
+          <?php foreach ($hot as $p):
+            $cover = !empty($p['pic_url'])
+              ? $paths->uploads . htmlspecialchars($p['pic_url'])
+              : './public/img/placeholder-photo.jpg';
+          ?>
+            <a class="hot-card" href="picture.php?id=<?= (int)$p['pic_id'] ?>">
+              <img src="<?= $cover ?>" alt="">
+              <span class="hot-title"><?= htmlspecialchars($p['pic_title'] ?? 'Untitled') ?></span>
+            </a>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
 
       <section class="feed">
         <?php foreach ($pictures as $p): ?>
