@@ -32,6 +32,9 @@ $people = $q !== '' ? $search->peopleByDisplayNameLike('%' . ltrim($q, '@') . '%
 $picturesRepo = new PictureRepository();
 $pictures = $picturesRepo->feed($me, $q, $cat, $sort);
 
+$featuredRepo = new FeaturedRepository();
+$hot = $featuredRepo->listForWeek();
+
 
 $base = rtrim(str_replace('\\','/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 $cssFile = __DIR__ . '/public/css/main.css';
@@ -115,6 +118,24 @@ $cssVer  = @filemtime($cssFile) ?: time();
           <?php endforeach; ?>
         </div>
       <?php endif; ?>
+
+
+      <!-- after your controls row, before the main feed -->
+<?php if (!empty($hot)): ?>
+  <h2 class="section-title">🔥 Hot this week</h2>
+  <div class="hot-row">
+    <?php foreach ($hot as $p):
+      $cover = !empty($p['pic_url'])
+        ? $paths->uploads . htmlspecialchars($p['pic_url'])
+        : './public/img/placeholder-photo.jpg';
+    ?>
+      <a class="hot-card" href="picture.php?id=<?= (int)$p['pic_id'] ?>">
+        <img src="<?= $cover ?>" alt="">
+        <span class="hot-title"><?= htmlspecialchars($p['pic_title'] ?? 'Untitled') ?></span>
+      </a>
+    <?php endforeach; ?>
+  </div>
+<?php endif; ?>
 
       <section class="feed">
         <?php foreach ($pictures as $p): ?>
