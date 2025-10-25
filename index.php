@@ -34,6 +34,8 @@ $pictures = $picturesRepo->feed($me, $q, $cat, $sort);
 
 $cssPath = __DIR__ . '/public/css/main.css';
 $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
+
+$baseUrl = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
 ?>
 <!doctype html>
 <html lang="en">
@@ -42,12 +44,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
   <meta charset="utf-8">
   <title>Home · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
- <link rel="stylesheet"
-      href="/mada/public/css/main.css?v=<?= filemtime(__DIR__ . '/public/css/main.css') ?>">
-
-<link rel="stylesheet"
-      href="/mada/public/css/custom.css?v=<?= time() ?>">
-
+    <link rel="stylesheet" href="<?= $baseUrl ?>/public/css/main.css?v=<?= $ver ?>">
 </head>
 
 <body>
