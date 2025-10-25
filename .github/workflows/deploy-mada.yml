@@ -3,10 +3,11 @@ name: Deploy Mada's Branch
 on:
   push:
     branches: [ mada ]
-  workflow_dispatch:
+  workflow_dispatch: 
 
 jobs:
   ftp-deploy:
+    if: github.ref == 'refs/heads/mada' 
     runs-on: ubuntu-latest
 
     steps:
@@ -21,8 +22,8 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: /public_html/mada/
           local-dir: ./
-          port: 21
           protocol: ftp
+          port: 21
           timeout: 60000
           passive: true
           log-level: verbose
@@ -32,3 +33,5 @@ jobs:
             **/node_modules/**
             **/uploads/**
             **/includes/env.php
+            **/includes/config.local.php
+            **/includes/config.server.php
