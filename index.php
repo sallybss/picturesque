@@ -32,7 +32,7 @@ $people = $q !== '' ? $search->peopleByDisplayNameLike('%' . ltrim($q, '@') . '%
 $picturesRepo = new PictureRepository();
 $pictures = $picturesRepo->feed($me, $q, $cat, $sort);
 
-
+$base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
 $cssPath = __DIR__ . '/public/css/main.css';   
 $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 ?>
@@ -44,7 +44,31 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
   <meta charset="utf-8">
   <title>Home · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="./public/css/main.css?v=<?= $cssVer ?>">
+
+<link rel="stylesheet" href="<?= $base ?>/public/css/main.css?v=<?= $cssVer ?>">
+
+<style>
+/* ==== FORCE filter styles (inline) ==== */
+.filter-form{display:flex;align-items:center;gap:10px}
+.filter-label{font-size:14px;color:#4b5563}
+.filter-select-wrap{position:relative}
+.filter-select{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none !important;
+  background:#fff;border:1px solid #e5e7eb;border-radius:999px;
+  padding:10px 38px 10px 14px;font-size:14px;font-weight:600;color:#111827;
+  cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)
+}
+.filter-select:hover{background:#f9fafb;border-color:#cbd5e1}
+.filter-select:focus{
+  outline:none;border-color:#93c5fd;
+  box-shadow:0 0 0 3px rgba(147,197,253,.3)
+}
+.filter-select-wrap::after{
+  content:"";position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  width:10px;height:6px;pointer-events:none;background-size:10px 6px;background-repeat:no-repeat;
+  background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")
+}
+</style>
 
 </head>
 
