@@ -32,14 +32,13 @@ $people = $q !== '' ? $search->peopleByDisplayNameLike('%' . ltrim($q, '@') . '%
 $picturesRepo = new PictureRepository();
 $pictures = $picturesRepo->feed($me, $q, $cat, $sort);
 
-$base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-$cssPath = __DIR__ . '/public/css/main.css';   
-$cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 
-$prefix = (strpos($_SERVER['REQUEST_URI'], '/mada/') === 0) ? '/mada' : '';
+$base = rtrim(str_replace('\\','/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+$cssFile = __DIR__ . '/public/css/main.css';
+$cssVer  = @filemtime($cssFile) ?: time();
+
+
 ?>
-
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -47,8 +46,7 @@ $prefix = (strpos($_SERVER['REQUEST_URI'], '/mada/') === 0) ? '/mada' : '';
   <title>Home · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link rel="stylesheet" href="<?= $prefix ?>/public/css/main.css?v=<?= time() ?>">
-<link rel="stylesheet" href="/mada/public/css/filter.css?v=<?= time() ?>">
+<link rel="stylesheet" href="<?= $base ?>/public/css/main.css?v=<?= $cssVer ?>">
 
 
 </head>
