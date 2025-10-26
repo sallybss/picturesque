@@ -17,6 +17,11 @@ $meAvatarUrl = !empty($meRow['avatar_photo'])
 $q = trim($_GET['q'] ?? '');
 
 $cat = trim($_GET['cat'] ?? '');
+$sort = $_GET['sort'] ?? 'new';
+if (!in_array($sort, ['new', 'old'], true)) {
+  $sort = 'new';
+}
+
 require __DIR__ . '/includes/categories_repository.php';
 $catsRepo = new CategoriesRepository();
 $cats = $catsRepo->listActive();
@@ -25,10 +30,19 @@ $search = new SearchRepository();
 $people = $q !== '' ? $search->peopleByDisplayNameLike('%' . ltrim($q, '@') . '%') : [];
 
 $picturesRepo = new PictureRepository();
-$pictures = $picturesRepo->feed($me, $q, $cat);
+$pictures = $picturesRepo->feed($me, $q, $cat, $sort);
 
-$cssPath = __DIR__ . '/public/css/main.css';
-$ver = file_exists($cssPath) ? filemtime($cssPath) : time();
+$featuredRepo = new FeaturedRepository();
+$hot = $featuredRepo->listForWeek();
+$hotIds     = array_column($hot, 'pic_id');
+$hotIdsSet  = array_fill_keys($hotIds, true);
+$hotCount   = count($hotIds);
+
+$base = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+$cssFile = __DIR__ . '/public/css/main.css';
+$cssVer  = @filemtime($cssFile) ?: time();
+
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -37,7 +51,10 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
   <meta charset="utf-8">
   <title>Home · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="./public/css/main.css?v=12">
+
+  <link rel="stylesheet" href="<?= $base ?>/public/css/main.css?v=<?= $cssVer ?>">
+
+
 </head>
 
 <body>
@@ -51,6 +68,13 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
     <main class="content">
       <div class="content-top">
         <form method="get" action="index.php" class="search-wrap">
+          <?php if ($cat !== ''): ?>
+            <input type="hidden" name="cat" value="<?= htmlspecialchars($cat) ?>">
+          <?php endif; ?>
+          <?php if ($sort !== ''): ?>
+            <input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>">
+          <?php endif; ?>
+
           <input class="search" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Search photos or username">
         </form>
 
@@ -62,21 +86,52 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
         </a>
       </div>
 
+
       <div class="controls-row">
-  <div class="pills">
-    <a class="pill<?= $cat==='' ? ' is-selected' : '' ?>" href="index.php<?= $q!=='' ? ('?q='.urlencode($q)) : '' ?>">All</a>
-    <?php foreach ($cats as $c): ?>
-      <?php
-    
-        $href = 'index.php?cat='.urlencode($c['slug']).($q!=='' ? '&q='.urlencode($q) : '');
-      ?>
-      <a class="pill<?= $cat === $c['slug'] ? ' is-selected' : '' ?>" href="<?= $href ?>">
-        <?= htmlspecialchars($c['name']) ?>
-      </a>
-    <?php endforeach; ?>
-  </div>
-  <button class="filter-btn" type="button">Filter</button>
-</div>
+        <div class="pills">
+          <?php
+          // build helper for query strings
+          $qs = function (array $params) {
+            return http_build_query(array_filter($params, fn($v) => $v !== '' && $v !== null));
+          };
+          ?>
+
+          <a class="pill<?= $cat === '' ? ' is-selected' : '' ?>"
+            href="index.php?<?= $qs(['q' => $q, 'sort' => $sort]) ?>">All</a>
+
+          <?php foreach ($cats as $c): ?>
+            <?php
+            $href = 'index.php?' . $qs([
+              'cat'  => $c['slug'],
+              'q'    => $q,
+              'sort' => $sort,
+            ]);
+            ?>
+            <a class="pill<?= $cat === $c['slug'] ? ' is-selected' : '' ?>" href="<?= $href ?>">
+              <?= htmlspecialchars($c['name']) ?>
+            </a>
+          <?php endforeach; ?>
+        </div>
+
+
+        <!-- Clean dropdown -->
+        <form class="filter-form" method="get" action="index.php">
+          <?php if ($q !== ''): ?>
+            <input type="hidden" name="q" value="<?= htmlspecialchars($q) ?>">
+          <?php endif; ?>
+          <?php if ($cat !== ''): ?>
+            <input type="hidden" name="cat" value="<?= htmlspecialchars($cat) ?>">
+          <?php endif; ?>
+
+          <label for="sort" class="filter-label">Sort by:</label>
+          <div class="filter-select-wrap">
+            <select name="sort" id="sort" class="filter-select" onchange="this.form.submit()">
+              <option value="new" <?= $sort === 'new' ? 'selected' : '' ?>>Newest → Oldest</option>
+              <option value="old" <?= $sort === 'old' ? 'selected' : '' ?>>Oldest → Newest</option>
+            </select>
+          </div>
+        </form>
+      </div>
 
 
       <?php if ($q !== '' && !empty($people)): ?>
@@ -90,6 +145,24 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
             <a class="person" href="profile.php?id=<?= (int)$u['profile_id'] ?>">
               <img src="<?= $avatar ?>" alt="">
               <span><?= htmlspecialchars($u['display_name']) ?></span>
+            </a>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+
+
+      <!-- after your controls row, before the main feed -->
+      <?php if (!empty($hot)): ?>
+        <h2 class="section-title">🔥 Hot this week</h2>
+        <div class="hot-row">
+          <?php foreach ($hot as $p):
+            $cover = !empty($p['pic_url'])
+              ? $paths->uploads . htmlspecialchars($p['pic_url'])
+              : './public/img/placeholder-photo.jpg';
+          ?>
+            <a class="hot-card" href="picture.php?id=<?= (int)$p['pic_id'] ?>">
+              <img src="<?= $cover ?>" alt="">
+              <span class="hot-title"><?= htmlspecialchars($p['pic_title'] ?? 'Untitled') ?></span>
             </a>
           <?php endforeach; ?>
         </div>
@@ -110,10 +183,25 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
             <img src="<?= $coverUrl ?>" alt="">
 
             <div class="card-body">
-              <a class="author-row" href="profile.php?id=<?= (int)$p['pic_profile_id'] ?>" style="text-decoration:none; color:inherit;">
-                <img class="mini-avatar" src="<?= $avatarUrl ?>" alt="<?= htmlspecialchars($p['author_name']) ?> avatar">
-                <span class="author"><?= htmlspecialchars($p['author_name']) ?></span>
-              </a>
+              <?php if ($isAdmin):
+                $isHot = isset($hotIdsSet[$p['pic_id']]);
+                $disablePin = (!$isHot && $hotCount >= 10);
+              ?>
+                <form method="post" action="./actions/toggle_feature.php" style="display:inline">
+                  <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+                  <input type="hidden" name="picture_id" value="<?= (int)$p['pic_id'] ?>">
+                  <input type="hidden" name="return_to" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
+
+                  <?php if ($isHot): ?>
+                    <input type="hidden" name="mode" value="unpin">
+                    <button type="submit" class="pill" style="margin-top:6px;">🔥 Unpin</button>
+                  <?php else: ?>
+                    <button type="submit" class="pill" style="margin-top:6px;" <?= $disablePin ? 'disabled' : '' ?>>
+                      📌 Pin to Hot
+                    </button>
+                  <?php endif; ?>
+                </form>
+              <?php endif; ?>
 
               <div class="card-title"><?= htmlspecialchars($p['pic_title']) ?></div>
 

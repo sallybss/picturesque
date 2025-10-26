@@ -1,0 +1,37 @@
+name: Deploy Mada's Branch
+
+on:
+  push:
+    branches: [ mada ]
+  workflow_dispatch: 
+
+jobs:
+  ftp-deploy:
+    if: github.ref == 'refs/heads/mada' 
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Upload Mada's branch to Simply.com
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /public_html/mada/
+          local-dir: ./
+          protocol: ftp
+          port: 21
+          timeout: 60000
+          passive: true
+          log-level: verbose
+          exclude: |
+            **/.git*
+            **/.github/**
+            **/node_modules/**
+            **/uploads/**
+            **/includes/env.php
+            **/includes/config.local.php
+            **/includes/config.server.php
