@@ -22,12 +22,13 @@ $commentsCount = $picturesRepo->commentsCountForProfilePictures($profileId);
 $myPics        = $picturesRepo->listByProfile($profileId);
 
 $avatarSrc = !empty($viewRow['avatar_photo'])
-  ? $paths->uploads . htmlspecialchars($viewRow['avatar_photo'])
+  ? img_from_db($viewRow['avatar_photo'])
   : 'https://placehold.co/96x96?text=%20';
 
 $coverSrc = !empty($viewRow['cover_photo'])
-  ? $paths->uploads . htmlspecialchars($viewRow['cover_photo'])
-  : $paths->images . 'default-cover.jpg';
+  ? img_from_db($viewRow['cover_photo'])
+  : url('images/default-cover.jpg'); 
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -88,6 +89,7 @@ $coverSrc = !empty($viewRow['cover_photo'])
       <h2 class="section-title"><?= ($me === $profileId ? 'My Photos' : 'Photos') ?></h2>
       <section class="feed">
         <?php foreach ($myPics as $p): ?>
+          <?php $cardImg = img_from_db($p['picture_url'] ?? $p['pic_url'] ?? ''); ?>
           <article class="card">
             <img src="<?= $paths->uploads . htmlspecialchars($p['picture_url']) ?>" alt="">
             <div class="card-body">

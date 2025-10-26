@@ -1,6 +1,12 @@
 <?php
 require_once __DIR__ . '/includes/init.php';
 
+function url_from_db(string $path): string
+{
+  return url($path);
+}
+
+
 $me = Auth::requireUserOrRedirect('./home_guest.php');
 
 $paths = new Paths();
@@ -11,7 +17,7 @@ $meRow = $profiles->getHeader($me);
 $isAdmin = strtolower(trim($meRow['role'] ?? '')) === 'admin';
 
 $meAvatarUrl = !empty($meRow['avatar_photo'])
-  ? $paths->uploads . htmlspecialchars($meRow['avatar_photo'])
+  ? url_from_db($meRow['avatar_photo'])
   : 'https://placehold.co/28x28?text=%20';
 
 $q = trim($_GET['q'] ?? '');
@@ -38,7 +44,7 @@ $hotIds     = array_column($hot, 'pic_id');
 $hotIdsSet  = array_fill_keys($hotIds, true);
 $hotCount   = count($hotIds);
 
-$base = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+$base = BASE_PATH;
 $cssFile = __DIR__ . '/public/css/main.css';
 $cssVer  = @filemtime($cssFile) ?: time();
 
@@ -139,7 +145,7 @@ $cssVer  = @filemtime($cssFile) ?: time();
         <div class="people-row">
           <?php foreach ($people as $u):
             $avatar = !empty($u['avatar_photo'])
-              ? $paths->uploads . htmlspecialchars($u['avatar_photo'])
+              ? url_from_db($u['avatar_photo'])
               : 'https://placehold.co/56x56?text=%20';
           ?>
             <a class="person" href="profile.php?id=<?= (int)$u['profile_id'] ?>">
@@ -147,6 +153,7 @@ $cssVer  = @filemtime($cssFile) ?: time();
               <span><?= htmlspecialchars($u['display_name']) ?></span>
             </a>
           <?php endforeach; ?>
+
         </div>
       <?php endif; ?>
 
@@ -156,9 +163,8 @@ $cssVer  = @filemtime($cssFile) ?: time();
         <h2 class="section-title">🔥 Hot this week</h2>
         <div class="hot-row">
           <?php foreach ($hot as $p):
-            $cover = !empty($p['pic_url'])
-              ? $paths->uploads . htmlspecialchars($p['pic_url'])
-              : './public/img/placeholder-photo.jpg';
+            $cover = img_from_db($p['pic_url']);
+
           ?>
             <a class="hot-card" href="picture.php?id=<?= (int)$p['pic_id'] ?>">
               <img src="<?= $cover ?>" alt="">
@@ -171,13 +177,8 @@ $cssVer  = @filemtime($cssFile) ?: time();
       <section class="feed">
         <?php foreach ($pictures as $p): ?>
           <?php
-          $coverUrl = !empty($p['pic_url'])
-            ? $paths->uploads . htmlspecialchars($p['pic_url'])
-            : './public/img/placeholder-photo.jpg';
-
-          $avatarUrl = !empty($p['author_avatar'])
-            ? $paths->uploads . htmlspecialchars($p['author_avatar'])
-            : 'https://placehold.co/24x24?text=%20';
+          $coverUrl  = img_from_db($p['pic_url']);
+          $avatarUrl = img_from_db($p['author_avatar']);
           ?>
           <article class="card">
             <img src="<?= $coverUrl ?>" alt="">
