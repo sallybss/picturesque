@@ -21,13 +21,15 @@ $likesCount    = $picturesRepo->likesCountForProfilePictures($profileId);
 $commentsCount = $picturesRepo->commentsCountForProfilePictures($profileId);
 $myPics        = $picturesRepo->listByProfile($profileId);
 
+
 $avatarSrc = !empty($viewRow['avatar_photo'])
   ? img_from_db($viewRow['avatar_photo'])
   : 'https://placehold.co/96x96?text=%20';
 
 $coverSrc = !empty($viewRow['cover_photo'])
   ? img_from_db($viewRow['cover_photo'])
-  : url('images/default-cover.jpg'); 
+  : asset('/images/default-cover.jpg'); 
+
 
 ?>
 <!doctype html>
@@ -91,7 +93,7 @@ $coverSrc = !empty($viewRow['cover_photo'])
         <?php foreach ($myPics as $p): ?>
           <?php $cardImg = img_from_db($p['picture_url'] ?? $p['pic_url'] ?? ''); ?>
           <article class="card">
-            <img src="<?= $paths->uploads . htmlspecialchars($p['picture_url']) ?>" alt="">
+            <img src="<?= img_from_db($p['picture_url']) ?>" alt="">
             <div class="card-body">
               <div class="card-title"><?= htmlspecialchars($p['picture_title']) ?></div>
               <?php if (!empty($p['picture_description'])): ?>

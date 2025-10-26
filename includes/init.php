@@ -14,16 +14,21 @@ function asset(string $path): string {
     return url($path);
 }
 
-function redirect(string $to): void {
-    header('Location: ' . url($to));
-    exit;
-}
-
 function img_from_db(?string $v): string {
-    if (!$v) return url('public/img/placeholder-photo.jpg');
+    if (!$v) return asset('public/images/placeholder-photo.jpg'); 
     if ($v[0] === '/') return url($v);
     return url('uploads/' . ltrim($v, '/'));
 }
+function redirect(string $to): void {
+    if (preg_match('~^https?://~i', $to)) {
+        header('Location: ' . $to);
+    } else {
+        header('Location: ' . url($to));
+    }
+    exit;
+}
+
+
 
 
 require_once __DIR__ . '/flash.php';
