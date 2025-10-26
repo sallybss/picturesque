@@ -6,7 +6,6 @@ function url_from_db(string $path): string
   return url($path);
 }
 
-
 $me = Auth::requireUserOrRedirect('./home_guest.php');
 
 $paths = new Paths();

@@ -43,35 +43,33 @@ $publicUploads = $paths->uploads;
       </div>
 
       <section class="feed">
-        <?php foreach ($posts as $p): ?>
-          <article class="card">
-            <img src="<?= $publicUploads . htmlspecialchars($p['picture_url']) ?>" alt="">
-            <div class="card-body">
-              <div class="card-title"><?= htmlspecialchars($p['picture_title']) ?></div>
-              <?php if (!empty($p['picture_description'])): ?>
-                <div class="card-desc"><?= htmlspecialchars($p['picture_description']) ?></div>
-              <?php endif; ?>
-              <div class="meta">
-                <span class="counts">
-                  <span class="muted">❤ <?= (int)$p['like_count'] ?></span>
-                  <span class="muted">💬 <?= (int)$p['comment_count'] ?></span>
-                </span>
-                <span class="spacer"></span>
-                <form method="post" action="./actions/admin_delete_picture.php"
-                      onsubmit="return confirm('Delete this picture?');" style="display:inline">
-                  <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
-                  <input type="hidden" name="picture_id" value="<?= (int)$p['picture_id'] ?>">
-                  <button class="btn-danger pill" type="submit">Delete</button>
-                </form>
-              </div>
-            </div>
-          </article>
-        <?php endforeach; ?>
-
-        <?php if (!$posts): ?>
-          <p class="muted">No posts.</p>
+  <?php foreach ($posts as $p): ?>
+    <?php $cover = img_from_db($p['picture_url']); ?>
+    <article class="card">
+      <img src="<?= $cover ?>" alt="">
+      <div class="card-body">
+        <div class="card-title"><?= htmlspecialchars($p['picture_title']) ?></div>
+        <?php if (!empty($p['picture_description'])): ?>
+          <div class="card-desc"><?= htmlspecialchars($p['picture_description']) ?></div>
         <?php endif; ?>
-      </section>
+        <div class="meta">
+          <span class="counts">
+            <span class="muted">❤ <?= (int)$p['like_count'] ?></span>
+            <span class="muted">💬 <?= (int)$p['comment_count'] ?></span>
+          </span>
+          <span class="spacer"></span>
+          <form method="post" action="./actions/admin_delete_picture.php"
+                onsubmit="return confirm('Delete this picture?');" style="display:inline">
+            <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+            <input type="hidden" name="picture_id" value="<?= (int)$p['picture_id'] ?>">
+            <button class="btn-danger pill" type="submit">Delete</button>
+          </form>
+        </div>
+      </div>
+    </article>
+  <?php endforeach; ?>
+</section>
+
     </main>
   </div>
 </body>
