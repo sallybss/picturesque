@@ -15,7 +15,8 @@ $pictures = new PictureRepository();
 $pic = $pictures->getEditableByOwner($pid, $me);
 if (!$pic) { set_flash('err','Picture not found or not yours.'); header('Location: ./profile.php'); exit; }
 
-$currentImgUrl = $paths->uploads . htmlspecialchars($pic['picture_url']);
+$currentImgUrl = img_from_db($pic['picture_url'] ?? null);
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -96,7 +97,8 @@ $currentImgUrl = $paths->uploads . htmlspecialchars($pic['picture_url']);
     const removeBtn = document.getElementById('removeBtn');
     const browseBtn = document.getElementById('browseBtn');
     const resetInput = document.getElementById('resetImage');
-    const originalUrl = "<?= $currentImgUrl ?>";
+    const originalUrl = "<?= htmlspecialchars($currentImgUrl) ?>";
+
 
     (function () {
       preview.src = originalUrl;
