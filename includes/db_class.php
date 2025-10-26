@@ -8,15 +8,18 @@ class DB {
 
             $cfgFile = __DIR__ . '/env.php';
             if (!file_exists($cfgFile)) {
-                $cfgFile = __DIR__ . '/env.sample.php'; 
+                $cfgFile = __DIR__ . '/env.sample.php';
             }
             $cfg = require $cfgFile;
+            if (!is_array($cfg)) {
+                throw new RuntimeException('env.php/env.sample.php must return an array');
+            }
 
             self::$db = new mysqli(
-                $cfg['host'],
-                $cfg['user'],
-                $cfg['pass'],
-                $cfg['name'],
+                $cfg['host'] ?? 'localhost',
+                $cfg['user'] ?? '',
+                $cfg['pass'] ?? '',
+                $cfg['name'] ?? '',
                 $cfg['port'] ?? 3306
             );
             self::$db->set_charset('utf8mb4');
