@@ -1,18 +1,26 @@
 <?php
 class DB {
-    private static ?mysqli $conn = null;
+    private static ?mysqli $db = null;
 
     public static function get(): mysqli {
-        if (!self::$conn) {
+        if (!self::$db) {
             mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-            $cfg = require __DIR__ . '/env.php';
+            $cfgFile = __DIR__ . '/env.php';
+            if (!file_exists($cfgFile)) {
+                $cfgFile = __DIR__ . '/env.sample.php'; 
+            }
+            $cfg = require $cfgFile;
 
-            $c = new mysqli($cfg['host'], $cfg['user'], $cfg['pass'], $cfg['name'], $cfg['port'] ?? 3306);
-            $c->set_charset('utf8mb4');
-
-            self::$conn = $c;
+            self::$db = new mysqli(
+                $cfg['host'],
+                $cfg['user'],
+                $cfg['pass'],
+                $cfg['name'],
+                $cfg['port'] ?? 3306
+            );
+            self::$db->set_charset('utf8mb4');
         }
-        return self::$conn;
+        return self::$db;
     }
 }
