@@ -18,3 +18,15 @@ require_once __DIR__ . '/pages_repository.php';
 require_once __DIR__ . '/search_repository.php';
 require_once __DIR__ . '/featured_repository.php';
 
+
+function app_base_path(): string {
+   
+    $script = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');    
+    $app    = rtrim(dirname($script), '/\\');                     
+    return ($app === '' ? '/' : $app . '/');
+}
+
+function redirect(string $to): void {
+    header('Location: ' . app_base_path() . ltrim($to, '/'));
+    exit;
+}

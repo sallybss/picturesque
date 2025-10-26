@@ -1534,7 +1534,7 @@ body.guest-locked {
   overflow: hidden;
   scroll-snap-align: start;
   box-shadow: 0 4px 18px rgba(0,0,0,.08);
-  background: #fff;
+  background: #ffffff;
 }
 
 .hot-card img {
@@ -1549,7 +1549,7 @@ body.guest-locked {
   left: 10px;
   bottom: 10px;
   background: rgba(0,0,0,.55);
-  color: #fff;
+  color: #ffffff;
   font-size: 14px;
   padding: 4px 8px;
   border-radius: 10px;
