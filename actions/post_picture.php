@@ -97,7 +97,12 @@ if (!is_dir($uploadDir)) {
 
 $ext      = $allowed[$mime];
 $basename = time() . '_' . bin2hex(random_bytes(4));
-$name     = $basename . '.' . $ext;           
+$name     = $basename . '.' . $ext;  
+
+$storedPath = '/uploads/' . $name;  
+
+$repo = new PictureRepository();
+$repo->create($me, $title, $desc, $storedPath, $catId);
 $dest     = $uploadDir . $name;
 
 if (!move_uploaded_file($tmp, $dest)) {
@@ -111,5 +116,6 @@ $repo = new PictureRepository();
 $repo->create($me, $title, $desc, $name, $catId);
 
 set_flash('ok', 'Picture posted!');
-redirect('index.php');
+redirect($redirect); 
 exit;
+
