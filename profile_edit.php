@@ -3,14 +3,13 @@ require_once __DIR__ . '/includes/init.php';
 
 $me = Auth::requireUserOrRedirect('./auth/login.php');
 
-$paths = new Paths();
-
 $profiles = new ProfileRepository();
 $meRow = $profiles->getById($me);
 if (!$meRow) { header('Location: ./index.php'); exit; }
 
 $isAdmin   = isset($meRow['role']) && strtolower($meRow['role']) === 'admin';
-$avatarSrc = !empty($meRow['avatar_photo']) ? $paths->uploads . htmlspecialchars($meRow['avatar_photo']) : 'https://placehold.co/96x96?text=%20';
+
+$avatarSrc = img_from_db($meRow['avatar_photo'] ?? null);
 ?>
 <!doctype html>
 <html lang="en">
@@ -18,7 +17,7 @@ $avatarSrc = !empty($meRow['avatar_photo']) ? $paths->uploads . htmlspecialchars
   <meta charset="utf-8">
   <title>Edit Profile · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="./public/css/main.css?v=1">
+  <link rel="stylesheet" href="<?= asset('public/css/main.css?v=1') ?>">
 </head>
 <body>
   <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
@@ -32,14 +31,17 @@ $avatarSrc = !empty($meRow['avatar_photo']) ? $paths->uploads . htmlspecialchars
         <h2 class="card-title">Edit Profile</h2>
 
         <div class="edit-avatar-row">
-          <div class="edit-avatar"><img src="<?= $avatarSrc ?>" alt="Avatar" class="avatar-preview"></div>
+          <div class="edit-avatar">
+            <img src="<?= $avatarSrc ?>" alt="Avatar" class="avatar-preview">
+          </div>
           <span class="avatar-note">Upload a new avatar (JPG/PNG/WEBP)</span>
         </div>
 
         <form action="./actions/post_profile_update.php" method="post" enctype="multipart/form-data">
           <div class="form-row">
             <label class="label-sm" for="display_name">Display name</label>
-            <input class="input-sm" id="display_name" name="display_name" required value="<?= htmlspecialchars($meRow['display_name'] ?? '') ?>">
+            <input class="input-sm" id="display_name" name="display_name" required
+                   value="<?= htmlspecialchars($meRow['display_name'] ?? '') ?>">
           </div>
 
           <div class="form-row">
@@ -48,9 +50,12 @@ $avatarSrc = !empty($meRow['avatar_photo']) ? $paths->uploads . htmlspecialchars
             <div class="dropzone" id="avatarDropzone">
               <div class="dz-empty" id="avatarDzEmpty">
                 <svg class="dz-icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M12 16V6m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M12 16V6m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <p class="dz-text">Drag &amp; drop your avatar here or <button type="button" class="dz-link" id="avatarBrowseBtn">browse</button></p>
+                <p class="dz-text">Drag &amp; drop your avatar here or
+                  <button type="button" class="dz-link" id="avatarBrowseBtn">browse</button>
+                </p>
               </div>
               <img id="avatarPreview" class="dz-preview" alt="Avatar preview" hidden>
               <button type="button" class="dz-remove" id="avatarRemoveBtn" aria-label="Remove image" hidden>×</button>
@@ -68,13 +73,13 @@ $avatarSrc = !empty($meRow['avatar_photo']) ? $paths->uploads . htmlspecialchars
   </div>
 
   <script>
-    const avatarInput = document.getElementById('avatarInput');
-    const avatarDz = document.getElementById('avatarDropzone');
+    const avatarInput   = document.getElementById('avatarInput');
+    const avatarDz      = document.getElementById('avatarDropzone');
     const avatarDzEmpty = document.getElementById('avatarDzEmpty');
     const avatarPreview = document.getElementById('avatarPreview');
-    const avatarRemove = document.getElementById('avatarRemoveBtn');
-    const avatarBrowse = document.getElementById('avatarBrowseBtn');
-    const originalUrl = "<?= $avatarSrc ?>";
+    const avatarRemove  = document.getElementById('avatarRemoveBtn');
+    const avatarBrowse  = document.getElementById('avatarBrowseBtn');
+    const originalUrl   = "<?= htmlspecialchars($avatarSrc, ENT_QUOTES) ?>";
 
     (function () {
       if (originalUrl) {
@@ -95,8 +100,12 @@ $avatarSrc = !empty($meRow['avatar_photo']) ? $paths->uploads . htmlspecialchars
       if (f) setFile(f);
     });
 
-    ['dragenter','dragover'].forEach(ev => avatarDz.addEventListener(ev, e => { e.preventDefault(); avatarDz.classList.add('is-drag'); }));
-    ['dragleave','drop'].forEach(ev => avatarDz.addEventListener(ev, e => { e.preventDefault(); avatarDz.classList.remove('is-drag'); }));
+    ['dragenter','dragover'].forEach(ev =>
+      avatarDz.addEventListener(ev, e => { e.preventDefault(); avatarDz.classList.add('is-drag'); })
+    );
+    ['dragleave','drop'].forEach(ev =>
+      avatarDz.addEventListener(ev, e => { e.preventDefault(); avatarDz.classList.remove('is-drag'); })
+    );
     avatarDz.addEventListener('drop', (e) => {
       const f = e.dataTransfer.files[0];
       if (f) setFile(f);
