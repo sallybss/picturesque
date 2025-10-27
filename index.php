@@ -158,8 +158,6 @@ $cssVer  = @filemtime($cssFile) ?: time();
 
 
       <!-- after your controls row, before the main feed -->
-
-      <div><h1>HELLO</h1></div>
       <?php if (!empty($hot)): ?>
         <h2 class="section-title">🔥 Hot this week</h2>
         <div class="hot-row">
