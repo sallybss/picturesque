@@ -817,7 +817,7 @@ img.c-avatar {
     display: flex;
     gap: 16px;
     align-items: center;
-    background: #ce4848;
+    background: #fff;
     border: 1px solid var(--line);
     border-radius: 16px;
     padding: 16px;
