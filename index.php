@@ -63,7 +63,6 @@ $cssVer  = @filemtime($cssFile) ?: time();
 </head>
 
 <body>
- <h2>SALLY'S BRANCH</h2>
   <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
