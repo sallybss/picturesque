@@ -6,8 +6,9 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 $ENV = require __DIR__ . '/env.php';
 define('BASE_PATH', rtrim($ENV['base_path'] ?? '', '/'));  
 
+// always project-relative (no leading slash)
 function url(string $path = ''): string {
-    return (BASE_PATH === '' ? '' : BASE_PATH) . '/' . ltrim($path, '/');
+    return './' . ltrim($path, '/');
 }
 
 function asset(string $path): string {
@@ -15,9 +16,13 @@ function asset(string $path): string {
 }
 
 function img_from_db(?string $v): string {
-    if (!$v) return asset('public/images/placeholder-photo.jpg'); 
-    if ($v[0] === '/') return url($v);
-    return url('uploads/' . ltrim($v, '/'));
+    if (!$v) return asset('public/images/placeholder-photo.jpg');
+    // if full http(s) or already project-relative path provided, pass through
+    if (preg_match('~^https?://~i', $v)) return $v;
+    if ($v[0] === '.') return $v;
+    if ($v[0] === '/') return '.' . $v; // turn absolute into project-relative
+    // DB contains only filenames -> point to uploads/
+    return asset('uploads/' . $v);
 }
 function redirect(string $to): void {
     if (preg_match('~^https?://~i', $to)) {

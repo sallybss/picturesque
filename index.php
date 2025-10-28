@@ -43,9 +43,9 @@ $hotIds     = array_column($hot, 'pic_id');
 $hotIdsSet  = array_fill_keys($hotIds, true);
 $hotCount   = count($hotIds);
 
-$base = BASE_PATH;
-$cssFile = __DIR__ . '/public/css/main.css';
-$cssVer  = @filemtime($cssFile) ?: time();
+// $base = BASE_PATH;
+// $cssFile = __DIR__ . '/public/css/main.css';
+// $cssVer  = @filemtime($cssFile) ?: time();
 
 
 ?>
@@ -56,10 +56,11 @@ $cssVer  = @filemtime($cssFile) ?: time();
   <meta charset="utf-8">
   <title>Home · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <link rel="stylesheet" href="<?= $base ?>/public/css/main.css?v=<?= $cssVer ?>">
-
-
+  <?php
+  $cssPath = __DIR__ . '/public/css/main.css';
+  $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
+  ?>
+  <link rel="stylesheet" href="./public/css/main.css?v=<?= $ver ?>">
 </head>
 
 <body>
