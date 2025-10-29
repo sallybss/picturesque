@@ -31,6 +31,15 @@ function render_sidebar(array $opts = []): void {
           Home' . ($homeCount !== null ? '<span class="badge">' . (int)$homeCount . '</span>' : '') . '
         </a>';
 
+        $rulesActive = ($cur === 'rules.php') ? 'active' : '';
+        echo '<a href="./rules.php" class="'.$rulesActive.'">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="ico">
+            <path d="M12 2l8 4v6c0 5-3.8 9.5-8 10-4.2-.5-8-5-8-10V6l8-4z"/>
+             <path d="M9 12l2 2 4-4"/>
+          </svg>
+                Rules &amp; Regulations
+              </a>';
+
   if (!$isGuest) {
     $active = in_array($cur, ['profile.php','profile_edit.php','profile_settings.php']) ? 'active' : '';
     echo '<a href="./profile.php" class="' . $active . '">

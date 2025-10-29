@@ -10,6 +10,33 @@ class PagesRepository {
         return $row;
     }
 
+    public function getBySlug(string $slug): array {
+        $st = DB::get()->prepare("SELECT * FROM pages WHERE slug=? LIMIT 1");
+        $st->bind_param('s', $slug);
+        $st->execute();
+        $row = $st->get_result()->fetch_assoc() ?: [];
+        $st->close();
+        return $row;
+    }
+
+    public function upsert(string $slug, string $title, string $content, ?string $imagePath, ?int $userId): void {
+        $sql = "
+          INSERT INTO pages (slug, title, content, image_path, updated_by)
+          VALUES (?, ?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE
+            title = VALUES(title),
+            content = VALUES(content),
+            image_path = VALUES(image_path),
+            updated_by = VALUES(updated_by),
+            updated_at = NOW()
+        ";
+        $st = DB::get()->prepare($sql);
+        $uid = $userId ?? null;
+        $st->bind_param('ssssi', $slug, $title, $content, $imagePath, $uid);
+        $st->execute();
+        $st->close();
+    }
+
     public function updateAbout(int $pageId, string $title, string $content, ?string $imagePath, int $userId): void {
         $stmt = DB::get()->prepare("UPDATE pages SET title=?, content=?, image_path=?, updated_by=?, updated_at=NOW() WHERE page_id=?");
         $stmt->bind_param('sssii', $title, $content, $imagePath, $userId, $pageId);

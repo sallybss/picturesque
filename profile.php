@@ -6,11 +6,11 @@ $me = Auth::requireUserOrRedirect('./auth/login.php');
 $profileId = isset($_GET['id']) ? (int)$_GET['id'] : $me;
 if ($profileId <= 0) { header('Location: ./auth/login.php'); exit; }
 
-$paths = new Paths();
-
+$paths    = new Paths();
 $profiles = new ProfileRepository();
-$meRow = $profiles->getHeader($me);
-$iAmAdmin = (($meRow['role'] ?? 'user') === 'admin');
+
+$meRow     = $profiles->getHeader($me);
+$iAmAdmin  = (strtolower($meRow['role'] ?? 'user') === 'admin');
 
 $viewRow = $profiles->getById($profileId);
 if (!$viewRow) { header('Location: ./auth/login.php'); exit; }
@@ -21,16 +21,17 @@ $likesCount    = $picturesRepo->likesCountForProfilePictures($profileId);
 $commentsCount = $picturesRepo->commentsCountForProfilePictures($profileId);
 $myPics        = $picturesRepo->listByProfile($profileId);
 
-
 $avatarSrc = !empty($viewRow['avatar_photo'])
   ? img_from_db($viewRow['avatar_photo'])
   : 'https://placehold.co/96x96?text=%20';
 
 $coverSrc = !empty($viewRow['cover_photo'])
   ? img_from_db($viewRow['cover_photo'])
-  : asset('/images/default-cover.jpg'); 
+  : asset('images/default-cover.jpg'); // no leading slash
 
-
+// CSS versioning by file mtime
+$cssPath = __DIR__ . '/public/css/main.css';
+$cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 ?>
 <!doctype html>
 <html lang="en">
@@ -38,7 +39,7 @@ $coverSrc = !empty($viewRow['cover_photo'])
   <meta charset="utf-8">
   <title><?= htmlspecialchars($viewRow['display_name']) ?> · Profile</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="./public/css/main.css?v=1">
+  <link rel="stylesheet" href="./public/css/main.css?v=<?= $cssVer ?>">
 </head>
 <body>
   <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
@@ -56,12 +57,12 @@ $coverSrc = !empty($viewRow['cover_photo'])
             <form method="post" action="./actions/update_cover.php" enctype="multipart/form-data">
               <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
               <input id="coverInput" type="file" name="cover" accept="image/*" hidden onchange="this.form.submit()">
-              <label for="coverInput" class="btn-ghost small">Change Cover</label>
+              <label for="coverInput" class="btn btn-ghost small">Change Cover</label>
             </form>
             <form method="post" action="./actions/update_cover.php">
               <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
               <input type="hidden" name="action" value="reset">
-              <button type="submit" class="btn-ghost small">Reset</button>
+              <button type="submit" class="btn btn-ghost small">Reset</button>
             </form>
           </div>
         <?php endif; ?>
@@ -81,8 +82,8 @@ $coverSrc = !empty($viewRow['cover_photo'])
           </div>
           <?php if ($me === $profileId): ?>
             <div class="profile-actions" style="display:flex; gap:8px; flex-wrap:wrap">
-              <a class="btn-primary" href="./profile_edit.php">Edit Profile</a>
-              <a class="btn-ghost" href="./profile_settings.php">Profile Settings</a>
+              <a class="btn btn-primary" href="./profile_edit.php">Edit Profile</a>
+              <a class="btn btn-ghost" href="./profile_settings.php">Profile Settings</a>
             </div>
           <?php endif; ?>
         </div>
@@ -93,7 +94,7 @@ $coverSrc = !empty($viewRow['cover_photo'])
         <?php foreach ($myPics as $p): ?>
           <?php $cardImg = img_from_db($p['picture_url'] ?? $p['pic_url'] ?? ''); ?>
           <article class="card">
-            <img src="<?= img_from_db($p['picture_url']) ?>" alt="">
+            <img src="<?= $cardImg ?>" alt="">
             <div class="card-body">
               <div class="card-title"><?= htmlspecialchars($p['picture_title']) ?></div>
               <?php if (!empty($p['picture_description'])): ?>
@@ -106,11 +107,11 @@ $coverSrc = !empty($viewRow['cover_photo'])
                 </span>
                 <span class="spacer"></span>
                 <?php if ($me === $profileId): ?>
-                  <a class="btn-ghost" href="./edit_picture.php?id=<?= (int)$p['picture_id'] ?>">Edit</a>
+                  <a class="btn btn-ghost" href="./edit_picture.php?id=<?= (int)$p['picture_id'] ?>">Edit</a>
                   <form method="post" action="./actions/delete_picture.php" onsubmit="return confirm('Delete this photo? This cannot be undone.');" style="display:inline">
                     <input type="hidden" name="picture_id" value="<?= (int)$p['picture_id'] ?>">
                     <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
-                    <button type="submit" class="btn-danger">Delete</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
                   </form>
                 <?php endif; ?>
               </div>
