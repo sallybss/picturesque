@@ -14,7 +14,7 @@ $me   = Auth::requireUserOrRedirect('../auth/login.php');
 $pictureId = (int)($_POST['picture_id'] ?? 0);
 $parentId  = isset($_POST['parent_comment_id']) && $_POST['parent_comment_id'] !== ''
            ? (int)$_POST['parent_comment_id'] : null;
-$content   = trim($_POST['comment_content'] ?? '');   // <-- must be "comment_content"
+$content   = trim($_POST['comment_content'] ?? '');   
 
 if ($pictureId <= 0 || $content === '') {
   set_flash('err','Please write a comment.'); 

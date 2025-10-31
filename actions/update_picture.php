@@ -28,7 +28,7 @@ $st->close();
 
 $repo = new PictureRepository();
 $old  = $repo->getUrlIfOwned($pid, $me);
-if ($old === null) { // fixed minor check
+if ($old === null) { 
   set_flash('err','Picture not found or not yours.');
   header('Location: ../profile.php'); exit;
 }

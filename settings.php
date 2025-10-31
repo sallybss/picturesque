@@ -20,6 +20,11 @@ if (!$isAdmin) {
 $pages = new PagesRepository();
 $page  = $pages->getAbout();
 
+// ---- Load Rules page (slug='rules') ----
+$rules        = $pages->getBySlug('rules');
+$rulesTitle   = $rules['title']   ?? 'Rules & Regulations';
+$rulesContent = $rules['content'] ?? '';
+
 $pageId    = (int)($page['page_id'] ?? 0);
 $title     = $page['title']   ?? 'About Picturesque';
 $content   = $page['content'] ?? '';
@@ -33,6 +38,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
   $action = trim($_POST['action'] ?? '');
 
+  // ---- Rules: save text (title + content) ----
+  if ($action === 'save_rules') {
+    $newTitle   = trim($_POST['rules_title']   ?? 'Rules & Regulations');
+    $newContent = trim($_POST['rules_content'] ?? '');
+
+    if ($newTitle === '' || $newContent === '') {
+      set_flash('err', 'Rules title and content are required.');
+      header('Location: ./settings.php#rules');
+      exit;
+    }
+
+    // Text-only for now; no image upload. updated_by = $me
+    $pages->upsert('rules', $newTitle, $newContent, null, $me);
+
+    set_flash('ok', 'Rules & Regulations saved.');
+    header('Location: ./settings.php#rules');
+    exit;
+  }
+
+  // ---- Categories handlers ----
   if ($action === 'add_cat') {
     $name = trim($_POST['name'] ?? '');
     if ($name === '') {
@@ -93,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
   }
 
-
+  // ---- About page save (title/content/image) ----
   $newTitle   = trim($_POST['title'] ?? '');
   $newContent = trim($_POST['content'] ?? '');
   $resetImg   = !empty($_POST['reset_image']);
@@ -157,7 +182,6 @@ $cats = DB::get()->query("
   ORDER BY c.active DESC, c.category_name
 ")->fetch_all(MYSQLI_ASSOC);
 
-
 $imgUrl = $imagePath ? ($paths->uploads . htmlspecialchars($imagePath)) : null;
 $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/public/css/main.css') : time();
 ?>
@@ -182,7 +206,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
     <main class="content">
       <div class="settings-wrap">
         <h1 class="page-title">Admin Settings</h1>
-        <p class="sub">Edit the About page.</p>
+        <p class="sub">Edit the About page and Rules & Regulations.</p>
 
         <section id="cats" class="card pad" style="margin-bottom:1rem">
           <h2 class="section-title" style="margin-bottom:.75rem">Categories</h2>
@@ -244,6 +268,33 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
           </table>
         </section>
 
+        <!-- Rules & Regulations (editable) -->
+        <section id="rules" class="card pad" style="margin-bottom:1rem">
+          <h2 class="section-title" style="margin-bottom:.75rem">Rules &amp; Regulations</h2>
+
+          <form method="post" action="settings.php#rules" class="form-grid">
+            <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+            <input type="hidden" name="action" value="save_rules">
+
+            <div class="label">Title</div>
+            <div class="row">
+              <input class="input" name="rules_title" value="<?= htmlspecialchars($rulesTitle) ?>" required>
+            </div>
+
+            <div class="label">Content</div>
+            <div class="row">
+              <textarea class="textarea" name="rules_content" rows="10" required><?= htmlspecialchars($rulesContent) ?></textarea>
+            </div>
+
+            <div></div>
+            <div class="btns">
+              <button class="btn-primary" type="submit">Save Rules</button>
+              <a class="btn-ghost" href="./rules.php" target="_blank" rel="noopener">View Public Page</a>
+            </div>
+          </form>
+        </section>
+
+        <!-- About page -->
         <form class="about-card" method="post" action="settings.php" enctype="multipart/form-data">
           <div class="pad form-grid">
             <div class="label">Title</div>
@@ -315,5 +366,4 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
   </script>
 
 </body>
-
 </html>

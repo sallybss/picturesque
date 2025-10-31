@@ -23,6 +23,7 @@ $sql = "
   ORDER BY p.created_at DESC
   LIMIT 120
 ";
+
 $res = DB::get()->query($sql);
 $pictures = [];
 while ($row = $res->fetch_assoc()) $pictures[] = $row;
