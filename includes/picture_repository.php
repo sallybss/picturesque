@@ -15,12 +15,12 @@ class PictureRepository
         $sql = "
       SELECT
         p.picture_id          AS pic_id,
-        p.profile_id          AS pic_profile_id,
+        p.profile_id          AS author_id,
         p.picture_title       AS pic_title,
         p.picture_description AS pic_desc,
         p.picture_url         AS pic_url,
         p.created_at          AS pic_created_at,
-        pr.display_name       AS author_name,
+        pr.display_name       AS author_display_name,
         pr.avatar_photo       AS author_avatar,
         COALESCE(l.cnt, 0)    AS like_count,
         COALESCE(c.cnt, 0)    AS comment_count,
@@ -90,7 +90,6 @@ class PictureRepository
         return $row;
     }
 
-
     public function countByProfile(int $profileId): int
     {
         $stmt = DB::get()->prepare("SELECT COUNT(*) AS cnt FROM pictures WHERE profile_id = ?");
@@ -146,7 +145,6 @@ class PictureRepository
         return $rows;
     }
 
-
     public function getEditableByOwner(int $pictureId, int $ownerId): ?array
     {
         $sql = "
@@ -162,7 +160,6 @@ class PictureRepository
         $stmt->close();
         return $row;
     }
-
 
     public function getOwnerAndUrl(int $pictureId): ?array
     {
@@ -233,7 +230,6 @@ class PictureRepository
         return (int)$id;
     }
 
-
     public function updateOwned(int $pictureId, int $ownerId, string $title, string $desc, ?string $filename, int $categoryId): void
     {
         if ($filename === null) {
@@ -254,7 +250,6 @@ class PictureRepository
         $stmt->execute();
         $stmt->close();
     }
-
 
     public function clearImage(int $pictureId, int $ownerId): void
     {

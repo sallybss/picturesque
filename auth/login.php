@@ -40,8 +40,9 @@ require __DIR__ . '/../includes/flash.php';
           </div>
 
           <button class="btn btn-primary" type="submit">Sign In</button>
-
+          <p class="note">Not registered? <a href="../home_guest.php">Take a look and change your mind</a></p>
           <p class="note">New User? <a href="./register.php">Sign Up</a></p>
+  
         </form>
       </div>
     </div>

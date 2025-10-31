@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/init.php';
+require_once __DIR__ . '/includes/topbar.php'; 
+
 
 $me = Auth::requireUserOrRedirect('./auth/login.php');
 
@@ -33,6 +35,11 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
     <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
 
     <main class="content">
+
+    <?php if (isset($meRow)): ?>
+        <?php render_topbar_userbox($meRow); ?>
+      <?php endif; ?>
+      
       <section class="about">
         <h1><?= htmlspecialchars($title) ?></h1>
         <p class="lead"><?= nl2br(htmlspecialchars($page['content'] ?? '')) ?></p>

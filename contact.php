@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/init.php';
+require_once __DIR__ . '/includes/topbar.php'; 
+
 
 $me = Auth::requireUserOrRedirect('./auth/login.php');
 
@@ -30,6 +32,11 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
     <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
 
     <main class="content">
+
+    <?php if (isset($meRow)): ?>
+        <?php render_topbar_userbox($meRow); ?>
+      <?php endif; ?>
+      
       <section class="contact-shell">
         <div class="contact-split">
           <div class="contact-media">

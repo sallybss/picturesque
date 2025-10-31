@@ -1,16 +1,16 @@
 <?php
-require_once __DIR__ . '/../includes/init.php';
+require_once __DIR__ . './includes/init.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../create.php'); exit;
+    header('Location: /create.php'); exit;
 }
 
 if (isset($_POST['csrf']) && !check_csrf($_POST['csrf'])) {
     set_flash('err','Invalid request.');
-    header('Location: ../create.php'); exit;
+    header('Location: /create.php'); exit;
 }
 
-$me = Auth::requireUserOrRedirect('../auth/login.php');
+$me = Auth::requireUserOrRedirect('/auth/login.php');
 
 $title = trim($_POST['picture_title'] ?? $_POST['title'] ?? '');
 $desc  = trim($_POST['picture_description'] ?? $_POST['desc'] ?? '');
@@ -29,7 +29,7 @@ if ($redirect === '') { $redirect = '/index.php'; }
 
 if ($catId <= 0) {
     set_flash('err', 'Please choose a category.');
-    header('Location: ../create.php'); exit;
+    header('Location: /create.php'); exit;
 }
 
 $st = DB::get()->prepare("SELECT 1 FROM categories WHERE category_id=? AND active=1");
@@ -40,17 +40,17 @@ $st->close();
 
 if (!$okCat) {
     set_flash('err', 'Invalid category.');
-    header('Location: ../create.php'); exit;
+    header('Location: /create.php'); exit;
 }
 
 if ($title === '' || !$file || empty($file['name'])) {
     set_flash('err', 'Please select a photo and enter a title.');
-    header('Location: ../create.php'); exit;
+    header('Location: /create.php'); exit;
 }
 
 if (!isset($file['error'])) {
     set_flash('err', 'No file field named "photo" was submitted.');
-    header('Location: ../create.php'); exit;
+    header('Location: /create.php'); exit;
 }
 
 $code = $file['error'];
@@ -66,13 +66,13 @@ if ($code !== UPLOAD_ERR_OK) {
     ];
     $msg = $map[$code] ?? ('Unknown upload error: '.$code);
     set_flash('err', 'Upload failed: ' . $msg);
-    header('Location: ../create.php'); exit;
+    header('Location: /create.php'); exit;
 }
 
 $tmp = $file['tmp_name'];
 if (!is_uploaded_file($tmp)) {
     set_flash('err', 'No file uploaded.');
-    header('Location: ../create.php'); exit;
+    header('Location: /create.php'); exit;
 }
 
 $finfo   = new finfo(FILEINFO_MIME_TYPE);
@@ -85,7 +85,7 @@ $allowed = [
 ];
 if (!isset($allowed[$mime])) {
     set_flash('err', 'Only JPG/PNG/GIF/WEBP allowed.');
-    header('Location: ../create.php'); exit;
+    header('Location: /create.php'); exit;
 }
 
 
@@ -101,7 +101,7 @@ $dest     = $uploadDir . $name;
 
 if (!move_uploaded_file($tmp, $dest)) {
     set_flash('err', 'Could not save the file.');
-    header('Location: ../create.php'); exit;
+    header('Location: /create.php'); exit;
 }
 @chmod($dest, 0644);
 
