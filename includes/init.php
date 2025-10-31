@@ -3,6 +3,11 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
+// Global favicon for all pages
+if (!headers_sent()) {
+    echo '<link rel="icon" type="image/x-icon" href="' . htmlspecialchars(url('/favicon.ico')) . '">' . PHP_EOL;
+  }
+
 $ENV = require __DIR__ . '/env.php';
 define('BASE_PATH', rtrim($ENV['base_path'] ?? '', '/'));  
 
