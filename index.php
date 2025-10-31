@@ -46,8 +46,6 @@ $hotCount   = count($hotIds);
 // $base = BASE_PATH;
 // $cssFile = __DIR__ . '/public/css/main.css';
 // $cssVer  = @filemtime($cssFile) ?: time();
-
-
 ?>
 <!doctype html>
 <html lang="en">

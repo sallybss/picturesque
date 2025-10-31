@@ -103,6 +103,8 @@ textarea,
     background: #fff;
     outline: none;
     font-size: 15px;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
 }
 
 .input {
@@ -119,6 +121,8 @@ textarea,
 .textarea,
 textarea {
     resize: vertical;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
 }
 
 .row {
@@ -151,11 +155,15 @@ textarea {
     display: block;
     text-align: center;
     background: var(--primary);
+    border: 1px solid #fee2e2;
+    border-radius: 10px;
     color: #fff;
-    font-weight: 700;
-    padding: 12px 14px;
+    font-weight: 500;
+    font-size: 15px;
+    padding: 10px 15px; 
     text-decoration: none;
     margin-bottom: 14px;
+    cursor: pointer;
 }
 
 .btn-primary:hover {
@@ -1462,6 +1470,8 @@ body.guest-locked {
 .reply-form textarea,
 .comment-form textarea {
     width: 100%;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
 }
 
 .comment-form .input {
@@ -1495,6 +1505,7 @@ body.guest-locked {
     border: 1px solid #e3e8ef;
     border-radius: 999px;
     text-decoration: none;
+    cursor: pointer;
 }
 
 .pill.is-selected {
@@ -1555,16 +1566,20 @@ body.guest-locked {
 }
 
 .btn-ghost {
-
     display: block;
     text-align: center;
     background: #fff;;
     color: #000000;
     border: 1px solid #475569;
-    font-weight: 700;
-    padding: 12px 14px;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 15px;
+    padding: 10px 15px; 
     text-decoration: none;
     margin-bottom: 14px;
+    cursor: pointer;
+
+
 }
 
 .btn-link {
@@ -1574,11 +1589,18 @@ body.guest-locked {
 }
 
 .btn-danger {
-    border: 1px solid #fee2e2;
+    display: block;
+    text-align: center;
     background: #fee2e2;
     color: #991b1b;
+    border: 1px solid #991b1b;
     border-radius: 10px;
-    padding: .4rem .7rem;
+    font-weight: 500;
+    font-size: 15px;
+    padding: 10px 15px;   
+    text-decoration: none;
+    margin-bottom: 14px;
+    cursor: pointer;
 }
 
 .btn-danger:hover {

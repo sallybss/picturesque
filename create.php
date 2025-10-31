@@ -5,7 +5,7 @@ require __DIR__.'/includes/categories_repository.php';
 $catsRepo = new CategoriesRepository();
 $cats = $catsRepo->listActive();
 
-$me = Auth::requireUserOrRedirect('./auth/login.php');
+$me = Auth::requireUserOrRedirect('/auth/login.php');
 
 $paths = new Paths();
 ?>
