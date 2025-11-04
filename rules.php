@@ -3,6 +3,7 @@ require_once __DIR__ . '/includes/init.php';
 require_once __DIR__ . '/includes/pages_repository.php';
 require_once __DIR__ . '/includes/sidebar.php';
 require_once __DIR__ . '/includes/profile_repository.php';
+require_once __DIR__ . '/includes/topbar.php';
 
 $pages = new PagesRepository();
 $rules = $pages->getBySlug('rules');
@@ -32,6 +33,13 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
   <div class="layout">
     <?php render_sidebar(['isAdmin' => $isAdmin, 'isGuest' => !$isLoggedIn]); ?>
     <main class="content">
+
+
+    <?php if ($isLoggedIn && isset($meRow)): ?>
+  <?php render_topbar_userbox($meRow); ?>
+<?php endif; ?>
+
+
       <section class="pad">
         <h1 class="page-title"><?= htmlspecialchars($title) ?></h1>
         <div class="prose">

@@ -38,7 +38,7 @@ require __DIR__ . '/../includes/flash.php';
           <input class="input" type="password" name="password" minlength="8" required>
 
           <button class="btn btn-primary" type="submit">Sign Up</button>
-
+          <p class="note">Not registered? <a href="../home_guest.php">Take a look and change your mind</a></p>
           <p class="note">Already have an account? <a href="./login.php">Sign In</a></p>
         </form>
       </div>

@@ -103,6 +103,8 @@ textarea,
     background: #fff;
     outline: none;
     font-size: 15px;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
 }
 
 .input {
@@ -119,6 +121,8 @@ textarea,
 .textarea,
 textarea {
     resize: vertical;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
 }
 
 .row {
@@ -130,17 +134,18 @@ textarea {
 
 /* Buttons (single source of truth) */
 .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 14px;
-    border: none;
+    display: block;
+    text-align: center;
+    background: var(--primary);
+    border: 1px solid #fee2e2;
     border-radius: 10px;
-    font-weight: 600;
+    color: #fff;
+    font-weight: 500;
+    font-size: 15px;
+    padding: 10px 15px; 
+    text-decoration: none;
+    margin-bottom: 14px;
     cursor: pointer;
-    background: #235ccf;
-    color: #111;
 }
 
 .btn:hover {
@@ -151,11 +156,15 @@ textarea {
     display: block;
     text-align: center;
     background: var(--primary);
+    border: 1px solid #fee2e2;
+    border-radius: 10px;
     color: #fff;
-    font-weight: 700;
-    padding: 12px 14px;
+    font-weight: 500;
+    font-size: 15px;
+    padding: 10px 15px; 
     text-decoration: none;
     margin-bottom: 14px;
+    cursor: pointer;
 }
 
 .btn-primary:hover {
@@ -224,21 +233,19 @@ textarea {
     margin: 0 0 20px;
     font-size: 14px;
 }
-
 .note {
-    color: var(--muted);
-    font-size: 13px;
-    margin-top: 10px;
-}
-
-.note a {
-    color: #2563eb;
+    margin-top: 12px;
+    font-size: 0.95rem;
+    color: #555;
+  }
+  .note a {
+    color: #7db9d6;
     text-decoration: none;
-}
-
-.note a:hover {
+    font-weight: 500;
+  }
+  .note a:hover {
     text-decoration: underline;
-}
+  }
 
 .auth-card .row {
     margin: 8px 0 16px;
@@ -312,7 +319,7 @@ img.mini-avatar {
     object-fit: cover;
 }
 
-/* In case another rule wins, force it */
+
 img.c-avatar {
     width: 20px !important;
     height: 20px !important;
@@ -321,23 +328,29 @@ img.c-avatar {
 
 /* Cards */
 .card {
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, .04);
+    background:#fff;
+    border:1px solid transparent;      
+    border-radius:14px;
+    overflow:hidden;
+    transition: box-shadow .18s ease, transform .18s ease, background-color .18s ease;
+    will-change: transform;            
+    contain: paint;  
 }
 
 .card:hover {
-    border-color: #cfd9e4;
-    border-width: 3px;
+    box-shadow: 0 10px 28px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.06);
+    transform: translateY(-2px); 
 }
 
 .card>img,
 .card .cover {
-    width: 100%;
-    height: auto;
-    display: block;
+    display:block;
+    width:100%;
+    height:auto;          
+    /* aspect-ratio: 4 / 3; 
+       object-fit: cover; */
+    backface-visibility: hidden;
+    transform: translateZ(0); 
 }
 
 .card-body,
@@ -530,12 +543,34 @@ img.c-avatar {
 }
 
 /* Content header */
-.content-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-}
+.content-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;  /* search left, avatar right */
+    gap:12px;
+    margin-bottom:12px;
+  }
+
+  .content-top .topbar{
+    margin:0;
+  }
+
+      /* Compact form layout: input + Go button */
+      .content-top .search-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 420px;
+      }
+      .content-top .search {
+        flex: 1;
+      }
+      .search-btn.btn-primary {
+        display: inline-flex;
+        margin: 0;
+        padding: 10px 14px;
+        font-weight: 500;
+      }
 
 .search-wrap {
     flex: 1;
@@ -551,16 +586,51 @@ img.c-avatar {
     background: #fff;
 }
 
-.userbox {
+/* === TOPBAR (user avatar + name, top-right) === */
+.topbar {
     display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin: 8px 0 12px;
+  }
+  
+  .single-wrap > .topbar {
+    justify-content: space-between;
+  }
+  
+  .userbox {
+    display: inline-flex;
     align-items: center;
     gap: 10px;
-}
-
-.username {
+    text-decoration: none;
+    color: inherit;
     font-weight: 600;
-}
-
+    cursor: pointer;
+  }
+  
+  .userbox .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid #e0e0e0;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  
+  .userbox .username {
+    color: #333;
+    font-size: 0.95rem;
+  }
+  
+  .userbox:hover .username {
+    color: #7db9d6; 
+  }
+  
+  .userbox:hover .avatar {
+    box-shadow: 0 0 0 3px rgba(125, 185, 214, 0.25);
+    transform: scale(1.04);
+  }
 /* =========================================================
    3) HOME → FEED, FILTERS, CHIPS
    ========================================================= */
@@ -647,9 +717,14 @@ img.c-avatar {
 }
 
 .card-title {
-    font-weight: 700;
-    margin: 2px 0;
+    font-weight: 600;     
+    line-height: 1.25;
 }
+
+.card:hover .card-title{
+    font-weight: 600;     
+    text-decoration: none; 
+  }
 
 .card-desc {
     color: var(--muted);
@@ -1462,6 +1537,8 @@ body.guest-locked {
 .reply-form textarea,
 .comment-form textarea {
     width: 100%;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
 }
 
 .comment-form .input {
@@ -1495,6 +1572,7 @@ body.guest-locked {
     border: 1px solid #e3e8ef;
     border-radius: 999px;
     text-decoration: none;
+    cursor: pointer;
 }
 
 .pill.is-selected {
@@ -1555,16 +1633,20 @@ body.guest-locked {
 }
 
 .btn-ghost {
-
     display: block;
     text-align: center;
     background: #fff;;
     color: #000000;
     border: 1px solid #475569;
-    font-weight: 700;
-    padding: 12px 14px;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 15px;
+    padding: 10px 15px; 
     text-decoration: none;
     margin-bottom: 14px;
+    cursor: pointer;
+
+
 }
 
 .btn-link {
@@ -1574,11 +1656,18 @@ body.guest-locked {
 }
 
 .btn-danger {
-    border: 1px solid #fee2e2;
+    display: block;
+    text-align: center;
     background: #fee2e2;
     color: #991b1b;
+    border: 1px solid #991b1b;
     border-radius: 10px;
-    padding: .4rem .7rem;
+    font-weight: 500;
+    font-size: 15px;
+    padding: 10px 15px;   
+    text-decoration: none;
+    margin-bottom: 14px;
+    cursor: pointer;
 }
 
 .btn-danger:hover {

@@ -2,6 +2,7 @@
 require_once __DIR__ . '/includes/init.php';
 require __DIR__ . '/includes/categories_repository.php';
 require __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/topbar.php'; // 👈 add this
 
 $catsRepo = new CategoriesRepository();
 
@@ -187,14 +188,12 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
 ?>
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <title>Admin Settings · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css?v=<?= $cssVer ?>">
 </head>
-
 <body>
 
   <?php if ($m = get_flash('ok')):  ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
@@ -204,6 +203,11 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
     <?php render_sidebar(['isAdmin' => true]); ?>
 
     <main class="content">
+      <!-- 👇 userbox in the top-right -->
+      <div class="content-top">
+        <?php render_topbar_userbox($meRow); ?>
+      </div>
+
       <div class="settings-wrap">
         <h1 class="page-title">Admin Settings</h1>
         <p class="sub">Edit the About page and Rules & Regulations.</p>
