@@ -3,10 +3,7 @@ require_once __DIR__ . '/includes/init.php';
 require_once __DIR__ . '/includes/topbar.php';
 require_once __DIR__ . '/includes/categories_repository.php';
 
-function url_from_db(string $path): string
-{
-  return url($path);
-}
+function url_from_db(string $path): string { return url($path); }
 
 $me = Auth::requireUserOrRedirect('./home_guest.php');
 
@@ -18,27 +15,19 @@ $isAdmin  = strtolower(trim($meRow['role'] ?? '')) === 'admin';
 $q    = trim($_GET['q'] ?? '');
 $cat  = trim($_GET['cat'] ?? '');
 $sort = $_GET['sort'] ?? 'new';
-if (!in_array($sort, ['new', 'old'], true)) {
-  $sort = 'new';
-}
+if (!in_array($sort, ['new', 'old'], true)) $sort = 'new';
 
 $catsRepo = new CategoriesRepository();
 $cats     = $catsRepo->listActive();
 
-/* --- Category-aware search: allow "test", "#test", or "cat:test" --- */
 $raw = strtolower(trim($q));
 if ($raw !== '') {
   if (substr($raw, 0, 1) === '#')    $raw = substr($raw, 1);
   if (substr($raw, 0, 4) === 'cat:') $raw = substr($raw, 4);
-
   foreach ($cats as $c) {
     $name = strtolower(trim($c['name']));
     $slug = strtolower(trim($c['slug']));
-    if ($raw === $name || $raw === $slug) {
-      $cat = $slug;
-      $q   = '';
-      break;
-    }
+    if ($raw === $name || $raw === $slug) { $cat = $slug; $q = ''; break; }
   }
 }
 
@@ -60,34 +49,27 @@ $hotCount     = count($hotIds);
   <meta charset="utf-8">
   <title>Home · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <?php
-  $cssPath = __DIR__ . '/public/css/main.css';
-  $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
-  ?>
+  <?php $cssPath = __DIR__ . '/public/css/main.css'; $ver = file_exists($cssPath) ? filemtime($cssPath) : time(); ?>
   <link rel="stylesheet" href="./public/css/main.css?v=<?= $ver ?>">
   <style>
-    /* Author row */
-    .author-row { margin-top: 10px; display: flex; align-items: center; gap: 8px; }
-    .author-link { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-    .author-avatar { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
-    .author-name { font-size: 0.9rem; color: #333; }
-
-    /* Clickable cover + title */
-    .card-cover { display:block; }
-    .card-cover img { display:block; width:100%; height:auto; }
-    .card-title a.card-title-link { color: inherit; text-decoration: none; }
-    .card-title a.card-title-link:hover { text-decoration: underline; }
-
-    /* Keep search input + button on one line (scoped to this page header) */
-    .content-top .search-wrap { display: flex; gap: 8px; align-items: center; }
-    .content-top .search-wrap .search { flex: 1; }
-    .search-btn.btn-primary { display: inline-flex; margin: 0; padding: 10px 14px; }
+    .author-row{margin-top:10px;display:flex;align-items:center;gap:8px}
+    .author-link{display:flex;align-items:center;gap:8px;text-decoration:none}
+    .author-avatar{width:26px;height:26px;border-radius:50%;object-fit:cover}
+    .author-name{font-size:.9rem;color:#333}
+    .card-cover{display:block}
+    .card-cover img{display:block;width:100%;height:auto}
+    .card-title a.card-title-link{color:inherit;text-decoration:none}
+    .card-title a.card-title-link:hover{text-decoration:underline}
+    .content-top .search-wrap{display:flex;gap:8px;align-items:center}
+    .content-top .search-wrap .search{flex:1}
+    .search-btn.btn-primary{display:inline-flex;margin:0;padding:10px 14px}
   </style>
 </head>
-
 <body>
   <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
+
+  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
 
   <div class="layout">
     <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
@@ -95,14 +77,10 @@ $hotCount     = count($hotIds);
     <main class="content">
       <div class="content-top">
         <form method="get" action="index.php" class="search-wrap">
-          <?php if ($cat !== ''):  ?><input type="hidden" name="cat" value="<?= htmlspecialchars($cat) ?>"><?php endif; ?>
+          <?php if ($cat !== ''):  ?><input type="hidden" name="cat"  value="<?= htmlspecialchars($cat)  ?>"><?php endif; ?>
           <?php if ($sort !== ''): ?><input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>"><?php endif; ?>
-          <input
-            class="search"
-            name="q"
-            list="search-suggest"
-            value="<?= htmlspecialchars($q) ?>"
-            placeholder="Search photos, username, or #category">
+          <input class="search" name="q" list="search-suggest" value="<?= htmlspecialchars($q) ?>"
+                 placeholder="Search photos, username, or #category">
           <datalist id="search-suggest">
             <?php foreach ($cats as $c): ?>
               <option value="#<?= htmlspecialchars($c['slug']) ?>"><?= htmlspecialchars($c['name']) ?></option>
@@ -117,22 +95,15 @@ $hotCount     = count($hotIds);
       <div class="controls-row">
         <div class="pills">
           <?php
-          $qs = function (array $params) {
-            return http_build_query(array_filter($params, fn($v) => $v !== '' && $v !== null));
-          };
+            $qs = function (array $params) {
+              return http_build_query(array_filter($params, fn($v) => $v !== '' && $v !== null));
+            };
           ?>
-
           <a class="pill<?= $cat === '' ? ' is-selected' : '' ?>"
              href="index.php?<?= $qs(['q' => $q, 'sort' => $sort]) ?>">All</a>
 
           <?php foreach ($cats as $c): ?>
-            <?php
-            $href = 'index.php?' . $qs([
-              'cat'  => $c['slug'],
-              'q'    => $q,
-              'sort' => $sort,
-            ]);
-            ?>
+            <?php $href = 'index.php?' . $qs(['cat'=>$c['slug'],'q'=>$q,'sort'=>$sort]); ?>
             <a class="pill<?= $cat === $c['slug'] ? ' is-selected' : '' ?>" href="<?= $href ?>">
               <?= htmlspecialchars($c['name']) ?>
             </a>
@@ -140,7 +111,7 @@ $hotCount     = count($hotIds);
         </div>
 
         <form class="filter-form" method="get" action="index.php">
-          <?php if ($q !== ''):  ?><input type="hidden" name="q" value="<?= htmlspecialchars($q) ?>"><?php endif; ?>
+          <?php if ($q   !== ''): ?><input type="hidden" name="q"   value="<?= htmlspecialchars($q)   ?>"><?php endif; ?>
           <?php if ($cat !== ''): ?><input type="hidden" name="cat" value="<?= htmlspecialchars($cat) ?>"><?php endif; ?>
           <label for="sort" class="filter-label">Sort by:</label>
           <div class="filter-select-wrap">
@@ -156,9 +127,7 @@ $hotCount     = count($hotIds);
         <h2 class="section-title">People</h2>
         <div class="people-row">
           <?php foreach ($people as $u):
-            $avatar = !empty($u['avatar_photo'])
-              ? url_from_db($u['avatar_photo'])
-              : 'https://placehold.co/56x56?text=%20';
+            $avatar = !empty($u['avatar_photo']) ? url_from_db($u['avatar_photo']) : 'https://placehold.co/56x56?text=%20';
           ?>
             <a class="person" href="profile.php?id=<?= (int)$u['profile_id'] ?>">
               <img src="<?= $avatar ?>" alt="">
@@ -193,13 +162,11 @@ $hotCount     = count($hotIds);
             $authorAvatar = $rawAvatar ? img_from_db($rawAvatar) : 'https://placehold.co/26x26?text=%20';
           ?>
           <article class="card">
-            <!-- Clickable image -->
             <a class="card-cover" href="picture.php?id=<?= $picId ?>">
               <img src="<?= $coverUrl ?>" alt="">
             </a>
 
             <div class="card-body">
-
               <?php if ($isAdmin):
                 $isHot = isset($hotIdsSet[$p['pic_id']]);
                 $disablePin = (!$isHot && $hotCount >= 10);
@@ -212,14 +179,11 @@ $hotCount     = count($hotIds);
                     <input type="hidden" name="mode" value="unpin">
                     <button type="submit" class="pill" style="margin-top:6px;">🔥 Unpin</button>
                   <?php else: ?>
-                    <button type="submit" class="pill" style="margin-top:6px;" <?= $disablePin ? 'disabled' : '' ?>>
-                      📌 Pin to Hot
-                    </button>
+                    <button type="submit" class="pill" style="margin-top:6px;" <?= $disablePin ? 'disabled' : '' ?>>📌 Pin to Hot</button>
                   <?php endif; ?>
                 </form>
               <?php endif; ?>
 
-              <!-- Clickable title -->
               <div class="card-title">
                 <a class="card-title-link" href="picture.php?id=<?= $picId ?>">
                   <?= htmlspecialchars($p['pic_title']) ?>
@@ -230,7 +194,6 @@ $hotCount     = count($hotIds);
                 <div class="card-desc"><?= htmlspecialchars($p['pic_desc']) ?></div>
               <?php endif; ?>
 
-              <!-- Author -->
               <div class="author-row">
                 <?php if ($authorId > 0): ?>
                   <a class="author-link" href="profile.php?id=<?= $authorId ?>">
@@ -267,5 +230,21 @@ $hotCount     = count($hotIds);
       </section>
     </main>
   </div>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <script>
+    (function(){
+      const body = document.body;
+      const btn = document.getElementById('hamburger');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      function openMenu(){ body.classList.add('sidebar-open'); btn && btn.setAttribute('aria-expanded','true'); }
+      function closeMenu(){ body.classList.remove('sidebar-open'); btn && btn.setAttribute('aria-expanded','false'); }
+      function toggle(){ body.classList.contains('sidebar-open') ? closeMenu() : openMenu(); }
+      btn && btn.addEventListener('click', toggle);
+      backdrop && backdrop.addEventListener('click', closeMenu);
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+    })();
+  </script>
 </body>
 </html>

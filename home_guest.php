@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/init.php';
 
-// latest 120 public pictures with counts
 $sql = "
   SELECT
     p.picture_id,
@@ -26,7 +25,6 @@ $res = DB::get()->query($sql);
 $pictures = [];
 while ($row = $res->fetch_assoc()) $pictures[] = $row;
 
-// fix: correct CSS path join
 $cssPath = __DIR__ . '/public/css/main.css';
 $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 ?>
@@ -78,8 +76,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
     <section class="feed feed-locked">
       <?php foreach ($pictures as $p): ?>
         <?php
-          // Use helpers so paths are correct regardless of base folder
-          $coverUrl = img_from_db($p['picture_url']); // or url($p['picture_url'])
+          $coverUrl = img_from_db($p['picture_url']); 
           $avatarUrl = !empty($p['avatar_photo'])
             ? img_from_db($p['avatar_photo'])
             : 'https://placehold.co/24x24?text=%20';

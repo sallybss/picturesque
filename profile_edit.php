@@ -65,7 +65,6 @@ $avatarSrc = !empty($meRow['avatar_photo'])
                 </p>
               </div>
 
-              <!-- IMPORTANT: give the preview an initial src so placeholder always shows -->
               <img id="avatarPreview" class="dz-preview" alt="Avatar preview"
                    src="<?= htmlspecialchars($avatarSrc) ?>">
 
@@ -93,8 +92,6 @@ $avatarSrc = !empty($meRow['avatar_photo'])
     const avatarBrowse = document.getElementById('avatarBrowseBtn');
     const originalUrl  = "<?= htmlspecialchars($avatarSrc) ?>";
 
-    // Start with the current (or placeholder) avatar visible in the preview.
-    // Hide the “empty” message.
     avatarPreview.src = originalUrl;
     avatarDzEmpty.hidden = true;
 
@@ -115,7 +112,7 @@ $avatarSrc = !empty($meRow['avatar_photo'])
 
     function clearFile(keepOriginal) {
       avatarInput.value = '';
-      avatarPreview.src = keepOriginal ? originalUrl : originalUrl; // keep showing something (placeholder or old)
+      avatarPreview.src = keepOriginal ? originalUrl : originalUrl; 
     }
 
     if (avatarBrowse) avatarBrowse.addEventListener('click', () => avatarInput.click());

@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD']!=='POST' || !check_csrf($_POST['csrf'] ?? '')) {
   set_flash('err','Invalid request.'); header('Location: ../admin_categories.php'); exit;
 }
 
-require __DIR__ . '/../includes/helpers.php'; // slugify()
+require __DIR__ . '/../includes/helpers.php';
 $name = trim($_POST['name'] ?? '');
 if ($name === '') { set_flash('err','Name required.'); header('Location: ../admin_categories.php'); exit; }
 

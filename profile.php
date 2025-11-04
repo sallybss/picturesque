@@ -27,9 +27,8 @@ $avatarSrc = !empty($viewRow['avatar_photo'])
 
 $coverSrc = !empty($viewRow['cover_photo'])
   ? img_from_db($viewRow['cover_photo'])
-  : asset('images/default-cover.jpg'); // no leading slash
+  : asset('images/default-cover.jpg');
 
-// CSS versioning by file mtime
 $cssPath = __DIR__ . '/public/css/main.css';
 $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 ?>

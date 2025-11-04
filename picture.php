@@ -18,7 +18,6 @@ if (!$pic) { header('Location: ./index.php'); exit; }
 $commentsRepo = new CommentRepository();
 $rows = $commentsRepo->listForPictureWithAuthors($picture_id);
 
-/** Build a tree: id → node with children[] */
 $byId = [];
 foreach ($rows as $r) {
   $r['children'] = [];
@@ -35,13 +34,12 @@ foreach ($byId as $id => &$node) {
     if (isset($byId[$pid])) {
       $byId[$pid]['children'][] = &$node;
     } else {
-      $rootComments[] = &$node; // fallback if parent missing
+      $rootComments[] = &$node; 
     }
   }
 }
 unset($node);
 
-/** Recursive renderer */
 function render_comment(array $c, int $depth, int $picture_id, bool $isAdmin): void {
   $avatar = img_from_db($c['avatar_photo']);
   $d = max(0, min(4, $depth));
@@ -105,7 +103,6 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 
     <main class="content">
       <div class="single-wrap">
-        <!-- Picture card -->
         <div class="card">
           <img src="<?= img_from_db($pic['picture_url']) ?>" alt="">
           <div class="pad">
@@ -119,12 +116,10 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
           </div>
         </div>
 
-        <!-- Comments card -->
         <div class="card">
           <div class="pad">
             <div class="topbar"><h3 class="subtitle">Comments (<?= (int)$pic['comment_count'] ?>)</h3></div>
 
-            <!-- Top-level comment form (matches actions/post_comment.php) -->
             <form class="comment-form" method="post" action="./actions/post_comment.php">
               <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
               <input type="hidden" name="picture_id" value="<?= (int)$picture_id ?>">
@@ -148,7 +143,6 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
   </div>
 
   <script>
-  // Toggle reply forms
   document.addEventListener('click', function (e) {
     if (e.target.matches('.js-reply')) {
       const id = e.target.getAttribute('data-target');
