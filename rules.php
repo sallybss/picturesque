@@ -23,22 +23,25 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
 ?>
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title><?= htmlspecialchars($title) ?> · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css?v=<?= $cssVer ?>">
 </head>
+
 <body>
+  
+  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+
   <div class="layout">
     <?php render_sidebar(['isAdmin' => $isAdmin, 'isGuest' => !$isLoggedIn]); ?>
     <main class="content">
 
-
-    <?php if ($isLoggedIn && isset($meRow)): ?>
-  <?php render_topbar_userbox($meRow); ?>
-<?php endif; ?>
-
+      <?php if ($isLoggedIn && isset($meRow)): ?>
+        <?php render_topbar_userbox($meRow); ?>
+      <?php endif; ?>
 
       <section class="pad">
         <h1 class="page-title"><?= htmlspecialchars($title) ?></h1>
@@ -48,5 +51,35 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
       </section>
     </main>
   </div>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+
+  <script>
+    (function() {
+      const body = document.body;
+      const btn = document.getElementById('hamburger');
+      const backdrop = document.getElementById('sidebarBackdrop');
+
+      function openMenu() {
+        body.classList.add('sidebar-open');
+        btn && btn.setAttribute('aria-expanded', 'true');
+      }
+
+      function closeMenu() {
+        body.classList.remove('sidebar-open');
+        btn && btn.setAttribute('aria-expanded', 'false');
+      }
+
+      function toggle() {
+        body.classList.contains('sidebar-open') ? closeMenu() : openMenu();
+      }
+      btn && btn.addEventListener('click', toggle);
+      backdrop && backdrop.addEventListener('click', closeMenu);
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeMenu();
+      });
+    })();
+  </script>
 </body>
+
 </html>

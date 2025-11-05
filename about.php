@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/init.php';
-require_once __DIR__ . '/includes/topbar.php'; 
-
+require_once __DIR__ . '/includes/topbar.php';
 
 $me = Auth::requireUserOrRedirect('./auth/login.php');
 
@@ -21,25 +20,29 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
 ?>
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title><?= htmlspecialchars($title) ?> · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css?v=<?= $cssVer ?>">
 </head>
+
 <body>
   <?php if ($m = get_flash('ok')):  ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
+
+  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
 
   <div class="layout">
     <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
 
     <main class="content">
 
-    <?php if (isset($meRow)): ?>
+      <?php if (isset($meRow)): ?>
         <?php render_topbar_userbox($meRow); ?>
       <?php endif; ?>
-      
+
       <section class="about">
         <h1><?= htmlspecialchars($title) ?></h1>
         <p class="lead"><?= nl2br(htmlspecialchars($page['content'] ?? '')) ?></p>
@@ -49,5 +52,34 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
       </section>
     </main>
   </div>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <script>
+    (function() {
+      const body = document.body;
+      const btn = document.getElementById('hamburger');
+      const backdrop = document.getElementById('sidebarBackdrop');
+
+      function openMenu() {
+        body.classList.add('sidebar-open');
+        btn && btn.setAttribute('aria-expanded', 'true');
+      }
+
+      function closeMenu() {
+        body.classList.remove('sidebar-open');
+        btn && btn.setAttribute('aria-expanded', 'false');
+      }
+
+      function toggle() {
+        body.classList.contains('sidebar-open') ? closeMenu() : openMenu();
+      }
+      btn && btn.addEventListener('click', toggle);
+      backdrop && backdrop.addEventListener('click', closeMenu);
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeMenu();
+      });
+    })();
+  </script>
+
 </body>
 </html>

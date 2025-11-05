@@ -5,7 +5,10 @@ $me = Auth::requireUserOrRedirect('./auth/login.php');
 
 $profiles = new ProfileRepository();
 $row = $profiles->getLoginEmailAndRole($me);
-if (!$row) { header('Location: ./index.php'); exit; }
+if (!$row) {
+  header('Location: ./index.php');
+  exit;
+}
 
 $isAdmin = ($row['role'] ?? '') === 'admin';
 $currentEmail = $row['login_email'] ?? '';
@@ -13,15 +16,19 @@ $currentEmail = $row['login_email'] ?? '';
 ?>
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>Profile Settings · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css?v=1">
 </head>
+
 <body>
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
   <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
+
+  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
 
   <div class="layout">
     <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
@@ -64,9 +71,9 @@ $currentEmail = $row['login_email'] ?? '';
             </form>
           </div>
         </div>
-
       </div>
     </main>
   </div>
 </body>
+
 </html>

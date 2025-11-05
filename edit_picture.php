@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/includes/init.php';
-require __DIR__.'/includes/categories_repository.php';
+require_once __DIR__ . '/includes/topbar.php';
+require __DIR__ . '/includes/categories_repository.php';
+
 $catsRepo = new CategoriesRepository();
 $cats = $catsRepo->listActive();
 
@@ -17,6 +19,9 @@ if (!$pic) { set_flash('err','Picture not found or not yours.'); header('Locatio
 
 $currentImgUrl = img_from_db($pic['picture_url'] ?? null);
 
+$profiles = new ProfileRepository();
+$meRow    = $profiles->getHeader($me);
+$isAdmin  = strtolower(trim($meRow['role'] ?? '')) === 'admin';
 ?>
 <!doctype html>
 <html lang="en">
@@ -27,67 +32,95 @@ $currentImgUrl = img_from_db($pic['picture_url'] ?? null);
   <link rel="stylesheet" href="./public/css/main.css">
 </head>
 <body>
-  <div class="create-page">
-    <div class="create-header">
-      <h1>Edit post</h1>
-      <a href="./profile.php" class="btn-ghost pill">Back to profile</a>
-    </div>
 
-    <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
-    <?php if ($m = get_flash('ok')):  ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
+  <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
+  <?php if ($m = get_flash('ok')):  ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
-    <form method="post" action="./actions/update_picture.php" enctype="multipart/form-data" class="create-form">
-      <input type="hidden" name="picture_id" value="<?= (int)$pic['picture_id'] ?>">
-      <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
-      <input type="hidden" name="reset_image" id="resetImage" value="">
+  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
 
-      <input id="photo" class="file-input" type="file" name="photo" accept="image/*">
+  <div class="layout">
+    <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
 
-      <div class="dropzone" id="dropzone">
-        <div class="dz-empty" id="dzEmpty">
-          <svg class="dz-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 16V6m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
-              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-          <p class="dz-text">Drag &amp; drop a new photo or <button type="button" class="dz-link" id="browseBtn">browse</button></p>
+    <main class="content">
+      <div class="content-top">
+        <?php render_topbar_userbox($meRow); ?>
+      </div>
+
+      <div class="create-page">
+        <div class="create-header">
+          <h1>Edit post</h1>
+          <a href="./profile.php" class="btn-ghost pill">Back to profile</a>
         </div>
 
-        <img id="preview" class="dz-preview" alt="Selected image preview" hidden>
-        <button type="button" class="dz-remove" id="removeBtn" aria-label="Remove image" hidden>×</button>
+        <form method="post" action="./actions/update_picture.php" enctype="multipart/form-data" class="create-form">
+          <input type="hidden" name="picture_id" value="<?= (int)$pic['picture_id'] ?>">
+          <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+          <input type="hidden" name="reset_image" id="resetImage" value="">
+
+          <input id="photo" class="file-input" type="file" name="photo" accept="image/*">
+
+          <div class="dropzone" id="dropzone">
+            <div class="dz-empty" id="dzEmpty">
+              <svg class="dz-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 16V6m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <p class="dz-text">Drag &amp; drop a new photo or <button type="button" class="dz-link" id="browseBtn">browse</button></p>
+            </div>
+
+            <img id="preview" class="dz-preview" alt="Selected image preview" hidden>
+            <button type="button" class="dz-remove" id="removeBtn" aria-label="Remove image" hidden>×</button>
+          </div>
+
+          <p class="muted" style="margin-top:6px;">Leave image empty to keep the current photo.</p>
+
+          <div class="form-row">
+            <label class="label">Title</label>
+            <input class="input" type="text" name="title" value="<?= htmlspecialchars($pic['picture_title']) ?>" required>
+          </div>
+
+          <div class="form-row">
+            <label class="label">Description</label>
+            <textarea class="input textarea" name="desc" rows="5"><?= htmlspecialchars($pic['picture_description']) ?></textarea>
+          </div>
+
+          <div class="form-row">
+            <label class="label">Category</label>
+            <select class="input" name="category_id" required>
+              <option value="">Choose a category…</option>
+              <?php foreach ($cats as $c): ?>
+                <option value="<?= (int)$c['category_id'] ?>"
+                  <?= (int)$pic['category_id'] === (int)$c['category_id'] ? 'selected' : '' ?>>
+                  <?= htmlspecialchars($c['name']) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <div class="actions">
+            <a href="./profile.php" class="btn-ghost wide">Cancel</a>
+            <button class="btn-primary wide" type="submit" name="submit">Save changes</button>
+          </div>
+        </form>
       </div>
-
-      <p class="muted" style="margin-top:6px;">Leave image empty to keep the current photo.</p>
-
-      <div class="form-row">
-        <label class="label">Title</label>
-        <input class="input" type="text" name="title" value="<?= htmlspecialchars($pic['picture_title']) ?>" required>
-      </div>
-
-      <div class="form-row">
-        <label class="label">Description</label>
-        <textarea class="input textarea" name="desc" rows="5"><?= htmlspecialchars($pic['picture_description']) ?></textarea>
-      </div>
-
-      <div class="form-row">
-  <label class="label">Category</label>
-  <select class="input" name="category_id" required>
-    <option value="">Choose a category…</option>
-    <?php foreach ($cats as $c): ?>
-      <option value="<?= (int)$c['category_id'] ?>"
-        <?= isset($picture) && (int)$picture['category_id']===(int)$c['category_id'] ? 'selected' : '' ?>>
-        <?= htmlspecialchars($c['name']) ?>
-      </option>
-    <?php endforeach; ?>
-  </select>
-</div>
-
-
-      <div class="actions">
-        <a href="./profile.php" class="btn-ghost wide">Cancel</a>
-        <button class="btn-primary wide" type="submit" name="submit">Save changes</button>
-      </div>
-    </form>
+    </main>
   </div>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <script>
+    (function(){
+      const body = document.body;
+      const btn = document.getElementById('hamburger');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      function openMenu(){ body.classList.add('sidebar-open'); btn && btn.setAttribute('aria-expanded','true'); }
+      function closeMenu(){ body.classList.remove('sidebar-open'); btn && btn.setAttribute('aria-expanded','false'); }
+      function toggle(){ body.classList.contains('sidebar-open') ? closeMenu() : openMenu(); }
+      btn && btn.addEventListener('click', toggle);
+      backdrop && backdrop.addEventListener('click', closeMenu);
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+    })();
+  </script>
 
   <script>
     const input = document.getElementById('photo');
@@ -98,7 +131,6 @@ $currentImgUrl = img_from_db($pic['picture_url'] ?? null);
     const browseBtn = document.getElementById('browseBtn');
     const resetInput = document.getElementById('resetImage');
     const originalUrl = "<?= htmlspecialchars($currentImgUrl) ?>";
-
 
     (function () {
       preview.src = originalUrl;
@@ -155,36 +187,6 @@ $currentImgUrl = img_from_db($pic['picture_url'] ?? null);
     }
 
     removeBtn.addEventListener('click', (e) => { e.preventDefault(); clearFile(); });
-
-    const chips = document.getElementById('chips');
-    const tagsInput = document.getElementById('tagsInput');
-    const addBtn = document.getElementById('addTag');
-
-    function syncTags() {
-      const selected = [...chips.querySelectorAll('.chip.is-selected')]
-        .map(b => b.textContent.trim())
-        .filter(t => t !== '+');
-      tagsInput.value = selected.join(',');
-    }
-
-    chips.addEventListener('click', (e) => {
-      if (e.target.classList.contains('chip') && !e.target.classList.contains('add')) {
-        e.target.classList.toggle('is-selected');
-        syncTags();
-      }
-    });
-
-    addBtn.addEventListener('click', () => {
-      const val = prompt('Add a tag');
-      if (val && val.trim()) {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'chip is-selected';
-        b.textContent = val.trim();
-        chips.insertBefore(b, addBtn);
-        syncTags();
-      }
-    });
   </script>
 </body>
 </html>
