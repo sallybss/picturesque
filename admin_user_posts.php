@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/init.php';
-
+require_once __DIR__ . '/includes/sidebar.php';
+require_once __DIR__ . '/includes/topbar.php';
 
 $me = Auth::requireAdminOrRedirect('./index.php');
 
@@ -15,7 +16,7 @@ $paths = new Paths();
 
 $profiles = new ProfileRepository();
 $meRow = $profiles->getHeader($me);
-$isAdmin = (($meRow['role'] ?? 'user') === 'admin');
+$isAdmin = (strtolower($meRow['role'] ?? 'user') === 'admin');
 if (!$isAdmin) {
   set_flash('err', 'Admins only.');
   header('Location: ./index.php');
@@ -32,28 +33,34 @@ if (!$user) {
 $pictures = new PictureRepository();
 $posts = $pictures->listByProfile($userId);
 
-$publicUploads = $paths->uploads;
+$cssPath = __DIR__ . '/public/css/main.css';
+$cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 ?>
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <title>Admin · Posts of <?= htmlspecialchars($user['display_name']) ?></title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="./public/css/main.css?v=8">
+  <link rel="stylesheet" href="./public/css/main.css?v=<?= $cssVer ?>">
 </head>
-
 <body>
   <?php if ($m = get_flash('ok')):  ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
-
-  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
 
   <div class="layout">
     <?php render_sidebar(['isAdmin' => true]); ?>
 
     <main class="content">
+      <!-- Top bar: hamburger (left) + userbox (right) -->
+      <div class="content-top">
+        <div class="top-actions" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+          <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+          <?php render_topbar_userbox($meRow); ?>
+        </div>
+      </div>
+
+      <!-- Page title -->
       <div class="content-top">
         <h1 class="page-title">Posts · <?= htmlspecialchars($user['display_name']) ?> (<?= count($posts) ?>)</h1>
       </div>
@@ -75,7 +82,7 @@ $publicUploads = $paths->uploads;
                 </span>
                 <span class="spacer"></span>
                 <form method="post" action="./actions/admin_delete_picture.php"
-                  onsubmit="return confirm('Delete this picture?');" style="display:inline">
+                      onsubmit="return confirm('Delete this picture?');" style="display:inline">
                   <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                   <input type="hidden" name="picture_id" value="<?= (int)$p['picture_id'] ?>">
                   <button class="btn-danger pill" type="submit">Delete</button>
@@ -84,39 +91,28 @@ $publicUploads = $paths->uploads;
             </div>
           </article>
         <?php endforeach; ?>
-      </section>
 
+        <?php if (!$posts): ?>
+          <p class="muted">No posts yet.</p>
+        <?php endif; ?>
+      </section>
     </main>
   </div>
 
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <script>
-    (function() {
+    (function(){
       const body = document.body;
       const btn = document.getElementById('hamburger');
       const backdrop = document.getElementById('sidebarBackdrop');
-
-      function openMenu() {
-        body.classList.add('sidebar-open');
-        btn && btn.setAttribute('aria-expanded', 'true');
-      }
-
-      function closeMenu() {
-        body.classList.remove('sidebar-open');
-        btn && btn.setAttribute('aria-expanded', 'false');
-      }
-
-      function toggle() {
-        body.classList.contains('sidebar-open') ? closeMenu() : openMenu();
-      }
+      function openMenu(){ body.classList.add('sidebar-open'); btn && btn.setAttribute('aria-expanded','true'); }
+      function closeMenu(){ body.classList.remove('sidebar-open'); btn && btn.setAttribute('aria-expanded','false'); }
+      function toggle(){ body.classList.contains('sidebar-open') ? closeMenu() : openMenu(); }
       btn && btn.addEventListener('click', toggle);
       backdrop && backdrop.addEventListener('click', closeMenu);
-      document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') closeMenu();
-      });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
     })();
   </script>
 </body>
-
 </html>

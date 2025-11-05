@@ -704,6 +704,28 @@ img.c-avatar {
     break-inside: avoid;   
 }
 
+@media (max-width: 700px) {
+  .feed {
+    column-count: 2;
+    column-gap: 12px;
+    column-width: auto;   
+  }
+  .feed .card {
+    display: inline-block; 
+    width: 100%;
+    break-inside: avoid;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1000px) {
+  .feed { column-count: 3; column-gap: 16px; column-width: auto; }
+}
+
+@media (min-width: 1001px) {
+  .feed { column-count: 4; column-gap: 16px; column-width: auto; }
+}
+
+
 .author-row {
     display: flex;
     align-items: center;
@@ -1166,6 +1188,81 @@ img.c-avatar {
     color: #3730a3;
     border: 1px solid #c7d2fe;
 }
+
+/* --- Admin page mobile polish --- */
+
+@media (max-width: 800px) {
+  .content-top { 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 10px;
+  }
+  .content-top .search-wrap {
+    width: 100%;
+    max-width: none;       
+  }
+  .content-top .search-wrap .search {
+    width: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-item {
+    grid-template-columns: 1fr;  
+    align-items: start;
+    gap: 10px;
+  }
+
+  .ai-left {
+    gap: 10px;
+  }
+  .ai-left .ai-avatar,
+  .ai-left img.ai-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    object-fit: cover;
+  }
+  .ai-meta { min-width: 0; }
+  .ai-name { font-size: 0.98rem; }
+  .ai-sub { 
+    flex-wrap: wrap; 
+    row-gap: 4px; 
+  }
+
+  .ai-actions {
+    order: 2;
+    justify-self: stretch;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .ai-actions .btn-ghost.pill,
+  .ai-actions .btn-danger.pill {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .ai-center {
+    order: 3;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .status-badge, .role-badge {
+    line-height: 1.2;
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 420px) {
+  .admin-item { padding: 12px; }
+  .ai-actions a, 
+  .ai-actions button {
+    flex: 1 1 auto;      
+  }
+}
+
 
 /* =========================================================
    7) ABOUT / SETTINGS
@@ -1976,4 +2073,53 @@ body.guest-locked {
   .layout{ grid-template-columns:1fr; margin-top:56px; }
 }
 
+/* Profile cards – compact buttons on mobile */
+@media (max-width: 700px) {
+  .feed .card .meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;         
+  }
+
+  .feed .card .counts {
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  .feed .card .spacer { display: none; }
+
+  .feed .card .btn-ghost,
+  .feed .card .btn-danger {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    font-size: 12px;
+    line-height: 1.1;
+    border-radius: 8px;
+    margin-bottom: 0;        
+  }
+
+  .feed .card .btn-ghost.pill,
+  .feed .card .btn-danger.pill {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 999px;
+  }
+
+  .feed .card .card-body { padding: 8px 10px; }
+}
+
+@media (max-width: 700px) {
+  .profile-actions .btn,
+  .profile-actions .btn-ghost,
+  .profile-actions .btn-primary {
+    padding: 8px 10px;
+    font-size: 13px;
+    border-radius: 8px;
+    margin-bottom: 0;
+  }
+  .profile-actions { gap: 8px; }
+}
 
