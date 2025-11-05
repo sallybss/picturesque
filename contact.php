@@ -33,15 +33,16 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
   <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
-  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
-  <div class="layout">
+    <div class="layout">
     <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
 
     <main class="content">
-
-      <?php if (isset($meRow)): ?>
-        <?php render_topbar_userbox($meRow); ?>
-      <?php endif; ?>
+      <div class="content-top">
+        <div class="top-actions" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+          <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+          <?php render_topbar_userbox($meRow); ?>
+        </div>
+      </div>
 
       <section class="contact-shell">
         <div class="contact-split">

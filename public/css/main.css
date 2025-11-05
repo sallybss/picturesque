@@ -761,6 +761,33 @@ img.c-avatar {
     transition: opacity .2s ease;
 }
 
+
+@media (max-width: 700px) {
+  .controls-row {
+    display: flex;
+    flex-direction: column;  
+    align-items: flex-start; 
+    gap: 10px;
+  }
+
+  .controls-row .pills {
+    order: 1; 
+    width: 100%;
+  }
+
+  .controls-row .filter-form {
+    order: 2; 
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .filter-form select {
+    width: 100%;
+  }
+}
+
+
+
 /* =========================================================
    4) FORMS (Create, shared)
    ========================================================= */
@@ -1894,44 +1921,59 @@ body.guest-locked {
     }
   }
 
-/* Hide on desktop, show & place fixed on mobile */
-.hamburger {
-  display: none;
-  border: 0;
-  background: transparent;
-  font-size: 26px;
-  line-height: 1;
-  padding: 6px 10px;
-  cursor: pointer;
+/* =========================================================
+   12) SIDEBAR (responsive)
+   ========================================================= */
+.content-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
 }
 
-@media (max-width: 900px) {
-  .hamburger { 
-    display: inline-block;
-    position: fixed;          /* <= stay at top-left */
-    top: 14px; 
-    left: 14px; 
-    z-index: 1100;
+.top-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.hamburger{
+  display:none;
+  border:none;
+  background:transparent;
+  font-size:26px;
+  line-height:1;
+  cursor:pointer;
+  color:hsl(194, 76%, 35%);
+}
+
+@media (max-width: 900px){
+  .hamburger{ display:inline-block; }
+
+  .content-top{ flex-wrap:wrap; }
+
+  .top-actions{
+    order:1;
+    width:100%;
+    justify-content:space-between;  
+  }
+
+  .search-wrap{
+    order:2;
+    width:100%;
   }
 
   .sidenav{
-    position: fixed; z-index: 1000;
-    top: 0; left: 0; height: 100vh; width: 280px; max-width: 88vw;
+    position:fixed; z-index:1000;
+    top:0; left:0; height:100vh; width:280px; max-width:88vw;
     background:#fff; box-shadow:0 10px 30px rgba(0,0,0,.2);
-    transform: translateX(-100%);
-    transition: transform .25s ease-in-out;
+    transform:translateX(-100%);
+    transition:transform .25s ease-in-out;
   }
-  body.sidebar-open .sidenav { transform: translateX(0); }
+  body.sidebar-open .sidenav{ transform:translateX(0); }
 
-  .sidebar-backdrop{
-    position: fixed; z-index: 900; inset: 0;
-    background: rgba(0,0,0,.35);
-    opacity: 0; pointer-events: none; transition: opacity .2s ease-in-out;
-  }
-  body.sidebar-open .sidebar-backdrop{
-    opacity: 1; pointer-events: auto;
-  }
-
-  /* Give content room for fixed hamburger */
   .layout{ grid-template-columns:1fr; margin-top:56px; }
 }
+
+

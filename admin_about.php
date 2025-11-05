@@ -37,8 +37,6 @@ $publicUploads = $paths->uploads;
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
 
-  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
-
   <div class="layout">
     <?php render_sidebar(['isAdmin' => true]); ?>
 

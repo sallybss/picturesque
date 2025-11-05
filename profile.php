@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/init.php';
+require_once __DIR__ . '/includes/topbar.php';
 
 $me = Auth::requireUserOrRedirect('./auth/login.php');
 
@@ -40,24 +41,29 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 ?>
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <title><?= htmlspecialchars($viewRow['display_name']) ?> · Profile</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css?v=<?= $cssVer ?>">
 </head>
-
 <body>
   <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
-
-  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
 
   <div class="layout">
     <?php render_sidebar(['isAdmin' => $iAmAdmin]); ?>
 
     <main class="content">
+      <!-- Header: Hamburger + User info (like index.php) -->
+      <div class="content-top">
+          <div class="spacer"></div>  
+        <div class="top-actions">
+          <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+          <?php render_topbar_userbox($meRow); ?>
+        </div>
+      </div>
+
       <div class="profile-cover">
         <img src="<?= $coverSrc ?>" alt="Cover Photo" class="cover-image">
 
@@ -156,13 +162,11 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
       function toggle() {
         body.classList.contains('sidebar-open') ? closeMenu() : openMenu();
       }
+
       btn && btn.addEventListener('click', toggle);
       backdrop && backdrop.addEventListener('click', closeMenu);
-      document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') closeMenu();
-      });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
     })();
   </script>
 </body>
-
 </html>

@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/init.php';
 require_once __DIR__ . '/includes/topbar.php';
-require __DIR__ . '/includes/categories_repository.php';
+require_once __DIR__ . '/includes/categories_repository.php';
 
 $catsRepo = new CategoriesRepository();
 $cats = $catsRepo->listActive();
@@ -22,6 +22,9 @@ $currentImgUrl = img_from_db($pic['picture_url'] ?? null);
 $profiles = new ProfileRepository();
 $meRow    = $profiles->getHeader($me);
 $isAdmin  = strtolower(trim($meRow['role'] ?? '')) === 'admin';
+
+$cssPath = __DIR__ . '/public/css/main.css';
+$cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 ?>
 <!doctype html>
 <html lang="en">
@@ -29,21 +32,23 @@ $isAdmin  = strtolower(trim($meRow['role'] ?? '')) === 'admin';
   <meta charset="utf-8">
   <title>Edit · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="./public/css/main.css">
+  <link rel="stylesheet" href="./public/css/main.css?v=<?= $cssVer ?>">
 </head>
 <body>
 
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
   <?php if ($m = get_flash('ok')):  ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
-  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
-
   <div class="layout">
     <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
 
     <main class="content">
+      <!-- top row: hamburger on the left, userbox on the right -->
       <div class="content-top">
-        <?php render_topbar_userbox($meRow); ?>
+        <div class="top-actions" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+          <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+          <?php render_topbar_userbox($meRow); ?>
+        </div>
       </div>
 
       <div class="create-page">
@@ -109,6 +114,7 @@ $isAdmin  = strtolower(trim($meRow['role'] ?? '')) === 'admin';
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <script>
+    // mobile sidebar toggle
     (function(){
       const body = document.body;
       const btn = document.getElementById('hamburger');
@@ -123,6 +129,7 @@ $isAdmin  = strtolower(trim($meRow['role'] ?? '')) === 'admin';
   </script>
 
   <script>
+    // dropzone preview logic
     const input = document.getElementById('photo');
     const dz = document.getElementById('dropzone');
     const dzEmpty = document.getElementById('dzEmpty');

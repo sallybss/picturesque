@@ -41,7 +41,10 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
 
     <main class="content">
       <div class="content-top">
-        <?php render_topbar_userbox($meRow); ?>
+        <div class="top-actions" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+          <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+          <?php render_topbar_userbox($meRow); ?>
+        </div>
       </div>
 
       <div class="settings-wrap">

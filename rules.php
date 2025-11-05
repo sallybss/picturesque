@@ -32,16 +32,17 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
 </head>
 
 <body>
-  
-  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
-
   <div class="layout">
     <?php render_sidebar(['isAdmin' => $isAdmin, 'isGuest' => !$isLoggedIn]); ?>
     <main class="content">
+      <div class="content-top">
+        <div class="spacer"></div>  
+        <div class="top-actions">
+         <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+          <?php render_topbar_userbox($meRow); ?>
+       </div>
+      </div>
 
-      <?php if ($isLoggedIn && isset($meRow)): ?>
-        <?php render_topbar_userbox($meRow); ?>
-      <?php endif; ?>
 
       <section class="pad">
         <h1 class="page-title"><?= htmlspecialchars($title) ?></h1>

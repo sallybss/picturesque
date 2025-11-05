@@ -23,7 +23,6 @@ $title      = $page['title']      ?? 'About Picturesque';
 $content    = $page['content']    ?? '';
 $imagePath  = $page['image_path'] ?? null;
 
-/* ----- POST actions ----- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!check_csrf($_POST['csrf'] ?? null)) {
     set_flash('err', 'Invalid CSRF token.');
@@ -80,7 +79,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Location: ./settings.php#cats'); exit;
   }
 
-  // About page save
   $newTitle   = trim($_POST['title'] ?? '');
   $newContent = trim($_POST['content'] ?? '');
   $resetImg   = !empty($_POST['reset_image']);
@@ -109,7 +107,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   header('Location: ./settings.php'); exit;
 }
 
-/* ----- Data for UI ----- */
 $cats = DB::get()->query("
   SELECT c.category_id, c.category_name, c.slug, c.active,
          COUNT(p.picture_id) AS pic_count
@@ -135,8 +132,6 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
   <?php if ($m = get_flash('ok')):  ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
-  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
-
   <div class="layout">
     <?php
       render_sidebar(['isAdmin' => true, 'isGuest' => false]);
@@ -144,7 +139,11 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
 
     <main class="content">
       <div class="content-top">
-        <?php render_topbar_userbox($meRow); ?>
+        <div class="spacer"></div>  
+        <div class="top-actions">
+         <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+          <?php render_topbar_userbox($meRow); ?>
+       </div>
       </div>
 
       <div class="settings-wrap">

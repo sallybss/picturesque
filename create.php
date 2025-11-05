@@ -29,15 +29,15 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
   <?php if ($m = get_flash('ok')):  ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
-  <!-- same hamburger as index.php -->
-  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
-
   <div class="layout">
     <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
 
     <main class="content">
       <div class="content-top">
-        <?php render_topbar_userbox($meRow); ?>
+        <div class="top-actions" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+          <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+          <?php render_topbar_userbox($meRow); ?>
+        </div>
       </div>
 
       <div class="create-page">
@@ -95,10 +95,8 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
     </main>
   </div>
 
-  <!-- one backdrop, same as index.php -->
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-  <!-- same tiny toggle script as index.php -->
   <script>
     (function(){
       const body = document.body;
@@ -113,7 +111,6 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
     })();
   </script>
 
-  <!-- your existing create-page JS -->
   <script>
     const input = document.getElementById('photo');
     const dz = document.getElementById('dropzone');

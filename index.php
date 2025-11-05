@@ -69,8 +69,6 @@ $hotCount     = count($hotIds);
   <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
-  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
-
   <div class="layout">
     <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
 
@@ -89,7 +87,10 @@ $hotCount     = count($hotIds);
           <button class="btn-primary search-btn" type="submit">Go</button>
         </form>
 
-        <?php render_topbar_userbox($meRow); ?>
+        <div class="top-actions">
+         <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+          <?php render_topbar_userbox($meRow); ?>
+       </div>
       </div>
 
       <div class="controls-row">
