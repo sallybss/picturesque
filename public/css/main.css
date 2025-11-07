@@ -1600,6 +1600,8 @@ body.guest-locked {
     margin-right: 10px;
 }
 
+
+
 /* =========================================================
    10) PICTURE PAGE (comments)
    ========================================================= */
@@ -2229,4 +2231,75 @@ body.guest-locked {
       margin: 0;
       padding: 10px 14px
     }
+
+    /* Guest page: responsive shell */
+@media (max-width: 900px){
+  .guest-main{
+    grid-template-columns: 1fr; 
+    gap: 16px;
+    padding: 16px;                  
+  }
+  .sidenav{
+    position: fixed;
+    z-index: 1000;
+    top: 0; left: 0;
+    height: 100vh;
+    width: 280px; max-width: 88vw;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0,0,0,.2);
+    transform: translateX(-100%);
+    transition: transform .25s ease-in-out;
+    padding-top: 40px;                
+  }
+  body.sidebar-open .sidenav{ transform: translateX(0); }
+
+  .content-top{ flex-wrap: wrap; gap: 10px; }
+  .top-actions{ order: 1; width: 100%; justify-content: space-between; }
+  .search-wrap{ order: 2; width: 100%; }
+
+  .hamburger{ display: inline-block; }
+}
+
+
+@media (max-width: 700px){
+  .feed {
+    column-count: 2;
+    column-gap: 12px;
+    column-width: auto;
+  }
+  .feed .card { display: inline-block; width: 100%; break-inside: avoid; }
+}
+
+.feed-locked { padding-bottom: min(32vh, 220px); }
+
+.feed-locked::after{
+  height: min(18vh, 120px);
+}
+
+.guest-cta{
+  padding: 20px 16px 16px;
+  gap: 10px;
+}
+
+@media (max-width: 700px){
+  .guest-cta{
+    flex-direction: column;
+    text-align: center;
+  }
+  .guest-cta .note-guest{ white-space: normal; margin: 0; }
+}
+
+.sidebar-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 900;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease;
+}
+body.sidebar-open .sidebar-backdrop{
+  opacity: 1;
+  pointer-events: auto;
+}
 
