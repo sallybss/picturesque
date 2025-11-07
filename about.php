@@ -60,27 +60,29 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
       const body = document.body;
       const btn = document.getElementById('hamburger');
       const backdrop = document.getElementById('sidebarBackdrop');
+      const closeBtn = document.getElementById('closeSidebar');
 
       function openMenu() {
         body.classList.add('sidebar-open');
-        btn && btn.setAttribute('aria-expanded', 'true');
+        btn?.setAttribute('aria-expanded', 'true');
       }
 
       function closeMenu() {
         body.classList.remove('sidebar-open');
-        btn && btn.setAttribute('aria-expanded', 'false');
+        btn?.setAttribute('aria-expanded', 'false');
       }
 
       function toggle() {
         body.classList.contains('sidebar-open') ? closeMenu() : openMenu();
       }
-      btn && btn.addEventListener('click', toggle);
-      backdrop && backdrop.addEventListener('click', closeMenu);
+
+      btn?.addEventListener('click', toggle);
+      backdrop?.addEventListener('click', closeMenu);
+      closeBtn?.addEventListener('click', closeMenu);
       document.addEventListener('keydown', e => {
         if (e.key === 'Escape') closeMenu();
       });
     })();
   </script>
-
 </body>
 </html>

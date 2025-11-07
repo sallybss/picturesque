@@ -10,7 +10,10 @@ $paths     = new Paths();
 $profiles  = new ProfileRepository();
 $meRow     = $profiles->getHeader($me);
 $isAdmin   = (strtolower(trim($meRow['role'] ?? 'user')) === 'admin');
-if (!$isAdmin) { header('Location: ./index.php'); exit; }
+if (!$isAdmin) {
+  header('Location: ./index.php');
+  exit;
+}
 
 $pages         = new PagesRepository();
 $page          = $pages->getAbout();
@@ -26,7 +29,8 @@ $imagePath  = $page['image_path'] ?? null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!check_csrf($_POST['csrf'] ?? null)) {
     set_flash('err', 'Invalid CSRF token.');
-    header('Location: ./settings.php'); exit;
+    header('Location: ./settings.php');
+    exit;
   }
 
   $action = trim($_POST['action'] ?? '');
@@ -36,75 +40,118 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $newContent = trim($_POST['rules_content'] ?? '');
     if ($newTitle === '' || $newContent === '') {
       set_flash('err', 'Rules title and content are required.');
-      header('Location: ./settings.php#rules'); exit;
+      header('Location: ./settings.php#rules');
+      exit;
     }
     $pages->upsert('rules', $newTitle, $newContent, null, $me);
     set_flash('ok', 'Rules & Regulations saved.');
-    header('Location: ./settings.php#rules'); exit;
+    header('Location: ./settings.php#rules');
+    exit;
   }
 
   if ($action === 'add_cat') {
     $name = trim($_POST['name'] ?? '');
-    if ($name === '') { set_flash('err','Category name required.'); header('Location: ./settings.php#cats'); exit; }
+    if ($name === '') {
+      set_flash('err', 'Category name required.');
+      header('Location: ./settings.php#cats');
+      exit;
+    }
     $slug = slugify($name);
     try {
       $st = DB::get()->prepare("INSERT INTO categories (category_name, slug, active) VALUES (?, ?, 1)");
       $st->bind_param('ss', $name, $slug);
-      $st->execute(); $st->close();
+      $st->execute();
+      $st->close();
       set_flash('ok', 'Category added.');
     } catch (mysqli_sql_exception $e) {
       set_flash('err', 'Could not add (duplicate name/slug?).');
     }
-    header('Location: ./settings.php#cats'); exit;
+    header('Location: ./settings.php#cats');
+    exit;
   }
 
   if ($action === 'toggle_cat') {
     $id = (int)($_POST['category_id'] ?? 0);
-    if ($id <= 0) { set_flash('err', 'Bad id.'); header('Location: ./settings.php#cats'); exit; }
+    if ($id <= 0) {
+      set_flash('err', 'Bad id.');
+      header('Location: ./settings.php#cats');
+      exit;
+    }
     $st = DB::get()->prepare("UPDATE categories SET active = 1 - active WHERE category_id=?");
     $st->bind_param('i', $id);
-    $st->execute(); $st->close();
+    $st->execute();
+    $st->close();
     set_flash('ok', 'Toggled.');
-    header('Location: ./settings.php#cats'); exit;
+    header('Location: ./settings.php#cats');
+    exit;
   }
 
   if ($action === 'delete_cat') {
     $id = (int)($_POST['category_id'] ?? 0);
-    if ($id <= 0) { set_flash('err', 'Bad id.'); header('Location: ./settings.php#cats'); exit; }
+    if ($id <= 0) {
+      set_flash('err', 'Bad id.');
+      header('Location: ./settings.php#cats');
+      exit;
+    }
     $st = DB::get()->prepare("DELETE FROM categories WHERE category_id = ?");
     $st->bind_param('i', $id);
-    try { $st->execute(); set_flash('ok','Category deleted.'); }
-    catch (mysqli_sql_exception $e) { set_flash('err','Could not delete category.'); }
+    try {
+      $st->execute();
+      set_flash('ok', 'Category deleted.');
+    } catch (mysqli_sql_exception $e) {
+      set_flash('err', 'Could not delete category.');
+    }
     $st->close();
-    header('Location: ./settings.php#cats'); exit;
+    header('Location: ./settings.php#cats');
+    exit;
   }
 
   $newTitle   = trim($_POST['title'] ?? '');
   $newContent = trim($_POST['content'] ?? '');
   $resetImg   = !empty($_POST['reset_image']);
-  if ($newTitle === '' || $newContent === '') { set_flash('err','Title and content are required.'); header('Location: ./settings.php'); exit; }
+  if ($newTitle === '' || $newContent === '') {
+    set_flash('err', 'Title and content are required.');
+    header('Location: ./settings.php');
+    exit;
+  }
 
   $newImagePath = $imagePath;
   if ($resetImg) $newImagePath = null;
 
   if (!empty($_FILES['image']['name'])) {
     $f = $_FILES['image'];
-    $ok = ['image/jpeg','image/png','image/webp','image/gif'];
-    if (!in_array($f['type'], $ok)) { set_flash('err','Upload JPG, PNG, WEBP or GIF.'); header('Location: ./settings.php'); exit; }
-    if ($f['size'] > 6 * 1024 * 1024) { set_flash('err','Image too large (max 6MB).'); header('Location: ./settings.php'); exit; }
+    $ok = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!in_array($f['type'], $ok)) {
+      set_flash('err', 'Upload JPG, PNG, WEBP or GIF.');
+      header('Location: ./settings.php');
+      exit;
+    }
+    if ($f['size'] > 6 * 1024 * 1024) {
+      set_flash('err', 'Image too large (max 6MB).');
+      header('Location: ./settings.php');
+      exit;
+    }
 
     $ext  = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
     $name = 'about_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
     $dest = __DIR__ . '/uploads/' . $name;
-    if (!move_uploaded_file($f['tmp_name'], $dest)) { set_flash('err','Upload failed.'); header('Location: ./settings.php'); exit; }
+    if (!move_uploaded_file($f['tmp_name'], $dest)) {
+      set_flash('err', 'Upload failed.');
+      header('Location: ./settings.php');
+      exit;
+    }
     $newImagePath = $name;
   }
 
-  if ($pageId > 0) { $pages->updateAbout($pageId, $newTitle, $newContent, $newImagePath, $me); }
-  else { $pages->insertAbout($newTitle, $newContent, $newImagePath, $me); }
+  if ($pageId > 0) {
+    $pages->updateAbout($pageId, $newTitle, $newContent, $newImagePath, $me);
+  } else {
+    $pages->insertAbout($newTitle, $newContent, $newImagePath, $me);
+  }
 
   set_flash('ok', 'About page updated.');
-  header('Location: ./settings.php'); exit;
+  header('Location: ./settings.php');
+  exit;
 }
 
 $cats = DB::get()->query("
@@ -121,12 +168,14 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
 ?>
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>Admin Settings · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css?v=<?= $cssVer ?>">
 </head>
+
 <body>
 
   <?php if ($m = get_flash('ok')):  ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
@@ -134,16 +183,16 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
 
   <div class="layout">
     <?php
-      render_sidebar(['isAdmin' => true, 'isGuest' => false]);
+    render_sidebar(['isAdmin' => true, 'isGuest' => false]);
     ?>
 
     <main class="content">
       <div class="content-top">
-        <div class="spacer"></div>  
+        <div class="spacer"></div>
         <div class="top-actions">
-         <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+          <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
           <?php render_topbar_userbox($meRow); ?>
-       </div>
+        </div>
       </div>
 
       <div class="settings-wrap">
@@ -195,7 +244,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
                   </form>
 
                   <form method="post" action="settings.php" style="display:inline"
-                        onsubmit="return confirm('Delete this category? Photos will keep their image but lose this category.');">
+                    onsubmit="return confirm('Delete this category? Photos will keep their image but lose this category.');">
                     <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                     <input type="hidden" name="action" value="delete_cat">
                     <input type="hidden" name="category_id" value="<?= (int)$c['category_id'] ?>">
@@ -239,7 +288,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
             <div class="row">
               <div class="image-preview-wrapper">
                 <img id="preview" class="preview"
-                     src="<?= $imgUrl ?: 'https://placehold.co/800x260?text=No+image' ?>" alt="About image">
+                  src="<?= $imgUrl ?: 'https://placehold.co/800x260?text=No+image' ?>" alt="About image">
                 <?php if ($imgUrl): ?>
                   <button type="button" class="remove-image" id="removeImageBtn" title="Remove image">×</button>
                 <?php endif; ?>
@@ -265,19 +314,34 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
     </main>
   </div>
 
-<script>
-    (function(){
+  <script>
+    (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
       const backdrop = document.getElementById('sidebarBackdrop');
-      function openMenu(){ body.classList.add('sidebar-open'); btn && btn.setAttribute('aria-expanded','true'); }
-      function closeMenu(){ body.classList.remove('sidebar-open'); btn && btn.setAttribute('aria-expanded','false'); }
-      function toggle(){ body.classList.contains('sidebar-open') ? closeMenu() : openMenu(); }
-      btn && btn.addEventListener('click', toggle);
-      backdrop && backdrop.addEventListener('click', closeMenu);
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+      const closeBtn = document.getElementById('closeSidebar');
+
+      function openMenu() {
+        body.classList.add('sidebar-open');
+        btn?.setAttribute('aria-expanded', 'true');
+      }
+
+      function closeMenu() {
+        body.classList.remove('sidebar-open');
+        btn?.setAttribute('aria-expanded', 'false');
+      }
+
+      function toggle() {
+        body.classList.contains('sidebar-open') ? closeMenu() : openMenu();
+      }
+
+      btn?.addEventListener('click', toggle);
+      backdrop?.addEventListener('click', closeMenu);
+      closeBtn?.addEventListener('click', closeMenu);
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeMenu();
+      });
     })();
   </script>
-  
 </body>
 </html>

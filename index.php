@@ -3,7 +3,10 @@ require_once __DIR__ . '/includes/init.php';
 require_once __DIR__ . '/includes/topbar.php';
 require_once __DIR__ . '/includes/categories_repository.php';
 
-function url_from_db(string $path): string { return url($path); }
+function url_from_db(string $path): string
+{
+  return url($path);
+}
 
 $me = Auth::requireUserOrRedirect('./home_guest.php');
 
@@ -27,7 +30,11 @@ if ($raw !== '') {
   foreach ($cats as $c) {
     $name = strtolower(trim($c['name']));
     $slug = strtolower(trim($c['slug']));
-    if ($raw === $name || $raw === $slug) { $cat = $slug; $q = ''; break; }
+    if ($raw === $name || $raw === $slug) {
+      $cat = $slug;
+      $q = '';
+      break;
+    }
   }
 }
 
@@ -45,26 +52,16 @@ $hotCount     = count($hotIds);
 ?>
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>Home · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <?php $cssPath = __DIR__ . '/public/css/main.css'; $ver = file_exists($cssPath) ? filemtime($cssPath) : time(); ?>
+  <?php $cssPath = __DIR__ . '/public/css/main.css';
+  $ver = file_exists($cssPath) ? filemtime($cssPath) : time(); ?>
   <link rel="stylesheet" href="./public/css/main.css?v=<?= $ver ?>">
-  <style>
-    .author-row{margin-top:10px;display:flex;align-items:center;gap:8px}
-    .author-link{display:flex;align-items:center;gap:8px;text-decoration:none}
-    .author-avatar{width:26px;height:26px;border-radius:50%;object-fit:cover}
-    .author-name{font-size:.9rem;color:#333}
-    .card-cover{display:block}
-    .card-cover img{display:block;width:100%;height:auto}
-    .card-title a.card-title-link{color:inherit;text-decoration:none}
-    .card-title a.card-title-link:hover{text-decoration:underline}
-    .content-top .search-wrap{display:flex;gap:8px;align-items:center}
-    .content-top .search-wrap .search{flex:1}
-    .search-btn.btn-primary{display:inline-flex;margin:0;padding:10px 14px}
-  </style>
 </head>
+
 <body>
   <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
@@ -75,10 +72,10 @@ $hotCount     = count($hotIds);
     <main class="content">
       <div class="content-top">
         <form method="get" action="index.php" class="search-wrap">
-          <?php if ($cat !== ''):  ?><input type="hidden" name="cat"  value="<?= htmlspecialchars($cat)  ?>"><?php endif; ?>
+          <?php if ($cat !== ''):  ?><input type="hidden" name="cat" value="<?= htmlspecialchars($cat)  ?>"><?php endif; ?>
           <?php if ($sort !== ''): ?><input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>"><?php endif; ?>
           <input class="search" name="q" list="search-suggest" value="<?= htmlspecialchars($q) ?>"
-                 placeholder="Search photos, username, or #category">
+            placeholder="Search photos, username, or #category">
           <datalist id="search-suggest">
             <?php foreach ($cats as $c): ?>
               <option value="#<?= htmlspecialchars($c['slug']) ?>"><?= htmlspecialchars($c['name']) ?></option>
@@ -88,23 +85,23 @@ $hotCount     = count($hotIds);
         </form>
 
         <div class="top-actions">
-         <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+          <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
           <?php render_topbar_userbox($meRow); ?>
-       </div>
+        </div>
       </div>
 
       <div class="controls-row">
         <div class="pills">
           <?php
-            $qs = function (array $params) {
-              return http_build_query(array_filter($params, fn($v) => $v !== '' && $v !== null));
-            };
+          $qs = function (array $params) {
+            return http_build_query(array_filter($params, fn($v) => $v !== '' && $v !== null));
+          };
           ?>
           <a class="pill<?= $cat === '' ? ' is-selected' : '' ?>"
-             href="index.php?<?= $qs(['q' => $q, 'sort' => $sort]) ?>">All</a>
+            href="index.php?<?= $qs(['q' => $q, 'sort' => $sort]) ?>">All</a>
 
           <?php foreach ($cats as $c): ?>
-            <?php $href = 'index.php?' . $qs(['cat'=>$c['slug'],'q'=>$q,'sort'=>$sort]); ?>
+            <?php $href = 'index.php?' . $qs(['cat' => $c['slug'], 'q' => $q, 'sort' => $sort]); ?>
             <a class="pill<?= $cat === $c['slug'] ? ' is-selected' : '' ?>" href="<?= $href ?>">
               <?= htmlspecialchars($c['name']) ?>
             </a>
@@ -112,7 +109,7 @@ $hotCount     = count($hotIds);
         </div>
 
         <form class="filter-form" method="get" action="index.php">
-          <?php if ($q   !== ''): ?><input type="hidden" name="q"   value="<?= htmlspecialchars($q)   ?>"><?php endif; ?>
+          <?php if ($q   !== ''): ?><input type="hidden" name="q" value="<?= htmlspecialchars($q)   ?>"><?php endif; ?>
           <?php if ($cat !== ''): ?><input type="hidden" name="cat" value="<?= htmlspecialchars($cat) ?>"><?php endif; ?>
           <label for="sort" class="filter-label">Sort by:</label>
           <div class="filter-select-wrap">
@@ -155,12 +152,12 @@ $hotCount     = count($hotIds);
       <section class="feed">
         <?php foreach ($pictures as $p): ?>
           <?php
-            $picId        = (int)$p['pic_id'];
-            $coverUrl     = img_from_db($p['pic_url']);
-            $authorId     = isset($p['author_id']) ? (int)$p['author_id'] : ((int)($p['profile_id'] ?? 0));
-            $authorName   = $p['author_display_name'] ?? $p['display_name'] ?? 'Unknown';
-            $rawAvatar    = $p['author_avatar'] ?? $p['avatar_photo'] ?? '';
-            $authorAvatar = $rawAvatar ? img_from_db($rawAvatar) : 'https://placehold.co/26x26?text=%20';
+          $picId        = (int)$p['pic_id'];
+          $coverUrl     = img_from_db($p['pic_url']);
+          $authorId     = isset($p['author_id']) ? (int)$p['author_id'] : ((int)($p['profile_id'] ?? 0));
+          $authorName   = $p['author_display_name'] ?? $p['display_name'] ?? 'Unknown';
+          $rawAvatar    = $p['author_avatar'] ?? $p['avatar_photo'] ?? '';
+          $authorAvatar = $rawAvatar ? img_from_db($rawAvatar) : 'https://placehold.co/26x26?text=%20';
           ?>
           <article class="card">
             <a class="card-cover" href="picture.php?id=<?= $picId ?>">
@@ -235,17 +232,34 @@ $hotCount     = count($hotIds);
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <script>
-    (function(){
+    (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
       const backdrop = document.getElementById('sidebarBackdrop');
-      function openMenu(){ body.classList.add('sidebar-open'); btn && btn.setAttribute('aria-expanded','true'); }
-      function closeMenu(){ body.classList.remove('sidebar-open'); btn && btn.setAttribute('aria-expanded','false'); }
-      function toggle(){ body.classList.contains('sidebar-open') ? closeMenu() : openMenu(); }
-      btn && btn.addEventListener('click', toggle);
-      backdrop && backdrop.addEventListener('click', closeMenu);
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+      const closeBtn = document.getElementById('closeSidebar');
+
+      function openMenu() {
+        body.classList.add('sidebar-open');
+        btn?.setAttribute('aria-expanded', 'true');
+      }
+
+      function closeMenu() {
+        body.classList.remove('sidebar-open');
+        btn?.setAttribute('aria-expanded', 'false');
+      }
+
+      function toggle() {
+        body.classList.contains('sidebar-open') ? closeMenu() : openMenu();
+      }
+
+      btn?.addEventListener('click', toggle);
+      backdrop?.addEventListener('click', closeMenu);
+      closeBtn?.addEventListener('click', closeMenu);
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeMenu();
+      });
     })();
   </script>
 </body>
+
 </html>

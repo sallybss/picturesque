@@ -9,11 +9,17 @@ $meRow    = $profiles->getHeader($me);
 $isAdmin  = strtolower(trim($meRow['role'] ?? '')) === 'admin';
 
 $picture_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-if ($picture_id <= 0) { header('Location: ./index.php'); exit; }
+if ($picture_id <= 0) {
+  header('Location: ./index.php');
+  exit;
+}
 
 $pictures = new PictureRepository();
 $pic = $pictures->getOneWithCountsAndAuthor($picture_id);
-if (!$pic) { header('Location: ./index.php'); exit; }
+if (!$pic) {
+  header('Location: ./index.php');
+  exit;
+}
 
 $commentsRepo = new CommentRepository();
 $rows = $commentsRepo->listForPictureWithAuthors($picture_id);
@@ -40,10 +46,11 @@ foreach ($byId as $id => &$node) {
 }
 unset($node);
 
-function render_comment(array $c, int $depth, int $picture_id, bool $isAdmin): void {
+function render_comment(array $c, int $depth, int $picture_id, bool $isAdmin): void
+{
   $avatar = img_from_db($c['avatar_photo']);
   $d = max(0, min(4, $depth));
-  ?>
+?>
   <div class="comment" id="c-<?= (int)$c['comment_id'] ?>" data-depth="<?= $d ?>">
     <div class="c-head">
       <img class="c-avatar" src="<?= $avatar ?>" alt="">
@@ -80,7 +87,7 @@ function render_comment(array $c, int $depth, int $picture_id, bool $isAdmin): v
       </div>
     <?php endif; ?>
   </div>
-  <?php
+<?php
 }
 
 $cssPath = __DIR__ . '/public/css/main.css';
@@ -88,12 +95,14 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 ?>
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title><?= htmlspecialchars($pic['picture_title'] ?? 'Picture') ?> · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css?v=<?= $ver ?>">
 </head>
+
 <body>
 
   <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
@@ -121,7 +130,9 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 
         <div class="card">
           <div class="pad">
-            <div class="topbar"><h3 class="subtitle">Comments (<?= (int)$pic['comment_count'] ?>)</h3></div>
+            <div class="topbar">
+              <h3 class="subtitle">Comments (<?= (int)$pic['comment_count'] ?>)</h3>
+            </div>
 
             <form class="comment-form" method="post" action="./actions/post_comment.php">
               <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
@@ -148,29 +159,44 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <script>
-    (function(){
+    (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
       const backdrop = document.getElementById('sidebarBackdrop');
-      function openMenu(){ body.classList.add('sidebar-open'); btn && btn.setAttribute('aria-expanded','true'); }
-      function closeMenu(){ body.classList.remove('sidebar-open'); btn && btn.setAttribute('aria-expanded','false'); }
-      function toggle(){ body.classList.contains('sidebar-open') ? closeMenu() : openMenu(); }
-      btn && btn.addEventListener('click', toggle);
-      backdrop && backdrop.addEventListener('click', closeMenu);
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
-    })();
-  </script>
+      const closeBtn = document.getElementById('closeSidebar');
 
-  <script>
-  document.addEventListener('click', function (e) {
-    if (e.target.matches('.js-reply')) {
-      const id = e.target.getAttribute('data-target');
-      const f = document.getElementById(id);
-      if (f) {
-        f.style.display = (!f.style.display || f.style.display === 'none') ? 'block' : 'none';
+      function openMenu() {
+        body.classList.add('sidebar-open');
+        btn?.setAttribute('aria-expanded', 'true');
       }
-    }
-  });
+
+      function closeMenu() {
+        body.classList.remove('sidebar-open');
+        btn?.setAttribute('aria-expanded', 'false');
+      }
+
+      function toggle() {
+        body.classList.contains('sidebar-open') ? closeMenu() : openMenu();
+      }
+
+      btn?.addEventListener('click', toggle);
+      backdrop?.addEventListener('click', closeMenu);
+      closeBtn?.addEventListener('click', closeMenu);
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeMenu();
+      });
+    })();
+
+    document.addEventListener('click', function(e) {
+      if (e.target.matches('.js-reply')) {
+        const id = e.target.getAttribute('data-target');
+        const f = document.getElementById(id);
+        if (f) {
+          f.style.display = (!f.style.display || f.style.display === 'none') ? 'block' : 'none';
+        }
+      }
+    });
   </script>
 </body>
+
 </html>

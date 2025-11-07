@@ -9,13 +9,21 @@ $cats = $catsRepo->listActive();
 $me  = Auth::requireUserOrRedirect('./auth/login.php');
 
 $pid = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-if ($pid <= 0) { set_flash('err','Invalid picture.'); header('Location: ./profile.php'); exit; }
+if ($pid <= 0) {
+  set_flash('err', 'Invalid picture.');
+  header('Location: ./profile.php');
+  exit;
+}
 
 $paths = new Paths();
 
 $pictures = new PictureRepository();
 $pic = $pictures->getEditableByOwner($pid, $me);
-if (!$pic) { set_flash('err','Picture not found or not yours.'); header('Location: ./profile.php'); exit; }
+if (!$pic) {
+  set_flash('err', 'Picture not found or not yours.');
+  header('Location: ./profile.php');
+  exit;
+}
 
 $currentImgUrl = img_from_db($pic['picture_url'] ?? null);
 
@@ -28,12 +36,14 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 ?>
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>Edit · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css?v=<?= $cssVer ?>">
 </head>
+
 <body>
 
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
@@ -114,22 +124,34 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <script>
-    // mobile sidebar toggle
-    (function(){
+    (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
       const backdrop = document.getElementById('sidebarBackdrop');
-      function openMenu(){ body.classList.add('sidebar-open'); btn && btn.setAttribute('aria-expanded','true'); }
-      function closeMenu(){ body.classList.remove('sidebar-open'); btn && btn.setAttribute('aria-expanded','false'); }
-      function toggle(){ body.classList.contains('sidebar-open') ? closeMenu() : openMenu(); }
-      btn && btn.addEventListener('click', toggle);
-      backdrop && backdrop.addEventListener('click', closeMenu);
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
-    })();
-  </script>
+      const closeBtn = document.getElementById('closeSidebar');
 
-  <script>
-    // dropzone preview logic
+      function openMenu() {
+        body.classList.add('sidebar-open');
+        btn?.setAttribute('aria-expanded', 'true');
+      }
+
+      function closeMenu() {
+        body.classList.remove('sidebar-open');
+        btn?.setAttribute('aria-expanded', 'false');
+      }
+
+      function toggle() {
+        body.classList.contains('sidebar-open') ? closeMenu() : openMenu();
+      }
+
+      btn?.addEventListener('click', toggle);
+      backdrop?.addEventListener('click', closeMenu);
+      closeBtn?.addEventListener('click', closeMenu);
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeMenu();
+      });
+    })();
+
     const input = document.getElementById('photo');
     const dz = document.getElementById('dropzone');
     const dzEmpty = document.getElementById('dzEmpty');
@@ -139,7 +161,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
     const resetInput = document.getElementById('resetImage');
     const originalUrl = "<?= htmlspecialchars($currentImgUrl) ?>";
 
-    (function () {
+    (function() {
       preview.src = originalUrl;
       preview.hidden = false;
       removeBtn.hidden = false;
@@ -148,23 +170,37 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
     })();
 
     browseBtn.addEventListener('click', () => input.click());
-    dz.addEventListener('click', (e) => { if (e.target === dz) input.click(); });
+    dz.addEventListener('click', (e) => {
+      if (e.target === dz) input.click();
+    });
 
-    input.addEventListener('change', function () {
+    input.addEventListener('change', function() {
       const file = this.files[0];
       if (file) setFile(file);
     });
 
-    ['dragenter','dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('is-drag'); }));
-    ['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('is-drag'); }));
+    ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => {
+      e.preventDefault();
+      dz.classList.add('is-drag');
+    }));
+    ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => {
+      e.preventDefault();
+      dz.classList.remove('is-drag');
+    }));
     dz.addEventListener('drop', (e) => {
       const file = e.dataTransfer.files[0];
       if (file) setFile(file);
     });
 
     function setFile(file) {
-      if (!file.type.startsWith('image/')) { alert('Please choose an image file.'); return; }
-      if (file.size > 10 * 1024 * 1024) { alert('Max size is 10MB.'); return; }
+      if (!file.type.startsWith('image/')) {
+        alert('Please choose an image file.');
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Max size is 10MB.');
+        return;
+      }
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -193,7 +229,11 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
       if (resetInput) resetInput.value = "1";
     }
 
-    removeBtn.addEventListener('click', (e) => { e.preventDefault(); clearFile(); });
+    removeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      clearFile();
+    });
   </script>
 </body>
+
 </html>

@@ -89,19 +89,33 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-<script>
-    (function(){
+  <script>
+    (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
       const backdrop = document.getElementById('sidebarBackdrop');
+      const closeBtn = document.getElementById('closeSidebar');
 
-      function openMenu(){ body.classList.add('sidebar-open'); btn && btn.setAttribute('aria-expanded','true'); }
-      function closeMenu(){ body.classList.remove('sidebar-open'); btn && btn.setAttribute('aria-expanded','false'); }
-      function toggle(){ body.classList.contains('sidebar-open') ? closeMenu() : openMenu(); }
+      function openMenu() {
+        body.classList.add('sidebar-open');
+        btn?.setAttribute('aria-expanded', 'true');
+      }
 
-      btn && btn.addEventListener('click', toggle);
-      backdrop && backdrop.addEventListener('click', closeMenu);
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+      function closeMenu() {
+        body.classList.remove('sidebar-open');
+        btn?.setAttribute('aria-expanded', 'false');
+      }
+
+      function toggle() {
+        body.classList.contains('sidebar-open') ? closeMenu() : openMenu();
+      }
+
+      btn?.addEventListener('click', toggle);
+      backdrop?.addEventListener('click', closeMenu);
+      closeBtn?.addEventListener('click', closeMenu);
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeMenu();
+      });
     })();
   </script>
 </body>

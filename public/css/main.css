@@ -2123,3 +2123,94 @@ body.guest-locked {
   .profile-actions { gap: 8px; }
 }
 
+
+/* ===== Sidebar Close Button (for mobile) ===== */
+.close-btn {
+  display: none;
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: #0f172a;
+  font-size: 26px;
+  cursor: pointer;
+  z-index: 1100;
+  transition: color 0.2s ease;
+}
+
+.close-btn:hover {
+  color: var(--primary-hover);
+}
+
+@media (max-width: 900px) {
+  .close-btn {
+    display: block;
+  }
+
+  .sidenav {
+    padding-top: 40px; /* adds room for close button */
+  }
+}
+
+
+  .author-row {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .author-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none
+    }
+
+    .author-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      object-fit: cover
+    }
+
+    .author-name {
+      font-size: .9rem;
+      color: #333
+    }
+
+    .card-cover {
+      display: block
+    }
+
+    .card-cover img {
+      display: block;
+      width: 100%;
+      height: auto
+    }
+
+    .card-title a.card-title-link {
+      color: inherit;
+      text-decoration: none
+    }
+
+    .card-title a.card-title-link:hover {
+      text-decoration: underline
+    }
+
+    .content-top .search-wrap {
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    .content-top .search-wrap .search {
+      flex: 1
+    }
+
+    .search-btn.btn-primary {
+      display: inline-flex;
+      margin: 0;
+      padding: 10px 14px
+    }

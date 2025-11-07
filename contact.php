@@ -33,7 +33,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
   <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
-    <div class="layout">
+  <div class="layout">
     <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
 
     <main class="content">
@@ -102,22 +102,25 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
       const body = document.body;
       const btn = document.getElementById('hamburger');
       const backdrop = document.getElementById('sidebarBackdrop');
+      const closeBtn = document.getElementById('closeSidebar');
 
       function openMenu() {
         body.classList.add('sidebar-open');
-        btn && btn.setAttribute('aria-expanded', 'true');
+        btn?.setAttribute('aria-expanded', 'true');
       }
 
       function closeMenu() {
         body.classList.remove('sidebar-open');
-        btn && btn.setAttribute('aria-expanded', 'false');
+        btn?.setAttribute('aria-expanded', 'false');
       }
 
       function toggle() {
         body.classList.contains('sidebar-open') ? closeMenu() : openMenu();
       }
-      btn && btn.addEventListener('click', toggle);
-      backdrop && backdrop.addEventListener('click', closeMenu);
+
+      btn?.addEventListener('click', toggle);
+      backdrop?.addEventListener('click', closeMenu);
+      closeBtn?.addEventListener('click', closeMenu);
       document.addEventListener('keydown', e => {
         if (e.key === 'Escape') closeMenu();
       });

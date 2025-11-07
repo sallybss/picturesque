@@ -52,7 +52,6 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
     <?php render_sidebar(['isAdmin' => true]); ?>
 
     <main class="content">
-      <!-- Top bar: hamburger (left) + userbox (right) -->
       <div class="content-top">
         <div class="top-actions" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
           <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
@@ -60,7 +59,6 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
         </div>
       </div>
 
-      <!-- Page title -->
       <div class="content-top">
         <h1 class="page-title">Posts · <?= htmlspecialchars($user['display_name']) ?> (<?= count($posts) ?>)</h1>
       </div>
@@ -102,16 +100,32 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <script>
-    (function(){
+    (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
       const backdrop = document.getElementById('sidebarBackdrop');
-      function openMenu(){ body.classList.add('sidebar-open'); btn && btn.setAttribute('aria-expanded','true'); }
-      function closeMenu(){ body.classList.remove('sidebar-open'); btn && btn.setAttribute('aria-expanded','false'); }
-      function toggle(){ body.classList.contains('sidebar-open') ? closeMenu() : openMenu(); }
-      btn && btn.addEventListener('click', toggle);
-      backdrop && backdrop.addEventListener('click', closeMenu);
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+      const closeBtn = document.getElementById('closeSidebar');
+
+      function openMenu() {
+        body.classList.add('sidebar-open');
+        btn?.setAttribute('aria-expanded', 'true');
+      }
+
+      function closeMenu() {
+        body.classList.remove('sidebar-open');
+        btn?.setAttribute('aria-expanded', 'false');
+      }
+
+      function toggle() {
+        body.classList.contains('sidebar-open') ? closeMenu() : openMenu();
+      }
+
+      btn?.addEventListener('click', toggle);
+      backdrop?.addEventListener('click', closeMenu);
+      closeBtn?.addEventListener('click', closeMenu);
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeMenu();
+      });
     })();
   </script>
 </body>

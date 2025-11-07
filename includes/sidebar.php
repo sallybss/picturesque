@@ -13,6 +13,8 @@ function render_sidebar(array $opts = []): void {
 
   echo '<aside class="sidenav" id="appSidebar">';
 
+echo '<button class="close-btn" id="closeSidebar" aria-label="Close menu">×</button>';
+
   echo '<div class="brand">
           <a href="' . htmlspecialchars($homeHref) . '" class="brand-link" style="text-decoration:none;">
             <img src="' . htmlspecialchars($logo) . '" alt="Picturesque logo" class="brand-logo">
