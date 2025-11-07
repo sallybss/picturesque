@@ -2260,6 +2260,66 @@ body.guest-locked {
   .hamburger{ display: inline-block; }
 }
 
+/* Hide hamburger on guest pages (mobile or any screen) */
+body.guest-locked .hamburger {
+  display: none !important;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* Hide sidebar for guests on desktop */
+body.guest-locked .sidenav {
+  display: none;
+}
+
+/* Allow feed to stretch full width when sidebar hidden */
+body.guest-locked .guest-main {
+  grid-template-columns: 1fr !important;
+  padding: 20px 30px;
+}
+
+/* For mobile, keep sidebar functional (if you ever re-enable hamburger) */
+@media (max-width: 900px) {
+  body.guest-locked .sidenav {
+    display: none; 
+  }
+}
+
+/* Guest page top bar layout */
+.guest-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+/* Make sure search and button align properly */
+body.guest-locked .content-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+
+/* On small screens, stack cleanly with Sign in on top-right */
+@media (max-width: 700px) {
+  body.guest-locked .content-top {
+    flex-wrap: wrap;
+  }
+  body.guest-locked .search-wrap {
+    order: 2;
+    width: 100%;
+  }
+  body.guest-locked .guest-actions {
+    order: 1;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+
 
 @media (max-width: 700px){
   .feed {

@@ -57,12 +57,10 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
           <input class="search" name="q" placeholder="Search" disabled title="Sign in to use search">
         </form>
 
-        <div class="top-actions">
-          <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+        <div class="top-actions guest-actions">
           <a class="btn-ghost pill" href="./auth/login.php" style="text-decoration:none">Sign in</a>
         </div>
       </div>
-
 
       <div class="controls-row">
         <div class="pills">
