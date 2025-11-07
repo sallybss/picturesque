@@ -1939,7 +1939,7 @@ body.guest-locked {
     }
 }
 
-@media(max-width:700px) {
+@media(max-width:1000px) {
     .guest-cta {
         flex-direction: column;
         text-align: center;
@@ -2062,7 +2062,7 @@ body.guest-locked {
   color:hsl(194, 76%, 35%);
 }
 
-@media (max-width: 900px){
+@media (max-width: 1000px){
   .hamburger{ display:inline-block; }
 
   .content-top{ flex-wrap:wrap; }
@@ -2091,7 +2091,7 @@ body.guest-locked {
 }
 
 /* Profile cards – compact buttons on mobile */
-@media (max-width: 700px) {
+@media (max-width: 1000px) {
   .feed .card .meta {
     display: flex;
     align-items: center;
@@ -2128,7 +2128,7 @@ body.guest-locked {
   .feed .card .card-body { padding: 8px 10px; }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1000px) {
   .profile-actions .btn,
   .profile-actions .btn-ghost,
   .profile-actions .btn-primary {
@@ -2160,7 +2160,7 @@ body.guest-locked {
   color: var(--primary-hover);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
   .close-btn {
     display: block;
   }
@@ -2233,7 +2233,7 @@ body.guest-locked {
     }
 
     /* Guest page: responsive shell */
-@media (max-width: 900px){
+@media (max-width: 1000px){
   .guest-main{
     grid-template-columns: 1fr; 
     gap: 16px;
@@ -2279,7 +2279,7 @@ body.guest-locked .guest-main {
 }
 
 /* For mobile, keep sidebar functional (if you ever re-enable hamburger) */
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
   body.guest-locked .sidenav {
     display: none; 
   }
@@ -2303,7 +2303,7 @@ body.guest-locked .content-top {
 }
 
 /* On small screens, stack cleanly with Sign in on top-right */
-@media (max-width: 700px) {
+@media (max-width: 1000px) {
   body.guest-locked .content-top {
     flex-wrap: wrap;
   }
@@ -2321,7 +2321,7 @@ body.guest-locked .content-top {
 
 
 
-@media (max-width: 700px){
+@media (max-width: 1000px){
   .feed {
     column-count: 2;
     column-gap: 12px;
@@ -2341,7 +2341,7 @@ body.guest-locked .content-top {
   gap: 10px;
 }
 
-@media (max-width: 700px){
+@media (max-width: 1000px){
   .guest-cta{
     flex-direction: column;
     text-align: center;
