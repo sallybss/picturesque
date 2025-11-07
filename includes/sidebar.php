@@ -1,5 +1,6 @@
 <?php
-function render_sidebar(array $opts = []): void {
+function render_sidebar(array $opts = []): void
+{
   $isAdmin   = (bool)($opts['isAdmin'] ?? false);
   $isGuest   = (bool)($opts['isGuest'] ?? false);
   $homeCount = $opts['homeCount'] ?? null;
@@ -13,7 +14,7 @@ function render_sidebar(array $opts = []): void {
 
   echo '<aside class="sidenav" id="appSidebar">';
 
-echo '<button class="close-btn" id="closeSidebar" aria-label="Close menu">×</button>';
+  echo '<button class="close-btn" id="closeSidebar" aria-label="Close menu">×</button>';
 
   echo '<div class="brand">
           <a href="' . htmlspecialchars($homeHref) . '" class="brand-link" style="text-decoration:none;">
@@ -34,10 +35,10 @@ echo '<button class="close-btn" id="closeSidebar" aria-label="Close menu">×</bu
         </a>';
 
   $rulesActive = ($cur === 'rules.php') ? 'active' : '';
-  echo '<a href="./rules.php" class="'.$rulesActive.'">Rules &amp; Regulations</a>';
+  echo '<a href="./rules.php" class="' . $rulesActive . '">Rules &amp; Regulations</a>';
 
   if (!$isGuest) {
-    $active = in_array($cur, ['profile.php','profile_edit.php','profile_settings.php']) ? 'active' : '';
+    $active = in_array($cur, ['profile.php', 'profile_edit.php', 'profile_settings.php']) ? 'active' : '';
     echo '<a href="./profile.php" class="' . $active . '">My Profile</a>';
   }
 
@@ -65,5 +66,5 @@ echo '<button class="close-btn" id="closeSidebar" aria-label="Close menu">×</bu
     echo '<a href="./auth/logout.php">Logout</a>';
   }
 
-  echo '</nav></aside>'; 
+  echo '</nav></aside>';
 }

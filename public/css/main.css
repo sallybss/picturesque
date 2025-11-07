@@ -1769,8 +1769,6 @@ body.guest-locked {
     text-decoration: none;
     margin-bottom: 14px;
     cursor: pointer;
-
-
 }
 
 .btn-link {
@@ -1802,6 +1800,23 @@ body.guest-locked {
     color: #64748b;
     font-size: 0.85rem;
 }
+
+/* Picture page: make two columns stack on mobile */
+@media (max-width: 900px){
+  .single-wrap{
+    grid-template-columns: 1fr;  
+  }
+  .single-wrap .card + .card{
+    margin-top: 12px;            
+  }
+}
+
+@media (max-width: 900px){
+  .hamburger{ display:inline-block; }
+  .content-top{ flex-wrap:wrap; }
+  .top-actions{ order:1; width:100%; justify-content:space-between; }
+}
+
 
 /* Filter dropdown */
 .filter-form {
@@ -2214,3 +2229,4 @@ body.guest-locked {
       margin: 0;
       padding: 10px 14px
     }
+

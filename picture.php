@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/init.php';
+require_once __DIR__ . '/includes/topbar.php';
 require_once __DIR__ . '/includes/comment_repository.php';
 
 $me = Auth::requireUserOrRedirect('./auth/login.php');
@@ -108,12 +109,17 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
   <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
   <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
 
-  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
-
   <div class="layout">
     <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
 
     <main class="content">
+      <div class="content-top">
+        <div class="top-actions">
+          <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+          <?php render_topbar_userbox($meRow); ?>
+        </div>
+      </div>
+
       <div class="single-wrap">
         <div class="card">
           <img src="<?= img_from_db($pic['picture_url']) ?>" alt="">
@@ -133,22 +139,17 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
             <div class="topbar">
               <h3 class="subtitle">Comments (<?= (int)$pic['comment_count'] ?>)</h3>
             </div>
-
             <form class="comment-form" method="post" action="./actions/post_comment.php">
               <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
               <input type="hidden" name="picture_id" value="<?= (int)$picture_id ?>">
               <textarea name="comment_content" rows="3" class="input" placeholder="Write a comment…" required></textarea>
-              <div class="form-actions">
-                <button type="submit" class="btn">Post</button>
-              </div>
+              <div class="form-actions"><button type="submit" class="btn">Post</button></div>
             </form>
-
             <div id="comments">
               <?php if (!$rootComments): ?>
                 <p class="muted">No comments yet. Be the first!</p>
-              <?php else: ?>
-                <?php foreach ($rootComments as $root) render_comment($root, 0, $picture_id, $isAdmin); ?>
-              <?php endif; ?>
+              <?php else: foreach ($rootComments as $root) render_comment($root, 0, $picture_id, $isAdmin);
+              endif; ?>
             </div>
           </div>
         </div>
@@ -185,17 +186,21 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
       document.addEventListener('keydown', e => {
         if (e.key === 'Escape') closeMenu();
       });
-    })();
 
-    document.addEventListener('click', function(e) {
-      if (e.target.matches('.js-reply')) {
-        const id = e.target.getAttribute('data-target');
-        const f = document.getElementById(id);
-        if (f) {
-          f.style.display = (!f.style.display || f.style.display === 'none') ? 'block' : 'none';
+      document.addEventListener('click', (e) => {
+        if (e.target.matches('.js-reply')) {
+          const f = document.getElementById(e.target.dataset.target);
+          if (f) f.style.display = (!f.style.display || f.style.display === 'none') ? 'block' : 'none';
         }
-      }
-    });
+      });
+
+      document.addEventListener('click', function(e) {
+        if (e.target.matches('.js-reply')) {
+          const f = document.getElementById(e.target.dataset.target);
+          if (f) f.style.display = (!f.style.display || f.style.display === 'none') ? 'block' : 'none';
+        }
+      });
+    })();
   </script>
 </body>
 
