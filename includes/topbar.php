@@ -1,6 +1,4 @@
 <?php
-// includes/topbar.php
-require_once __DIR__ . '/init.php';
 
 function render_topbar_userbox(array $meRow): void {
   $name = htmlspecialchars($meRow['display_name'] ?? 'You');

@@ -12,37 +12,41 @@ $title   = $rules['title']   ?? 'Rules & Regulations';
 $content = $rules['content'] ?? 'No rules have been published yet.';
 
 $isLoggedIn = isset($_SESSION['profile_id']) && (int)$_SESSION['profile_id'] > 0;
-$isAdmin = false;
+$isAdmin    = false;
+$meRow      = [];
+
 if ($isLoggedIn) {
-  $profiles = new ProfileRepository();
-  $meRow = $profiles->getHeader((int)$_SESSION['profile_id']);
-  $isAdmin = (strtolower($meRow['role'] ?? '') === 'admin');
+    $profiles = new ProfileRepository();
+    $meRow    = $profiles->getHeader((int)$_SESSION['profile_id']);
+    $isAdmin  = (strtolower($meRow['role'] ?? '') === 'admin');
 }
 
-$cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/public/css/main.css') : time();
+$cssVer = file_exists(__DIR__ . '/public/css/main.css')
+    ? filemtime(__DIR__ . '/public/css/main.css')
+    : time();
 ?>
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <title><?= htmlspecialchars($title) ?> · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css?v=<?= $cssVer ?>">
 </head>
-
 <body>
   <div class="layout">
     <?php render_sidebar(['isAdmin' => $isAdmin, 'isGuest' => !$isLoggedIn]); ?>
+
     <main class="content">
       <div class="content-top">
-        <div class="spacer"></div>  
+        <div class="spacer"></div>
         <div class="top-actions">
-         <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
-          <?php render_topbar_userbox($meRow); ?>
-       </div>
+          <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+          <?php if ($isLoggedIn): ?>
+            <?php render_topbar_userbox($meRow); ?>
+          <?php endif; ?>
+        </div>
       </div>
-
 
       <section class="pad">
         <h1 class="page-title"><?= htmlspecialchars($title) ?></h1>
@@ -52,8 +56,8 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
       </section>
     </main>
   </div>
-  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <script>
     (function() {
@@ -85,5 +89,4 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
     })();
   </script>
 </body>
-
 </html>
