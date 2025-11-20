@@ -1,9 +1,9 @@
 <?php
 require_once __DIR__ . '/includes/init.php';
 require_once __DIR__ . '/includes/pages_repository.php';
-require_once __DIR__ . '/includes/sidebar.php';
 require_once __DIR__ . '/includes/profile_repository.php';
 require_once __DIR__ . '/includes/topbar.php';
+require_once __DIR__ . '/includes/sidebar.php';
 
 $pages = new PagesRepository();
 $rules = $pages->getBySlug('rules');

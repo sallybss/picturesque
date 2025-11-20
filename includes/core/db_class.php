@@ -6,13 +6,16 @@ class DB {
         if (!self::$db) {
             mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
+            // env.php and env_sample.php are in includes/core/
             $cfgFile = __DIR__ . '/env.php';
             if (!file_exists($cfgFile)) {
-                $cfgFile = __DIR__ . '/env.sample.php';
+                // use the underscore filename you actually have
+                $cfgFile = __DIR__ . '/env_sample.php';
             }
+
             $cfg = require $cfgFile;
             if (!is_array($cfg)) {
-                throw new RuntimeException('env.php/env.sample.php must return an array');
+                throw new RuntimeException('env.php/env_sample.php must return an array');
             }
 
             self::$db = new mysqli(

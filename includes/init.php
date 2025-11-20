@@ -3,8 +3,9 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
-$ENV = require __DIR__ . '/env.php';
-define('BASE_PATH', rtrim($ENV['base_path'] ?? '', '/'));  
+// load config from core/env.php
+$ENV = require __DIR__ . '/core/env.php';
+define('BASE_PATH', rtrim($ENV['base_path'] ?? '', '/'));
 
 // always project-relative (no leading slash)
 function url(string $path = ''): string {
@@ -17,13 +18,12 @@ function asset(string $path): string {
 
 function img_from_db(?string $v): string {
     if (!$v) return asset('public/images/placeholder-photo.jpg');
-    // if full http(s) or already project-relative path provided, pass through
     if (preg_match('~^https?://~i', $v)) return $v;
     if ($v[0] === '.') return $v;
-    if ($v[0] === '/') return '.' . $v; // turn absolute into project-relative
-    // DB contains only filenames -> point to uploads/
+    if ($v[0] === '/') return '.' . $v;
     return asset('uploads/' . $v);
 }
+
 function redirect(string $to): void {
     if (preg_match('~^https?://~i', $to)) {
         header('Location: ' . $to);
@@ -33,15 +33,14 @@ function redirect(string $to): void {
     exit;
 }
 
+// --- core classes ---
+require_once __DIR__ . '/core/flash.php';
+require_once __DIR__ . '/core/helpers.php';
+require_once __DIR__ . '/core/db_class.php';
+require_once __DIR__ . '/core/auth_class.php';
+require_once __DIR__ . '/core/paths_class.php';
 
-
-
-require_once __DIR__ . '/flash.php';
-require_once __DIR__ . '/db_class.php';
-require_once __DIR__ . '/auth_class.php';
-require_once __DIR__ . '/paths_class.php';
-require_once __DIR__ . '/sidebar.php';
-
+// --- repositories ---
 require_once __DIR__ . '/base_repository.php';
 require_once __DIR__ . '/profile_repository.php';
 require_once __DIR__ . '/picture_repository.php';
@@ -51,5 +50,4 @@ require_once __DIR__ . '/pages_repository.php';
 require_once __DIR__ . '/search_repository.php';
 require_once __DIR__ . '/featured_repository.php';
 require_once __DIR__ . '/categories_repository.php';
-
-
+require_once __DIR__ . '/contact_repository.php';

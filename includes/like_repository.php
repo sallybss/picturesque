@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/db_class.php';
+require_once __DIR__ . '/core/db_class.php';
 require_once __DIR__ . '/base_repository.php';
 
 class LikeRepository extends BaseRepository
