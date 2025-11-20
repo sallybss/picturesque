@@ -187,17 +187,20 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
         if (e.key === 'Escape') closeMenu();
       });
 
-      document.addEventListener('click', (e) => {
-        if (e.target.matches('.js-reply')) {
-          const f = document.getElementById(e.target.dataset.target);
-          if (f) f.style.display = (!f.style.display || f.style.display === 'none') ? 'block' : 'none';
-        }
-      });
+      document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.js-reply');
+        if (!btn) return;
 
-      document.addEventListener('click', function(e) {
-        if (e.target.matches('.js-reply')) {
-          const f = document.getElementById(e.target.dataset.target);
-          if (f) f.style.display = (!f.style.display || f.style.display === 'none') ? 'block' : 'none';
+        const formId = btn.dataset.target;
+        if (!formId) return;
+
+        const f = document.getElementById(formId);
+        if (!f) return;
+
+        if (!f.style.display || f.style.display === 'none') {
+          f.style.display = 'block';
+        } else {
+          f.style.display = 'none';
         }
       });
     })();
