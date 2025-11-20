@@ -41,13 +41,13 @@ require_once __DIR__ . '/core/auth_class.php';
 require_once __DIR__ . '/core/paths_class.php';
 
 // --- repositories ---
-require_once __DIR__ . '/base_repository.php';
-require_once __DIR__ . '/profile_repository.php';
-require_once __DIR__ . '/picture_repository.php';
-require_once __DIR__ . '/comment_repository.php';
-require_once __DIR__ . '/like_repository.php';
-require_once __DIR__ . '/pages_repository.php';
-require_once __DIR__ . '/search_repository.php';
-require_once __DIR__ . '/featured_repository.php';
-require_once __DIR__ . '/categories_repository.php';
-require_once __DIR__ . '/contact_repository.php';
+require_once __DIR__ . '/repositories/base_repository.php';
+require_once __DIR__ . '/repositories/profile_repository.php';
+require_once __DIR__ . '/repositories/picture_repository.php';
+require_once __DIR__ . '/repositories/comment_repository.php';
+require_once __DIR__ . '/repositories/like_repository.php';
+require_once __DIR__ . '/repositories/pages_repository.php';
+require_once __DIR__ . '/repositories/search_repository.php';
+require_once __DIR__ . '/repositories/featured_repository.php';
+require_once __DIR__ . '/repositories/categories_repository.php';
+require_once __DIR__ . '/repositories/contact_repository.php';

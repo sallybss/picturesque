@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/init.php';
 require_once __DIR__ . '/includes/topbar.php';
-require_once __DIR__ . '/includes/categories_repository.php';
 require_once __DIR__ . '/includes/sidebar.php';
 
 $catsRepo = new CategoriesRepository();
