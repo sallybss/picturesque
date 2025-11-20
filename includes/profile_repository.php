@@ -73,19 +73,21 @@ class ProfileRepository extends BaseRepository
         $stmt->close();
     }
     public function getRoleAndStatus(int $profileId): ?array {
-        $stmt = DB::get()->prepare('SELECT role, status FROM profiles WHERE profile_id = ?');
+        $stmt = $this->db->prepare('SELECT role, status FROM profiles WHERE profile_id = ?');
         $stmt->bind_param('i', $profileId);
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc() ?: null;
         $stmt->close();
         return $row;
     }
+
     public function updateStatus(int $profileId, string $status): void {
-        $stmt = DB::get()->prepare('UPDATE profiles SET status = ? WHERE profile_id = ?');
+        $stmt = $this->db->prepare('UPDATE profiles SET status = ? WHERE profile_id = ?');
         $stmt->bind_param('si', $status, $profileId);
         $stmt->execute();
         $stmt->close();
     }
+
     public function findAuthByEmail(string $email): ?array {
         $stmt = DB::get()->prepare('
             SELECT profile_id, display_name, role, password_hash, status
@@ -182,4 +184,6 @@ class ProfileRepository extends BaseRepository
         $stmt->execute();
         $stmt->close();
     }
+
+    
 }

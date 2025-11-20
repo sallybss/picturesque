@@ -27,11 +27,39 @@ class CategoriesRepository extends BaseRepository
 
     public function isActive(int $categoryId): bool
     {
-        $stmt = $this->db->prepare("SELECT 1 FROM categories WHERE category_id = ? AND active = 1 LIMIT 1");
+        $stmt = $this->db->prepare(
+            "SELECT 1 FROM categories WHERE category_id = ? AND active = 1 LIMIT 1"
+        );
         $stmt->bind_param('i', $categoryId);
         $stmt->execute();
         $ok = (bool)$stmt->get_result()->fetch_row();
         $stmt->close();
         return $ok;
+    }
+
+
+    public function create(string $name, string $slug): bool
+    {
+        try {
+            $st = $this->db->prepare(
+                "INSERT INTO categories (category_name, slug) VALUES (?, ?)"
+            );
+            $st->bind_param('ss', $name, $slug);
+            $st->execute();
+            $st->close();
+            return true;
+        } catch (\mysqli_sql_exception $e) {
+            return false;
+        }
+    }
+
+    public function toggleActive(int $id): void
+    {
+        $st = $this->db->prepare(
+            "UPDATE categories SET active = 1 - active WHERE category_id = ?"
+        );
+        $st->bind_param('i', $id);
+        $st->execute();
+        $st->close();
     }
 }

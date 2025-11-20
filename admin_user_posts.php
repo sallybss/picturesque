@@ -1,37 +1,36 @@
 <?php
 require_once __DIR__ . '/includes/init.php';
-require_once __DIR__ . '/includes/sidebar.php';
 require_once __DIR__ . '/includes/topbar.php';
 
 $me = Auth::requireAdminOrRedirect('./index.php');
 
 $userId = (int)($_GET['id'] ?? 0);
 if ($userId <= 0) {
-  set_flash('err', 'Missing user id.');
-  header('Location: ./admin.php');
-  exit;
+    set_flash('err', 'Missing user id.');
+    header('Location: ./admin.php');
+    exit;
 }
 
-$paths = new Paths();
-
+$paths    = new Paths();
 $profiles = new ProfileRepository();
-$meRow = $profiles->getHeader($me);
+
+$meRow   = $profiles->getHeader($me);
 $isAdmin = (strtolower($meRow['role'] ?? 'user') === 'admin');
 if (!$isAdmin) {
-  set_flash('err', 'Admins only.');
-  header('Location: ./index.php');
-  exit;
+    set_flash('err', 'Admins only.');
+    header('Location: ./index.php');
+    exit;
 }
 
 $user = $profiles->getById($userId);
 if (!$user) {
-  set_flash('err', 'User not found.');
-  header('Location: ./admin.php');
-  exit;
+    set_flash('err', 'User not found.');
+    header('Location: ./admin.php');
+    exit;
 }
 
-$pictures = new PictureRepository();
-$posts = $pictures->listByProfile($userId);
+$picturesRepo = new PictureRepository();
+$posts        = $picturesRepo->listByProfile($userId);
 
 $cssPath = __DIR__ . '/public/css/main.css';
 $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
@@ -59,8 +58,12 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
         </div>
       </div>
 
-      <div class="content-top">
-        <h1 class="page-title">Posts · <?= htmlspecialchars($user['display_name']) ?> (<?= count($posts) ?>)</h1>
+      <div class="content-top" style="display:flex; align-items:center; justify-content:space-between;">
+        <h1 class="page-title">
+          Posts · <?= htmlspecialchars($user['display_name']) ?>
+          (<?= count($posts) ?>)
+        </h1>
+        <a href="admin.php" class="btn-ghost pill">← Back to overview</a>
       </div>
 
       <section class="feed">
@@ -70,17 +73,22 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
             <img src="<?= $cover ?>" alt="">
             <div class="card-body">
               <div class="card-title"><?= htmlspecialchars($p['picture_title']) ?></div>
+
               <?php if (!empty($p['picture_description'])): ?>
                 <div class="card-desc"><?= htmlspecialchars($p['picture_description']) ?></div>
               <?php endif; ?>
+
               <div class="meta">
                 <span class="counts">
                   <span class="muted">❤ <?= (int)$p['like_count'] ?></span>
                   <span class="muted">💬 <?= (int)$p['comment_count'] ?></span>
                 </span>
                 <span class="spacer"></span>
-                <form method="post" action="./actions/admin_delete_picture.php"
-                      onsubmit="return confirm('Delete this picture?');" style="display:inline">
+
+                <form method="post"
+                      action="./actions/admin_delete_picture.php"
+                      onsubmit="return confirm('Delete this picture?');"
+                      style="display:inline">
                   <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                   <input type="hidden" name="picture_id" value="<?= (int)$p['picture_id'] ?>">
                   <button class="btn-danger pill" type="submit">Delete</button>
@@ -101,32 +109,47 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 
   <script>
     (function() {
-      const body = document.body;
-      const btn = document.getElementById('hamburger');
-      const backdrop = document.getElementById('sidebarBackdrop');
-      const closeBtn = document.getElementById('closeSidebar');
+      const body      = document.body;
+      const btn       = document.getElementById('hamburger');
+      const backdrop  = document.getElementById('sidebarBackdrop');
+      const closeBtn  = document.getElementById('closeSidebar');
 
       function openMenu() {
         body.classList.add('sidebar-open');
-        btn?.setAttribute('aria-expanded', 'true');
+        if (btn) btn.setAttribute('aria-expanded', 'true');
       }
 
       function closeMenu() {
         body.classList.remove('sidebar-open');
-        btn?.setAttribute('aria-expanded', 'false');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
       }
 
       function toggle() {
         body.classList.contains('sidebar-open') ? closeMenu() : openMenu();
       }
 
-      btn?.addEventListener('click', toggle);
-      backdrop?.addEventListener('click', closeMenu);
-      closeBtn?.addEventListener('click', closeMenu);
+      btn      && btn.addEventListener('click', toggle);
+      backdrop && backdrop.addEventListener('click', closeMenu);
+      closeBtn && closeBtn.addEventListener('click', closeMenu);
+
       document.addEventListener('keydown', e => {
         if (e.key === 'Escape') closeMenu();
       });
     })();
   </script>
+
+  <?php if (!empty($_GET['afterDelete'])): ?>
+  <script>
+    (function () {
+      if (!window.history || !history.pushState) return;
+
+      history.pushState({afterDelete: true}, "", window.location.href);
+
+      window.addEventListener("popstate", function () {
+        window.location.href = "admin.php";
+      });
+    })();
+  </script>
+  <?php endif; ?>
 </body>
 </html>

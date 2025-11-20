@@ -1,22 +1,28 @@
 <?php
-require __DIR__ . '/../includes/init.php';
+require_once __DIR__ . '/../includes/init.php';
 
 $me = Auth::requireUserOrRedirect('../auth/login.php');
 $profiles = new ProfileRepository();
 $meRow = $profiles->getHeader($me);
-if (strtolower($meRow['role'] ?? '') !== 'admin') { set_flash('err','Admins only.'); header('Location: ../index.php'); exit; }
 
-if ($_SERVER['REQUEST_METHOD']!=='POST' || !check_csrf($_POST['csrf'] ?? '')) {
-  set_flash('err','Invalid request.'); header('Location: ../admin_categories.php'); exit;
+if (strtolower($meRow['role'] ?? '') !== 'admin') {
+    set_flash('err', 'Admins only.');
+    redirect('../index.php');
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !check_csrf($_POST['csrf'] ?? '')) {
+    set_flash('err', 'Invalid request.');
+    redirect('../admin_categories.php');
 }
 
 $id = (int)($_POST['category_id'] ?? 0);
-if ($id <= 0) { set_flash('err','Bad id.'); header('Location: ../admin_categories.php'); exit; }
+if ($id <= 0) {
+    set_flash('err', 'Bad id.');
+    redirect('../admin_categories.php');
+}
 
-$st = DB::get()->prepare("UPDATE categories SET active = 1 - active WHERE category_id=?");
-$st->bind_param('i', $id);
-$st->execute();
-$st->close();
+$catsRepo = new CategoriesRepository();
+$catsRepo->toggleActive($id);
 
-set_flash('ok','Toggled.');
-header('Location: ../admin_categories.php');
+set_flash('ok', 'Toggled.');
+redirect('../admin_categories.php');
