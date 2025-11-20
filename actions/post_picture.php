@@ -31,15 +31,10 @@ if ($catId <= 0) {
     header('Location: ../create.php'); exit;                   
 }
 
-$st = DB::get()->prepare("SELECT 1 FROM categories WHERE category_id=? AND active=1");
-$st->bind_param('i', $catId);
-$st->execute();
-$okCat = (bool)$st->get_result()->fetch_row();
-$st->close();
-
-if (!$okCat) {
+$catsRepo = new CategoriesRepository();
+if (!$catsRepo->isActive($catId)) {
     set_flash('err', 'Invalid category.');
-    header('Location: ../create.php'); exit;                   
+    header('Location: ../create.php'); exit;
 }
 
 if ($title === '' || !$file || empty($file['name'])) {

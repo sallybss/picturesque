@@ -50,3 +50,6 @@ require_once __DIR__ . '/like_repository.php';
 require_once __DIR__ . '/pages_repository.php';
 require_once __DIR__ . '/search_repository.php';
 require_once __DIR__ . '/featured_repository.php';
+require_once __DIR__ . '/categories_repository.php';
+
+

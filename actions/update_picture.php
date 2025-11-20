@@ -16,15 +16,11 @@ if ($pid <= 0 || $title === '' || $catId <= 0) {
   header('Location: ../edit_picture.php?id='.$pid); exit;
 }
 
-$st = DB::get()->prepare("SELECT 1 FROM categories WHERE category_id=? AND active=1");
-$st->bind_param('i', $catId);
-$st->execute();
-if (!$st->get_result()->fetch_row()) {
-  $st->close();
-  set_flash('err','Invalid category.');
-  header('Location: ../edit_picture.php?id='.$pid); exit;
+$catsRepo = new CategoriesRepository();
+if (!$catsRepo->isActive($catId)) {
+    set_flash('err', 'Invalid category.');
+    header('Location: ../edit_picture.php?id=' . $pid); exit;
 }
-$st->close();
 
 $repo = new PictureRepository();
 $old  = $repo->getUrlIfOwned($pid, $me);
