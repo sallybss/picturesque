@@ -5,7 +5,7 @@ require_once __DIR__ . '/base_repository.php';
 class LikeRepository extends BaseRepository
 {
     public function has(int $pictureId, int $userId): bool {
-        $stmt = DB::get()->prepare('SELECT 1 FROM likes WHERE picture_id = ? AND profile_id = ?');
+        $stmt = $this->db->prepare('SELECT 1 FROM likes WHERE picture_id = ? AND profile_id = ?');
         $stmt->bind_param('ii', $pictureId, $userId);
         $stmt->execute();
         $exists = (bool)$stmt->get_result()->fetch_row();
@@ -14,14 +14,14 @@ class LikeRepository extends BaseRepository
     }
 
     public function add(int $pictureId, int $userId): void {
-        $stmt = DB::get()->prepare('INSERT INTO likes (picture_id, profile_id) VALUES (?, ?)');
+        $stmt = $this->db->prepare('INSERT INTO likes (picture_id, profile_id) VALUES (?, ?)');
         $stmt->bind_param('ii', $pictureId, $userId);
         $stmt->execute();
         $stmt->close();
     }
 
     public function remove(int $pictureId, int $userId): void {
-        $stmt = DB::get()->prepare('DELETE FROM likes WHERE picture_id = ? AND profile_id = ?');
+        $stmt = $this->db->prepare('DELETE FROM likes WHERE picture_id = ? AND profile_id = ?');
         $stmt->bind_param('ii', $pictureId, $userId);
         $stmt->execute();
         $stmt->close();

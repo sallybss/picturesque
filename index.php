@@ -159,7 +159,7 @@ $hotCount     = count($hotIds);
           $rawAvatar    = $p['author_avatar'] ?? $p['avatar_photo'] ?? '';
           $authorAvatar = $rawAvatar ? img_from_db($rawAvatar) : 'https://placehold.co/26x26?text=%20';
           ?>
-          <article class="card">
+          <article class="card" id="pic-<?= $picId ?>">
             <a class="card-cover" href="picture.php?id=<?= $picId ?>">
               <img src="<?= $coverUrl ?>" alt="">
             </a>
