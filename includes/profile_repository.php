@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/db_class.php';
-class ProfileRepository {
+require_once __DIR__ . '/base_repository.php';
+class ProfileRepository extends BaseRepository
+{
     public function getHeader(int $id): array {
         $sql = 'SELECT display_name, avatar_photo, role FROM profiles WHERE profile_id = ?';
         $stmt = DB::get()->prepare($sql);

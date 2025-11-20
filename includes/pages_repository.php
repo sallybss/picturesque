@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/db_class.php';
+require_once __DIR__ . '/base_repository.php';
 
-class PagesRepository {
+class PagesRepository extends BaseRepository
+{
     public function getAbout(): array {
         $stmt = DB::get()->prepare("SELECT page_id, title, content, image_path FROM pages WHERE slug='about' LIMIT 1");
         $stmt->execute();

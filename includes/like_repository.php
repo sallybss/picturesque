@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/db_class.php';
+require_once __DIR__ . '/base_repository.php';
 
-class LikeRepository {
+class LikeRepository extends BaseRepository
+{
     public function has(int $pictureId, int $userId): bool {
         $stmt = DB::get()->prepare('SELECT 1 FROM likes WHERE picture_id = ? AND profile_id = ?');
         $stmt->bind_param('ii', $pictureId, $userId);

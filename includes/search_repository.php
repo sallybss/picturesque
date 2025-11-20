@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/db_class.php';
+require_once __DIR__ . '/base_repository.php';
 
-class SearchRepository {
+class SearchRepository extends BaseRepository
+{
     public function peopleByDisplayNameLike(string $like, int $limit = 20): array {
         $sql = '
             SELECT profile_id, display_name, avatar_photo

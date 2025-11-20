@@ -42,6 +42,7 @@ require_once __DIR__ . '/auth_class.php';
 require_once __DIR__ . '/paths_class.php';
 require_once __DIR__ . '/sidebar.php';
 
+require_once __DIR__ . '/base_repository.php';
 require_once __DIR__ . '/profile_repository.php';
 require_once __DIR__ . '/picture_repository.php';
 require_once __DIR__ . '/comment_repository.php';

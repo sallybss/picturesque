@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/db_class.php';
+require_once __DIR__ . '/base_repository.php';
 
-class CommentRepository {
+class CommentRepository extends BaseRepository 
+{
     public function listForPictureWithAuthors(int $pictureId): array {
         $sql = "
             SELECT

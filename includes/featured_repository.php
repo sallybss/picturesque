@@ -1,16 +1,9 @@
 <?php
 require_once __DIR__ . '/db_class.php';
+require_once __DIR__ . '/base_repository.php';
 
-class FeaturedRepository
+class FeaturedRepository extends BaseRepository
 {
-    /** @var mysqli */
-    private $db;
-
-    public function __construct()
-    {
-        $this->db = DB::get(); // same helper as other repos (MySQLi)
-    }
-
     // Monday for any given date (defaults to today)
     private function mondayOfWeek(?DateTime $d = null): string
     {
