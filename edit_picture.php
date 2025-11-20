@@ -67,7 +67,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
           <a href="./profile.php" class="btn-ghost pill">Back to profile</a>
         </div>
 
-        <form method="post" action="./actions/update_picture.php" enctype="multipart/form-data" class="create-form">
+        <form method="post" action="./actions/user/update_picture.php" enctype="multipart/form-data" class="create-form">
           <input type="hidden" name="picture_id" value="<?= (int)$pic['picture_id'] ?>">
           <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
           <input type="hidden" name="reset_image" id="resetImage" value="">

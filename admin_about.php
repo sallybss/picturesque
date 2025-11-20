@@ -45,7 +45,7 @@ $publicUploads = $paths->uploads;
       <h1 class="page-title">Edit About Page</h1>
 
       <div class="form-card">
-        <form method="post" action="./actions/admin_save_about.php" enctype="multipart/form-data" autocomplete="off">
+        <form method="post" action="./actions/admin/save_about.php" enctype="multipart/form-data" autocomplete="off">
           <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
 
           <div class="form-row">

@@ -87,7 +87,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
                 <span class="spacer"></span>
 
                 <form method="post"
-                      action="./actions/admin_delete_picture.php"
+                      action="./actions/admin/delete_picture.php"
                       onsubmit="return confirm('Delete this picture?');"
                       style="display:inline">
                   <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">

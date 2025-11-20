@@ -1,28 +1,34 @@
 <?php
-session_start();
 require_once __DIR__ . '/../../includes/init.php';
 
-$email = trim($_POST['login_email'] ?? '');
-$pass  = $_POST['password'] ?? '';
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    redirect('../../auth/login.php');
+}
 
-if (!check_csrf($_POST['csrf'] ?? null)) { set_flash('err','Invalid request.'); header('Location: ../auth/login.php'); exit; }
+if (!check_csrf($_POST['csrf'] ?? null)) {
+    set_flash('err', 'Invalid request.');
+    redirect('../../auth/login.php');
+}
+
+$email = trim($_POST['login_email'] ?? '');
+$pass  = (string)($_POST['password'] ?? '');
 
 if ($email === '' || $pass === '') {
-  set_flash('err', 'Please enter both email and password.');
-  header('Location: ../auth/login.php'); exit;
+    set_flash('err', 'Please enter both email and password.');
+    redirect('../../auth/login.php');
 }
 
 $profiles = new ProfileRepository();
-$user = $profiles->findAuthByEmail($email);
+$user     = $profiles->findAuthByEmail($email);
 
 if (!$user || !password_verify($pass, $user['password_hash'])) {
-  set_flash('err', 'Invalid email or password.');
-  header('Location: ../auth/login.php'); exit;
+    set_flash('err', 'Invalid email or password.');
+    redirect('../../auth/login.php');
 }
 
 if (($user['status'] ?? '') !== 'active') {
-  set_flash('err', 'Your account is not active.');
-  header('Location: ../auth/login.php'); exit;
+    set_flash('err', 'Your account is not active.');
+    redirect('../../auth/login.php');
 }
 
 $_SESSION['profile_id']   = (int)$user['profile_id'];
@@ -30,4 +36,4 @@ $_SESSION['display_name'] = (string)$user['display_name'];
 $_SESSION['role']         = (string)$user['role'];
 
 set_flash('ok', 'Welcome back, ' . htmlspecialchars($user['display_name']) . '!');
-header('Location: ../index.php'); exit;
+redirect('../../index.php');

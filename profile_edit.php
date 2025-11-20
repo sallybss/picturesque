@@ -56,7 +56,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
           <span class="avatar-note">Upload a new avatar (JPG/PNG/WEBP)</span>
         </div>
 
-        <form action="./actions/post_profile_update.php" method="post" enctype="multipart/form-data">
+        <form action="./actions/user/post_profile_update.php" method="post" enctype="multipart/form-data">
           <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
 
           <div class="form-row">

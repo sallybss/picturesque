@@ -59,7 +59,7 @@ function render_comment(array $c, int $depth, int $picture_id, bool $isAdmin): v
       <span class="c-time"><?= htmlspecialchars(substr($c['created_at'], 0, 16)) ?></span>
 
       <?php if ($isAdmin): ?>
-        <form method="post" action="./actions/comment_delete.php" style="display:inline; margin-left:auto">
+        <form method="post" action="./actions/admin/comment_delete.php" style="display:inline; margin-left:auto">
           <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
           <input type="hidden" name="comment_id" value="<?= (int)$c['comment_id'] ?>">
           <input type="hidden" name="picture_id" value="<?= (int)$picture_id ?>">
@@ -74,7 +74,7 @@ function render_comment(array $c, int $depth, int $picture_id, bool $isAdmin): v
       <button type="button" class="link-btn js-reply" data-target="rf-<?= (int)$c['comment_id'] ?>">Reply</button>
     </div>
 
-    <form id="rf-<?= (int)$c['comment_id'] ?>" class="reply-form" method="post" action="./actions/post_comment.php" style="display:none;">
+    <form id="rf-<?= (int)$c['comment_id'] ?>" class="reply-form" method="post" action="./actions/user/post_comment.php" style="display:none;">
       <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
       <input type="hidden" name="picture_id" value="<?= (int)$picture_id ?>">
       <input type="hidden" name="parent_comment_id" value="<?= (int)$c['comment_id'] ?>">
@@ -139,7 +139,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
             <div class="topbar">
               <h3 class="subtitle">Comments (<?= (int)$pic['comment_count'] ?>)</h3>
             </div>
-            <form class="comment-form" method="post" action="./actions/post_comment.php">
+            <form class="comment-form" method="post" action="./actions/user/post_comment.php">
               <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
               <input type="hidden" name="picture_id" value="<?= (int)$picture_id ?>">
               <textarea name="comment_content" rows="3" class="input" placeholder="Write a comment…" required></textarea>

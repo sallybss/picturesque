@@ -26,7 +26,7 @@ require_once __DIR__ . '/../includes/init.php';
           <div class="flash ok"><?= htmlspecialchars($m) ?></div>
         <?php endif; ?>
 
-        <form method="post" action="../actions/post_register.php" autocomplete="off">
+        <form method="post" action="../actions/auth/post_register.php" autocomplete="off">
           <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
 
           <label class="label">Email (login)</label>

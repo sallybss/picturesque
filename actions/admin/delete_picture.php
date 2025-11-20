@@ -30,5 +30,5 @@ if (is_file($file)) {
 }
 
 set_flash('ok','Picture deleted.');
-header('Location: ../admin_user_posts.php?id=' . (int)$row['owner_id'] . '&afterDelete=1');
+header('Location: ../../admin_user_posts.php?id=' . (int)$row['owner_id'] . '&afterDelete=1');
 exit;

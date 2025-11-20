@@ -69,12 +69,13 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 
         <?php if ($me === $profileId): ?>
           <div class="cover-actions">
-            <form method="post" action="./actions/update_cover.php" enctype="multipart/form-data">
+            <form method="post" action="./actions/user/update_cover.php" enctype="multipart/form-data">
               <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
               <input id="coverInput" type="file" name="cover" accept="image/*" hidden onchange="this.form.submit()">
               <label for="coverInput" class="btn btn-ghost small">Change Cover</label>
             </form>
-            <form method="post" action="./actions/update_cover.php">
+
+            <form method="post" action="./actions/user/update_cover.php">
               <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
               <input type="hidden" name="action" value="reset">
               <button type="submit" class="btn btn-ghost small">Reset</button>
@@ -123,7 +124,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
                 <span class="spacer"></span>
                 <?php if ($me === $profileId): ?>
                   <a class="btn btn-ghost" href="./edit_picture.php?id=<?= (int)$p['picture_id'] ?>">Edit</a>
-                  <form method="post" action="./actions/delete_picture.php" onsubmit="return confirm('Delete this photo? This cannot be undone.');" style="display:inline">
+                  <form method="post" action="./actions/user/delete_picture.php" onsubmit="return confirm('Delete this photo? This cannot be undone.');" style="display:inline">
                     <input type="hidden" name="picture_id" value="<?= (int)$p['picture_id'] ?>">
                     <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                     <button type="submit" class="btn btn-danger">Delete</button>

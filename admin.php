@@ -84,7 +84,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 
             <div class="ai-actions">
               <?php if ((int)$u['profile_id'] !== $me && (strtolower($u['role'] ?? 'user') !== 'admin')): ?>
-                <form class="inline" method="post" action="./actions/admin_toggle_status.php">
+                <form class="inline" method="post" action="./actions/admin/toggle_status.php">
                   <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                   <input type="hidden" name="profile_id" value="<?= (int)$u['profile_id'] ?>">
                   <button class="btn-ghost pill" type="submit">
@@ -92,7 +92,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
                   </button>
                 </form>
 
-                <form class="inline" method="post" action="./actions/admin_delete_user.php"
+                <form class="inline" method="post" action="./actions/admin/delete_user.php"
                   onsubmit="return confirm('Delete this user and all their posts/likes/comments? This cannot be undone.');">
                   <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                   <input type="hidden" name="profile_id" value="<?= (int)$u['profile_id'] ?>">

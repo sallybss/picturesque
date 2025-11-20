@@ -48,7 +48,7 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
           <a href="./profile.php" class="btn-ghost pill">Back to profile</a>
         </div>
 
-        <form method="post" action="./actions/post_picture.php" enctype="multipart/form-data" class="create-form">
+        <form method="post" action="./actions/user/post_picture.php" enctype="multipart/form-data" class="create-form">
           <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
 
           <input id="photo" class="file-input" type="file" name="photo" accept="image/*" required>

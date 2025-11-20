@@ -51,7 +51,7 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
         <h1 class="page-title">Categories</h1>
 
         <section class="card pad" style="margin-bottom:1rem">
-          <form action="actions/admin_category_add.php" method="post" class="flex-row" style="gap:.5rem; align-items:center;">
+          <form action="actions/admin/category_add.php" method="post" class="flex-row" style="gap:.5rem; align-items:center;">
             <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
             <label class="label" style="margin:0">Name</label>
             <input type="text" class="input" name="name" placeholder="e.g. Night" required style="max-width:260px">
@@ -81,7 +81,7 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
                   <?php endif; ?>
                 </td>
                 <td style="white-space:nowrap">
-                  <form action="actions/admin_category_toggle.php" method="post" style="display:inline">
+                  <form action="actions/admin/category_toggle.php" method="post" style="display:inline">
                     <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                     <input type="hidden" name="category_id" value="<?= (int)$c['category_id'] ?>">
                     <button type="submit" class="btn-ghost">

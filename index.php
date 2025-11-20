@@ -170,18 +170,20 @@ $hotCount     = count($hotIds);
                 $isHot = isset($hotIdsSet[$p['pic_id']]);
                 $disablePin = (!$isHot && $hotCount >= 10);
               ?>
-                <form method="post" action="./actions/toggle_feature.php" style="display:inline">
+                <form method="post" action="./actions/admin/toggle_feature.php" style="display:inline">
                   <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                   <input type="hidden" name="picture_id" value="<?= (int)$p['pic_id'] ?>">
-                  <input type="hidden" name="return_to" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
                   <?php if ($isHot): ?>
                     <input type="hidden" name="mode" value="unpin">
                     <button type="submit" class="pill" style="margin-top:6px;">🔥 Unpin</button>
                   <?php else: ?>
-                    <button type="submit" class="pill" style="margin-top:6px;" <?= $disablePin ? 'disabled' : '' ?>>📌 Pin to Hot</button>
+                    <button type="submit" class="pill" style="margin-top:6px;" <?= $disablePin ? 'disabled' : '' ?>>
+                      📌 Pin to Hot
+                    </button>
                   <?php endif; ?>
                 </form>
               <?php endif; ?>
+
 
               <div class="card-title">
                 <a class="card-title-link" href="picture.php?id=<?= $picId ?>">
@@ -209,7 +211,7 @@ $hotCount     = count($hotIds);
 
               <div class="meta">
                 <span class="counts">
-                  <form method="post" action="./actions/toggle_like.php" style="display:inline">
+                  <form method="post" action="./actions/user/toggle_like.php" style="display:inline">
                     <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                     <input type="hidden" name="picture_id" value="<?= (int)$p['pic_id'] ?>">
                     <button type="submit" class="iconbtn">

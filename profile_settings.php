@@ -49,7 +49,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 
         <div class="about-card">
           <div class="pad">
-            <form method="post" action="./actions/update_credentials.php" autocomplete="off">
+            <form method="post" action="./actions/user/update_credentials.php" autocomplete="off">
               <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
 
               <div class="row">

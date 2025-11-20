@@ -55,7 +55,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
             <h1>Contact us</h1>
             <p class="sub">Don’t hesitate to get in touch for anything!</p>
 
-            <form method="post" action="./actions/contact_submit.php" novalidate>
+            <form method="post" action="./actions/user/contact_submit.php" novalidate>
               <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
 
               <div class="contact-grid2">
