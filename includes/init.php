@@ -17,12 +17,35 @@ function asset(string $path): string {
 }
 
 function img_from_db(?string $v): string {
-    if (!$v) return asset('public/images/placeholder-photo.jpg');
-    if (preg_match('~^https?://~i', $v)) return $v;
-    if ($v[0] === '.') return $v;
-    if ($v[0] === '/') return '.' . $v;
-    return asset('uploads/' . $v);
+    // Fallback placeholder
+    if (!$v) {
+        return asset('public/images/placeholder-photo.jpg');
+    }
+
+    // If DB already has full http(s) url → use as-is
+    if (preg_match('~^https?://~i', $v)) {
+        return $v;
+    }
+
+    // If DB already has a project-relative path like "./something"
+    if ($v[0] === '.') {
+        return $v;
+    }
+
+    // If DB has a leading "/" (absolute from web root), make it project-relative "./..."
+    if ($v[0] === '/') {
+        return '.' . $v;
+    }
+
+    // If DB already starts with "uploads/" or "public/uploads/", don't prepend again
+    if (strpos($v, 'uploads/') === 0 || strpos($v, 'public/uploads/') === 0) {
+        return asset($v);          // e.g. "uploads/abc.jpg" -> "./uploads/abc.jpg"
+    }
+
+    // Otherwise, treat it as just a filename and store under uploads/
+    return asset('uploads/' . $v); // e.g. "abc.jpg" -> "./uploads/abc.jpg"
 }
+
 
 function redirect(string $to): void {
     if (preg_match('~^https?://~i', $to)) {

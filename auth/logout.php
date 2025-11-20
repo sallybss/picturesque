@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../includes/flash.php';
+require_once __DIR__ . '/../includes/init.php';
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
