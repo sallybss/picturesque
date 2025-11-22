@@ -52,27 +52,6 @@ a.link:hover {
    1) GLOBAL UI PRIMITIVES
    ========================================================= */
 
-/* Flash messages */
-.flash {
-    padding: 10px 12px;
-    border-radius: 8px;
-    margin: 12px auto;
-    max-width: 1280px;
-    font-size: 14px;
-}
-
-.flash.ok {
-    background: #dcfce7;
-    color: #166534;
-    border: 1px solid #bbf7d0;
-}
-
-.flash.err {
-    background: #fee2e2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
-}
-
 /* Toast container (top-right corner) */
 .flash-stack {
   position: fixed;
@@ -421,7 +400,7 @@ img.c-avatar {
     display: grid;
     grid-template-columns: 260px minmax(0, 1fr);
     gap: 20px;
-    margin: 32px 30px;
+    margin: 32px 30px 32px 30px;
     padding: 0 10px;
     max-width: none;
 }
@@ -438,12 +417,15 @@ img.c-avatar {
 
 /* Sidebar */
 .sidenav {
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 16px;
     position: sticky;
-    top: 20px;
+    top: 32px;
+    bottom: 32px;
+    height: auto;
+    padding: 16px;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid var(--line);
+     max-height: calc(100vh - 64px);
 }
 
 .brand {
