@@ -9,5 +9,5 @@ $_SESSION = [];
 session_destroy();
 
 set_flash('ok', 'You are logged out.');
-header('Location: ./login.php');
+header('Location: ./home_guest.php');
 exit;
