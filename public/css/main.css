@@ -807,6 +807,9 @@ img.c-avatar {
 .card-title {
     font-weight: 600;     
     line-height: 1.25;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .card:hover .card-title{
@@ -2285,6 +2288,7 @@ body.guest-locked {
     margin: 0 auto;
 }
 
+
 /* Tablets & small laptops */
 @media (max-width: 768px) {
   .card-cover img {
@@ -2306,8 +2310,6 @@ body.guest-locked {
     max-height: 380px;   
   }
 }
-
-
 
 /* ==== Single picture view (picture.php) ==== */
 

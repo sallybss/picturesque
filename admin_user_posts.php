@@ -80,9 +80,16 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
         <?php foreach ($posts as $p): ?>
           <?php $cover = img_from_db($p['picture_url']); ?>
           <article class="card">
-            <img src="<?= $cover ?>" alt="">
+            <a href="picture.php?id=<?= (int)$p['picture_id'] ?>" class="card-cover">
+              <img src="<?= $cover ?>" alt="">
+            </a>
+
             <div class="card-body">
-              <div class="card-title"><?= htmlspecialchars($p['picture_title']) ?></div>
+              <div class="card-title">
+                <a href="picture.php?id=<?= (int)$p['picture_id'] ?>" class="card-title-link">
+                  <?= htmlspecialchars($p['picture_title']) ?>
+                </a>
+              </div>
 
               <?php if (!empty($p['picture_description'])): ?>
                 <div class="card-desc"><?= htmlspecialchars($p['picture_description']) ?></div>
@@ -112,6 +119,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
           <p class="muted">No posts yet.</p>
         <?php endif; ?>
       </section>
+
     </main>
   </div>
 
@@ -123,7 +131,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
       if (!flashes.length) return;
 
       setTimeout(() => {
-        flashes.forEach(flash => { 
+        flashes.forEach(flash => {
           flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
           flash.style.opacity = '0';
           flash.style.transform = 'translateY(-6px)';
@@ -132,7 +140,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
         });
       }, 2000);
     });
-    
+
     (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');

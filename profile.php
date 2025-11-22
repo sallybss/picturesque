@@ -119,7 +119,10 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
         <?php foreach ($myPics as $p): ?>
           <?php $cardImg = img_from_db($p['picture_url'] ?? $p['pic_url'] ?? ''); ?>
           <article class="card">
-            <img src="<?= $cardImg ?>" alt="">
+            <div class="card-cover">
+              <img src="<?= $cardImg ?>" alt="">
+            </div>
+            
             <div class="card-body">
               <div class="card-title"><?= htmlspecialchars($p['picture_title']) ?></div>
               <?php if (!empty($p['picture_description'])): ?>
@@ -168,7 +171,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
         });
       }, 2000);
     });
-    
+
     (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
