@@ -354,6 +354,27 @@ img.c-avatar {
     contain: paint;  
 }
 
+/* Title – single line with ellipsis */
+.card-title-link {
+    display: block;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Description – max 3 lines, then "…" */
+.card-desc {
+    margin-top: 4px;
+    font-size: 0.9rem;
+    color: var(--muted, #555);
+    display: -webkit-box; 
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 .card:hover {
     box-shadow: 0 10px 28px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.06);
     transform: translateY(-2px); 
@@ -2239,15 +2260,54 @@ body.guest-locked {
       color: #333
     }
 
-    .card-cover {
-      display: block
-    }
+/* ==== Card images in the feed (index.php) ==== */
 
-    .card-cover img {
-      display: block;
-      width: 100%;
-      height: auto
-    }
+.card-cover {
+    display: block;
+    overflow: hidden;        
+    border-radius: 16px 16px 0 0; 
+}
+
+.card-cover img {
+    display: block;
+    width: 100%;
+    height: auto;   
+    max-height: 520px;          
+}
+
+
+/* Tablets & small laptops */
+@media (max-width: 768px) {
+  .card-cover img {
+    max-height: 420px;     
+  }
+
+  .single-wrap .card > img {
+    max-height: 500px;
+  }
+}
+
+/* Phones */
+@media (max-width: 480px) {
+  .card-cover img {
+    max-height: 320px;    
+  }
+
+  .single-wrap .card > img {
+    max-height: 380px;   
+  }
+}
+
+
+
+/* ==== Single picture view (picture.php) ==== */
+
+.single-wrap .card > img {
+    display: block;
+    max-height: 600px; 
+    width: 100%;
+    object-fit: contain; 
+}
 
     .card-title a.card-title-link {
       color: inherit;

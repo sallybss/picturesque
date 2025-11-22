@@ -191,15 +191,16 @@ $hotCount     = count($hotIds);
                 </form>
               <?php endif; ?>
 
-
               <div class="card-title">
                 <a class="card-title-link" href="picture.php?id=<?= $picId ?>">
-                  <?= htmlspecialchars($p['pic_title']) ?>
+                  <?= htmlspecialchars(truncate_text($p['pic_title'] ?? '', 60)) ?>
                 </a>
               </div>
 
               <?php if (!empty($p['pic_desc'])): ?>
-                <div class="card-desc"><?= htmlspecialchars($p['pic_desc']) ?></div>
+                <div class="card-desc">
+                  <?= htmlspecialchars(truncate_text($p['pic_desc'] ?? '', 140)) ?>
+                </div>
               <?php endif; ?>
 
               <div class="author-row">
