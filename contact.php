@@ -12,9 +12,10 @@ if (!$meRow) {
   exit;
 }
 
+$row = $profiles->getLoginEmailAndRole($me);
 $isAdmin      = strtolower(trim($meRow['role'] ?? '')) === 'admin';
 $prefillName  = $meRow['display_name'] ?? '';
-$prefillEmail = $meRow['email'] ?? '';
+$prefillEmail = $row['login_email'] ?? '';   // <-- FIXED
 
 $cssPath = __DIR__ . '/public/css/main.css';
 $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
@@ -68,7 +69,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
               <div class="contact-grid2">
                 <div>
                   <div class="contact-label">Name</div>
-                  <input class="contact-input" name="name" required value="<?= htmlspecialchars($prefillName) ?>">
+                  <input class="contact-input" name="name" value="<?= htmlspecialchars($prefillName) ?>" disabled>
                 </div>
                 <div>
                   <div class="contact-label">Company (Optional)</div>
@@ -79,23 +80,30 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
               <div class="contact-grid2">
                 <div>
                   <div class="contact-label">Email</div>
-                  <input class="contact-input" type="email" name="email" required value="<?= htmlspecialchars($prefillEmail) ?>">
+                  <input class="contact-input" type="email" name="email" value="<?= htmlspecialchars($prefillEmail) ?>" disabled>
                 </div>
                 <div>
-                  <div class="contact-label">Subject</div>
-                  <input class="contact-input" name="subject" required>
+                  <div class="contact-label" style="display:flex; justify-content:space-between;">
+                    Subject
+                    <span id="subjectCount" class="field-counter">0 / 100</span>
+                  </div>
+                  <input class="contact-input" id="subjectInput" name="subject" maxlength="100" required>
                 </div>
               </div>
 
               <div>
-                <div class="contact-label">Message</div>
-                <textarea class="contact-textarea" name="message" required></textarea>
+                <div class="contact-label" style="display:flex; justify-content:space-between;">
+                  Message
+                  <span id="msgCount" class="field-counter">0 / 500</span>
+                </div>
+                <textarea class="contact-textarea" id="msgInput" name="message" maxlength="500" required></textarea>
               </div>
 
               <div class="contact-actions">
                 <button type="submit" class="btn-primary">Submit</button>
               </div>
             </form>
+
           </div>
         </div>
       </section>
@@ -119,7 +127,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
         });
       }, 2000);
     });
-    
+
     (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
@@ -147,6 +155,58 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
         if (e.key === 'Escape') closeMenu();
       });
     })();
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+  /* ===== SUBJECT (100 chars) ===== */
+  const subject = document.getElementById("subjectInput");
+  const subjectCount = document.getElementById("subjectCount");
+  const SUBJECT_MAX = 100;
+
+  if (subject) {
+    subject.addEventListener("input", () => {
+      let text = subject.value;
+      if (text.length > SUBJECT_MAX) {
+        text = text.slice(0, SUBJECT_MAX);
+        subject.value = text;
+      }
+      subjectCount.textContent = `${text.length} / ${SUBJECT_MAX}`;
+
+      if (text.length >= SUBJECT_MAX) {
+        subject.classList.add("at-limit");
+        subjectCount.classList.add("at-limit");
+      } else {
+        subject.classList.remove("at-limit");
+        subjectCount.classList.remove("at-limit");
+      }
+    });
+  }
+
+  /* ===== MESSAGE (500 chars) ===== */
+  const msg = document.getElementById("msgInput");
+  const msgCount = document.getElementById("msgCount");
+  const MSG_MAX = 500;
+
+  if (msg) {
+    msg.addEventListener("input", () => {
+      let text = msg.value;
+      if (text.length > MSG_MAX) {
+        text = text.slice(0, MSG_MAX);
+        msg.value = text;
+      }
+      msgCount.textContent = `${text.length} / ${MSG_MAX}`;
+
+      if (text.length >= MSG_MAX) {
+        msg.classList.add("at-limit");
+        msgCount.classList.add("at-limit");
+      } else {
+        msg.classList.remove("at-limit");
+        msgCount.classList.remove("at-limit");
+      }
+    });
+  }
+});
+
   </script>
 </body>
 
