@@ -360,10 +360,13 @@ img.c-avatar {
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    display: -webkit-box; 
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
 }
 
-/* Description – max 3 lines, then "…" */
+/* Description – max 1 line, then "…" */
 .card-desc {
     margin-top: 4px;
     font-size: 0.9rem;
@@ -870,8 +873,6 @@ img.c-avatar {
     width: 100%;
   }
 }
-
-
 
 /* =========================================================
    4) FORMS (Create, shared)
@@ -2275,6 +2276,14 @@ body.guest-locked {
     max-height: 520px;          
 }
 
+.single-wrap .card img {
+    width: auto;
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+}
 
 /* Tablets & small laptops */
 @media (max-width: 768px) {
@@ -2315,7 +2324,7 @@ body.guest-locked {
     }
 
     .card-title a.card-title-link:hover {
-      text-decoration: underline
+      text-decoration: none
     }
 
     .content-top .search-wrap {
@@ -2463,5 +2472,41 @@ body.guest-locked .content-top {
 body.sidebar-open .sidebar-backdrop{
   opacity: 1;
   pointer-events: auto;
+}
+
+.char-hint {
+    margin-top: 4px;
+    font-size: 0.8rem;
+    color: var(--muted, #666);
+    text-align: right;
+}
+
+.input.at-limit {
+    border-color: #e74c3c;
+}
+
+.char-hint.at-limit {
+    color: #e74c3c;
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.field-counter {
+  font-size: 0.8rem;
+  color: var(--muted, #777);
+}
+
+.input.at-limit {
+  border-color: #ef4444;
+}
+
+.field-counter.at-limit {
+  color: #ef4444;
+  font-weight: 500;
 }
 

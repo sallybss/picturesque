@@ -14,12 +14,11 @@ if (!$row) {
 
 $isAdmin = ($row['role'] ?? '') === 'admin';
 $currentEmail = $row['login_email'] ?? '';
-
 $meRow = $profiles->getHeader($me);
-
 $cssPath = __DIR__ . '/public/css/main.css';
 $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 ?>
+
 <!doctype html>
 <html lang="en">
 
@@ -105,7 +104,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
       if (!flashes.length) return;
 
       setTimeout(() => {
-        flashes.forEach(flash => {A 
+        flashes.forEach(flash => {
           flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
           flash.style.opacity = '0';
           flash.style.transform = 'translateY(-6px)';

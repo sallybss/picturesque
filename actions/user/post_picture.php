@@ -11,12 +11,12 @@ if (isset($_POST['csrf']) && !check_csrf($_POST['csrf'])) {
 }
 
 $me = Auth::requireUserOrRedirect('../../auth/login.php');
-
 $title = trim($_POST['picture_title'] ?? $_POST['title'] ?? '');
+$title = mb_substr($title, 0, 50); 
 $desc  = trim($_POST['picture_description'] ?? $_POST['desc'] ?? '');
+$desc  = mb_substr($desc, 0, 250);
 $file  = $_FILES['photo'] ?? null;
 $catId = (int)($_POST['category_id'] ?? 0);
-
 $redirect = isset($_POST['redirect']) ? (string)$_POST['redirect'] : '';
 
 if ($redirect === '' && !empty($_SERVER['HTTP_REFERER'])) {

@@ -91,7 +91,7 @@ $publicUploads = $paths->uploads;
       if (!flashes.length) return;
 
       setTimeout(() => {
-        flashes.forEach(flash => {A 
+        flashes.forEach(flash => {
           flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
           flash.style.opacity = '0';
           flash.style.transform = 'translateY(-6px)';

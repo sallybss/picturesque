@@ -92,16 +92,30 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
             <button type="button" class="dz-remove" id="removeBtn" aria-label="Remove image" hidden>×</button>
           </div>
 
-          <p class="muted" style="margin-top:6px;">Leave image empty to keep the current photo.</p>
+          <p class="muted" style="margin-bottom:25px; font-size:0.95rem;">
+            Leave image empty to keep the current photo.
+          </p>
 
           <div class="form-row">
-            <label class="label">Title</label>
-            <input class="input" type="text" name="title" value="<?= htmlspecialchars($pic['picture_title']) ?>" required>
+            <div class="label-row">
+              <label class="label" for="titleInput">Title</label>
+              <span class="field-counter" id="titleCount">0 / 50</span>
+            </div>
+            <input id="titleInput"
+              class="input"
+              type="text"
+              name="title"
+              value="<?= htmlspecialchars($pic['picture_title']) ?>"
+              placeholder="Give your photo a title"
+              required>
           </div>
 
           <div class="form-row">
-            <label class="label">Description</label>
-            <textarea class="input textarea" name="desc" rows="5"><?= htmlspecialchars($pic['picture_description']) ?></textarea>
+            <div class="label-row">
+              <label class="label" for="descInput">Description</label>
+              <span class="field-counter" id="descCount">0 / 250</span>
+            </div>
+            <textarea id="descInput" class="input textarea" name="desc" rows="5" placeholder="Optional description" maxlength="250"><?= htmlspecialchars($pic['picture_description']) ?></textarea>
           </div>
 
           <div class="form-row">
@@ -110,7 +124,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
               <option value="">Choose a category…</option>
               <?php foreach ($cats as $c): ?>
                 <option value="<?= (int)$c['category_id'] ?>"
-                  <?= (int)$pic['category_id'] === (int)$c['category_id'] ? 'selected' : '' ?>>
+                  <?= (int)($pic['category_id'] ?? 0) === (int)$c['category_id'] ? 'selected' : '' ?>>
                   <?= htmlspecialchars($c['name']) ?>
                 </option>
               <?php endforeach; ?>
@@ -134,7 +148,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
       if (!flashes.length) return;
 
       setTimeout(() => {
-        flashes.forEach(flash => {A 
+        flashes.forEach(flash => {
           flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
           flash.style.opacity = '0';
           flash.style.transform = 'translateY(-6px)';
@@ -143,7 +157,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
         });
       }, 2000);
     });
-    
+
     (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
@@ -182,11 +196,13 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
     const originalUrl = "<?= htmlspecialchars($currentImgUrl) ?>";
 
     (function() {
-      preview.src = originalUrl;
-      preview.hidden = false;
-      removeBtn.hidden = false;
-      dzEmpty.hidden = true;
-      dz.classList.add('has-image');
+      if (originalUrl) {
+        preview.src = originalUrl;
+        preview.hidden = false;
+        removeBtn.hidden = false;
+        dzEmpty.hidden = true;
+        dz.classList.add('has-image');
+      }
     })();
 
     browseBtn.addEventListener('click', () => input.click());
@@ -253,6 +269,62 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
       e.preventDefault();
       clearFile();
     });
+
+    // --- Description live counter (max 250 chars) ---
+    const descField = document.getElementById('descInput');
+    const descCounter = document.getElementById('descCount');
+    const DESC_MAX = 250;
+
+    if (descField && descCounter) {
+      const updateDescCounter = () => {
+        let text = descField.value;
+
+        if (text.length > DESC_MAX) {
+          text = text.slice(0, DESC_MAX);
+          descField.value = text;
+        }
+
+        const len = text.length;
+        descCounter.textContent = `${len} / ${DESC_MAX}`;
+
+        if (len >= DESC_MAX) {
+          descField.classList.add('at-limit');
+          descCounter.classList.add('at-limit');
+        } else {
+          descField.classList.remove('at-limit');
+          descCounter.classList.remove('at-limit');
+        }
+      };
+
+      descField.addEventListener('input', updateDescCounter);
+      updateDescCounter();
+    }
+
+    // Title character counter (max 20 chars)
+    const titleInput = document.getElementById('titleInput');
+    const titleCount = document.getElementById('titleCount');
+    const TITLE_MAX = 50;
+
+    if (titleInput && titleCount) {
+      const updateTitleCounter = () => {
+        let text = titleInput.value;
+
+        if (text.length > TITLE_MAX) {
+          text = text.slice(0, TITLE_MAX);
+          titleInput.value = text;
+          titleInput.classList.add('at-limit');
+          titleCount.classList.add('at-limit');
+        } else {
+          titleInput.classList.remove('at-limit');
+          titleCount.classList.remove('at-limit');
+        }
+
+        titleCount.textContent = `${text.length} / ${TITLE_MAX}`;
+      };
+
+      titleInput.addEventListener('input', updateTitleCounter);
+      updateTitleCounter();
+    }
   </script>
 </body>
 

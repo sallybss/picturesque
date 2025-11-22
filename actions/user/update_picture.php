@@ -12,11 +12,13 @@ if (!check_csrf($_POST['csrf'] ?? null)) {
 
 $me    = Auth::requireUserOrRedirect('../../auth/login.php');
 $pid   = (int)($_POST['picture_id'] ?? 0);
-$title = trim($_POST['title'] ?? '');
-$desc  = trim($_POST['desc'] ?? '');
+$title = trim($_POST['picture_title'] ?? $_POST['title'] ?? '');
+$desc  = trim($_POST['picture_description'] ?? $_POST['desc'] ?? '');
 $reset = !empty($_POST['reset_image']);
-
 $catId = (int)($_POST['category_id'] ?? 0);
+$title = mb_substr($title, 0, 50);  
+$desc  = mb_substr($desc, 0, 250);  
+
 
 if ($pid <= 0 || $title === '' || $catId <= 0) {
     set_flash('err', 'Invalid form.');

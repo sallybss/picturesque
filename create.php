@@ -56,7 +56,6 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
 
         <form method="post" action="./actions/user/post_picture.php" enctype="multipart/form-data" class="create-form">
           <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
-
           <input id="photo" class="file-input" type="file" name="photo" accept="image/*" required>
 
           <div class="dropzone" id="dropzone">
@@ -72,14 +71,25 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
             <button type="button" class="dz-remove" id="removeBtn" aria-label="Remove image" hidden>×</button>
           </div>
 
+          <p class="muted" style="margin-bottom:25px; font-size: 0.95rem;">
+            Images are automatically resized to fit the feed layout.
+            Full images are visible when opening the picture.
+          </p>
+
           <div class="form-row">
-            <label class="label">Title</label>
-            <input class="input" type="text" name="title" placeholder="Give your photo a title" required>
+            <div class="label-row">
+              <label class="label" for="titleInput">Title</label>
+              <span class="field-counter" id="titleCount">0 / 50</span>
+            </div>
+            <input id="titleInput" class="input" type="text" name="title" placeholder="Give your photo a title" maxlength="50" required>
           </div>
 
           <div class="form-row">
-            <label class="label">Description</label>
-            <textarea class="input textarea" name="desc" rows="5" placeholder="Optional description"></textarea>
+            <div class="label-row">
+              <label class="label" for="descInput">Description</label>
+              <span class="field-counter" id="descCount">0 / 250</span>
+            </div>
+            <textarea id="descInput" class="input textarea" name="desc" rows="5" placeholder="Optional description" maxlength="250"></textarea>
           </div>
 
           <div class="form-row">
@@ -112,7 +122,6 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
 
       setTimeout(() => {
         flashes.forEach(flash => {
-          A
           flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
           flash.style.opacity = '0';
           flash.style.transform = 'translateY(-6px)';
@@ -218,6 +227,63 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
       e.preventDefault();
       clearFile();
     });
+
+    // Description live counter (max 250 chars)
+    const descField = document.getElementById('descInput');
+    const descCounter = document.getElementById('descCount');
+    const DESC_MAX = 250;
+
+    if (descField && descCounter) {
+      const updateDescCounter = () => {
+        let text = descField.value;
+
+        if (text.length > DESC_MAX) {
+          text = text.slice(0, DESC_MAX);
+          descField.value = text;
+        }
+
+        const len = text.length;
+        descCounter.textContent = `${len} / ${DESC_MAX}`;
+
+        if (len >= DESC_MAX) {
+          descField.classList.add('at-limit');
+          descCounter.classList.add('at-limit');
+        } else {
+          descField.classList.remove('at-limit');
+          descCounter.classList.remove('at-limit');
+        }
+      };
+
+      descField.addEventListener('input', updateDescCounter);
+      updateDescCounter();
+    }
+
+
+    // Title character counter (max 50 chars)
+    const titleInput = document.getElementById('titleInput');
+    const titleCount = document.getElementById('titleCount');
+    const TITLE_MAX = 50;
+
+    if (titleInput && titleCount) {
+      const updateTitleCounter = () => {
+        let text = titleInput.value;
+
+        if (text.length > TITLE_MAX) {
+          text = text.slice(0, TITLE_MAX);
+          titleInput.value = text;
+          titleInput.classList.add('at-limit');
+          titleCount.classList.add('at-limit');
+        } else {
+          titleInput.classList.remove('at-limit');
+          titleCount.classList.remove('at-limit');
+        }
+
+        titleCount.textContent = `${text.length} / ${TITLE_MAX}`;
+      };
+
+      titleInput.addEventListener('input', updateTitleCounter);
+      updateTitleCounter();
+    }
   </script>
 </body>
 
