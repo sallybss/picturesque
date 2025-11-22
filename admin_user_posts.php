@@ -7,9 +7,9 @@ $me = Auth::requireAdminOrRedirect('./index.php');
 
 $userId = (int)($_GET['id'] ?? 0);
 if ($userId <= 0) {
-    set_flash('err', 'Missing user id.');
-    header('Location: ./admin.php');
-    exit;
+  set_flash('err', 'Missing user id.');
+  header('Location: ./admin.php');
+  exit;
 }
 
 $paths    = new Paths();
@@ -18,16 +18,16 @@ $profiles = new ProfileRepository();
 $meRow   = $profiles->getHeader($me);
 $isAdmin = (strtolower($meRow['role'] ?? 'user') === 'admin');
 if (!$isAdmin) {
-    set_flash('err', 'Admins only.');
-    header('Location: ./index.php');
-    exit;
+  set_flash('err', 'Admins only.');
+  header('Location: ./index.php');
+  exit;
 }
 
 $user = $profiles->getById($userId);
 if (!$user) {
-    set_flash('err', 'User not found.');
-    header('Location: ./admin.php');
-    exit;
+  set_flash('err', 'User not found.');
+  header('Location: ./admin.php');
+  exit;
 }
 
 $picturesRepo = new PictureRepository();
@@ -38,15 +38,24 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 ?>
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>Admin · Posts of <?= htmlspecialchars($user['display_name']) ?></title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css?v=<?= $cssVer ?>">
 </head>
+
 <body>
-  <?php if ($m = get_flash('ok')):  ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
-  <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
+  <div id="flash-stack" class="flash-stack">
+    <?php if ($m = get_flash('ok')): ?>
+      <div class="flash flash-ok"><?= htmlspecialchars($m) ?></div>
+    <?php endif; ?>
+
+    <?php if ($m = get_flash('err')): ?>
+      <div class="flash flash-err"><?= htmlspecialchars($m) ?></div>
+    <?php endif; ?>
+  </div>
 
   <div class="layout">
     <?php render_sidebar(['isAdmin' => true]); ?>
@@ -87,9 +96,9 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
                 <span class="spacer"></span>
 
                 <form method="post"
-                      action="./actions/admin/delete_picture.php"
-                      onsubmit="return confirm('Delete this picture?');"
-                      style="display:inline">
+                  action="./actions/admin/delete_picture.php"
+                  onsubmit="return confirm('Delete this picture?');"
+                  style="display:inline">
                   <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                   <input type="hidden" name="picture_id" value="<?= (int)$p['picture_id'] ?>">
                   <button class="btn-danger pill" type="submit">Delete</button>
@@ -109,11 +118,26 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const flashes = document.querySelectorAll('.flash-stack .flash');
+      if (!flashes.length) return;
+
+      setTimeout(() => {
+        flashes.forEach(flash => {A 
+          flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+          flash.style.opacity = '0';
+          flash.style.transform = 'translateY(-6px)';
+
+          setTimeout(() => flash.remove(), 500);
+        });
+      }, 2000);
+    });
+    
     (function() {
-      const body      = document.body;
-      const btn       = document.getElementById('hamburger');
-      const backdrop  = document.getElementById('sidebarBackdrop');
-      const closeBtn  = document.getElementById('closeSidebar');
+      const body = document.body;
+      const btn = document.getElementById('hamburger');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      const closeBtn = document.getElementById('closeSidebar');
 
       function openMenu() {
         body.classList.add('sidebar-open');
@@ -129,7 +153,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
         body.classList.contains('sidebar-open') ? closeMenu() : openMenu();
       }
 
-      btn      && btn.addEventListener('click', toggle);
+      btn && btn.addEventListener('click', toggle);
       backdrop && backdrop.addEventListener('click', closeMenu);
       closeBtn && closeBtn.addEventListener('click', closeMenu);
 
@@ -140,17 +164,20 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
   </script>
 
   <?php if (!empty($_GET['afterDelete'])): ?>
-  <script>
-    (function () {
-      if (!window.history || !history.pushState) return;
+    <script>
+      (function() {
+        if (!window.history || !history.pushState) return;
 
-      history.pushState({afterDelete: true}, "", window.location.href);
+        history.pushState({
+          afterDelete: true
+        }, "", window.location.href);
 
-      window.addEventListener("popstate", function () {
-        window.location.href = "admin.php";
-      });
-    })();
-  </script>
+        window.addEventListener("popstate", function() {
+          window.location.href = "admin.php";
+        });
+      })();
+    </script>
   <?php endif; ?>
 </body>
+
 </html>

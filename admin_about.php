@@ -4,7 +4,6 @@ require_once __DIR__ . '/includes/views/sidebar.php';
 
 $me = Auth::requireAdminOrRedirect('./index.php');
 
-
 $paths = new Paths();
 
 $profiles = new ProfileRepository();
@@ -23,6 +22,7 @@ $imagePath = $page['image_path'] ?? null;
 
 $publicUploads = $paths->uploads;
 ?>
+
 <!doctype html>
 <html lang="en">
 
@@ -34,9 +34,15 @@ $publicUploads = $paths->uploads;
 </head>
 
 <body>
-  <?php if ($m = get_flash('ok')):  ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
-  <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
+  <div id="flash-stack" class="flash-stack">
+    <?php if ($m = get_flash('ok')): ?>
+      <div class="flash flash-ok"><?= htmlspecialchars($m) ?></div>
+    <?php endif; ?>
 
+    <?php if ($m = get_flash('err')): ?>
+      <div class="flash flash-err"><?= htmlspecialchars($m) ?></div>
+    <?php endif; ?>
+  </div>
 
   <div class="layout">
     <?php render_sidebar(['isAdmin' => true]); ?>
@@ -80,6 +86,21 @@ $publicUploads = $paths->uploads;
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const flashes = document.querySelectorAll('.flash-stack .flash');
+      if (!flashes.length) return;
+
+      setTimeout(() => {
+        flashes.forEach(flash => {A 
+          flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+          flash.style.opacity = '0';
+          flash.style.transform = 'translateY(-6px)';
+
+          setTimeout(() => flash.remove(), 500);
+        });
+      }, 2000);
+    });
+    
     (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');

@@ -176,9 +176,15 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
 </head>
 
 <body>
+  <div id="flash-stack" class="flash-stack">
+    <?php if ($m = get_flash('ok')): ?>
+      <div class="flash flash-ok"><?= htmlspecialchars($m) ?></div>
+    <?php endif; ?>
 
-  <?php if ($m = get_flash('ok')):  ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
-  <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
+    <?php if ($m = get_flash('err')): ?>
+      <div class="flash flash-err"><?= htmlspecialchars($m) ?></div>
+    <?php endif; ?>
+  </div>
 
   <div class="layout">
     <?php
@@ -314,6 +320,21 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
   </div>
 
   <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const flashes = document.querySelectorAll('.flash-stack .flash');
+      if (!flashes.length) return;
+
+      setTimeout(() => {
+        flashes.forEach(flash => {
+          flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+          flash.style.opacity = '0';
+          flash.style.transform = 'translateY(-6px)';
+
+          setTimeout(() => flash.remove(), 500);
+        });
+      }, 2000); 
+    });
+
     (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
@@ -343,4 +364,5 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
     })();
   </script>
 </body>
+
 </html>

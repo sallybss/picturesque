@@ -4,7 +4,6 @@ require_once __DIR__ . '/base_repository.php';
 
 class FeaturedRepository extends BaseRepository
 {
-    // Monday for any given date (defaults to today)
     private function mondayOfWeek(?DateTime $d = null): string
     {
         $d ??= new DateTime('today');
@@ -12,7 +11,6 @@ class FeaturedRepository extends BaseRepository
         return $d->format('Y-m-d');
     }
 
-    /** Return up to 10 featured pictures for the given week (defaults to this week). */
     public function listForWeek(?DateTime $d = null): array
     {
         $week = $this->mondayOfWeek($d);
@@ -29,7 +27,6 @@ class FeaturedRepository extends BaseRepository
             LIMIT 10
         ";
 
-        // guard in case table doesn't exist locally yet
         try {
             $st = $this->db->prepare($sql);
         } catch (\mysqli_sql_exception $e) {
@@ -44,7 +41,6 @@ class FeaturedRepository extends BaseRepository
         return $rows;
     }
 
-    /** Replace the selection for a given week with up to 10 IDs. */
     public function replaceWeekSelection(array $pictureIds, int $adminProfileId, ?DateTime $week = null): void
     {
         $weekStart = $this->mondayOfWeek($week);

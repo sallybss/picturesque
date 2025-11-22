@@ -22,15 +22,24 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 ?>
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>Profile Settings · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css?v=<?= $cssVer ?>">
 </head>
+
 <body>
-  <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
-  <?php if ($m = get_flash('ok')): ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
+  <div id="flash-stack" class="flash-stack">
+    <?php if ($m = get_flash('ok')): ?>
+      <div class="flash flash-ok"><?= htmlspecialchars($m) ?></div>
+    <?php endif; ?>
+
+    <?php if ($m = get_flash('err')): ?>
+      <div class="flash flash-err"><?= htmlspecialchars($m) ?></div>
+    <?php endif; ?>
+  </div>
 
   <div class="layout">
     <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
@@ -55,7 +64,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
               <div class="row">
                 <label class="label" for="login_email">Login Email</label>
                 <input class="input" id="login_email" type="email" name="login_email"
-                       value="<?= htmlspecialchars($currentEmail) ?>" required>
+                  value="<?= htmlspecialchars($currentEmail) ?>" required>
               </div>
 
               <div class="row sub"><b>Change Password</b></div>
@@ -63,19 +72,19 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
               <div class="row">
                 <label class="label" for="current_password">Current Password</label>
                 <input class="input" id="current_password" type="password" name="current_password"
-                       placeholder="Enter current password if changing password">
+                  placeholder="Enter current password if changing password">
               </div>
 
               <div class="row">
                 <label class="label" for="new_password">New Password</label>
                 <input class="input" id="new_password" type="password" name="new_password"
-                       placeholder="Minimum 8 characters">
+                  placeholder="Minimum 8 characters">
               </div>
 
               <div class="row">
                 <label class="label" for="confirm_password">Confirm New Password</label>
                 <input class="input" id="confirm_password" type="password" name="confirm_password"
-                       placeholder="Repeat new password">
+                  placeholder="Repeat new password">
               </div>
 
               <div class="btns">
@@ -91,6 +100,21 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const flashes = document.querySelectorAll('.flash-stack .flash');
+      if (!flashes.length) return;
+
+      setTimeout(() => {
+        flashes.forEach(flash => {A 
+          flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+          flash.style.opacity = '0';
+          flash.style.transform = 'translateY(-6px)';
+
+          setTimeout(() => flash.remove(), 500);
+        });
+      }, 2000);
+    });
+    
     (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
@@ -120,4 +144,5 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
     })();
   </script>
 </body>
+
 </html>

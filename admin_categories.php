@@ -8,7 +8,11 @@ $me = Auth::requireUserOrRedirect('./auth/login.php');
 $profiles = new ProfileRepository();
 $meRow    = $profiles->getHeader($me);
 $isAdmin  = strtolower(trim($meRow['role'] ?? '')) === 'admin';
-if (!$isAdmin) { set_flash('err','Admins only.'); header('Location: ./index.php'); exit; }
+if (!$isAdmin) {
+  set_flash('err', 'Admins only.');
+  header('Location: ./index.php');
+  exit;
+}
 
 $catsRepo = new CategoriesRepository();
 
@@ -24,15 +28,24 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
 ?>
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>Manage Categories · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css?v=<?= $ver ?>">
 </head>
+
 <body>
-  <?php if ($m = get_flash('ok')):  ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
-  <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
+  <div id="flash-stack" class="flash-stack">
+    <?php if ($m = get_flash('ok')): ?>
+      <div class="flash flash-ok"><?= htmlspecialchars($m) ?></div>
+    <?php endif; ?>
+
+    <?php if ($m = get_flash('err')): ?>
+      <div class="flash flash-err"><?= htmlspecialchars($m) ?></div>
+    <?php endif; ?>
+  </div>
 
   <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
 
@@ -100,6 +113,22 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const flashes = document.querySelectorAll('.flash-stack .flash');
+      if (!flashes.length) return;
+
+      setTimeout(() => {
+        flashes.forEach(flash => {
+          A
+          flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+          flash.style.opacity = '0';
+          flash.style.transform = 'translateY(-6px)';
+
+          setTimeout(() => flash.remove(), 500);
+        });
+      }, 2000);
+    });
+
     (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
@@ -129,4 +158,5 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
     })();
   </script>
 </body>
+
 </html>

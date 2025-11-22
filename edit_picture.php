@@ -45,15 +45,20 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 </head>
 
 <body>
+  <div id="flash-stack" class="flash-stack">
+    <?php if ($m = get_flash('ok')): ?>
+      <div class="flash flash-ok"><?= htmlspecialchars($m) ?></div>
+    <?php endif; ?>
 
-  <?php if ($m = get_flash('err')): ?><div class="flash err"><?= htmlspecialchars($m) ?></div><?php endif; ?>
-  <?php if ($m = get_flash('ok')):  ?><div class="flash ok"><?= htmlspecialchars($m) ?></div><?php endif; ?>
+    <?php if ($m = get_flash('err')): ?>
+      <div class="flash flash-err"><?= htmlspecialchars($m) ?></div>
+    <?php endif; ?>
+  </div>
 
   <div class="layout">
     <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
 
     <main class="content">
-      <!-- top row: hamburger on the left, userbox on the right -->
       <div class="content-top">
         <div class="top-actions" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
           <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
@@ -124,6 +129,21 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const flashes = document.querySelectorAll('.flash-stack .flash');
+      if (!flashes.length) return;
+
+      setTimeout(() => {
+        flashes.forEach(flash => {A 
+          flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+          flash.style.opacity = '0';
+          flash.style.transform = 'translateY(-6px)';
+
+          setTimeout(() => flash.remove(), 500);
+        });
+      }, 2000);
+    });
+    
     (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
