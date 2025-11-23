@@ -150,12 +150,11 @@ textarea {
 }
 /* Profile settings form layout */
 .form-row {
-    display: grid;
-    grid-template-columns: 180px 1fr;
-    gap: 18px;
-    margin-bottom: 18px;
-    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
+
 
 .form-row .label {
     margin: 0; 
