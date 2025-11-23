@@ -4,13 +4,21 @@ require_once __DIR__ . '/base_repository.php';
 
 class PictureRepository extends BaseRepository
 {
+    private function sanitizeSort(string $sort): string
+    {
+        return match ($sort) {
+            'old' => 'p.created_at ASC',
+            'new' => 'p.created_at DESC',
+            default => 'p.created_at DESC'
+        };
+    }
+    
     public function feed(
         int $viewerId,
         ?string $q = null,
         ?string $catSlug = null,
-        string $sort = 'new'     
-    ): array
-    {
+        string $sort = 'new'
+    ): array {
         $orderBy = ($sort === 'old') ? 'p.created_at ASC' : 'p.created_at DESC';
 
         $sql = "
