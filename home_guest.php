@@ -92,20 +92,26 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
       <section class="feed feed-locked">
         <?php foreach ($pictures as $p): ?>
           <?php
-          $coverUrl = img_from_db($p['picture_url']);
+          $coverUrl  = img_from_db($p['picture_url']);
           $avatarUrl = !empty($p['avatar_photo']) ? img_from_db($p['avatar_photo']) : 'https://placehold.co/24x24?text=%20';
           ?>
           <article class="card">
-            <img src="<?= $coverUrl ?>" alt="">
+            <div class="card-cover">
+              <img src="<?= $coverUrl ?>" alt="">
+            </div>
+
             <div class="card-body">
               <div class="author-row">
                 <img class="mini-avatar" src="<?= $avatarUrl ?>" alt="<?= htmlspecialchars($p['display_name']) ?> avatar">
                 <span class="author"><?= htmlspecialchars($p['display_name']) ?></span>
               </div>
+
               <div class="card-title"><?= htmlspecialchars($p['picture_title']) ?></div>
+
               <?php if (!empty($p['picture_description'])): ?>
                 <div class="card-desc"><?= htmlspecialchars($p['picture_description']) ?></div>
               <?php endif; ?>
+
               <div class="meta">
                 <span class="counts">
                   <span class="muted" title="Sign in to like">♡ <?= (int)$p['like_count'] ?></span>
@@ -116,6 +122,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
           </article>
         <?php endforeach; ?>
       </section>
+
 
       <div class="guest-cta">
         <span class="note-guest">To have full access to the gallery, please log in or create an account.</span>
@@ -133,7 +140,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
       if (!flashes.length) return;
 
       setTimeout(() => {
-        flashes.forEach(flash => { 
+        flashes.forEach(flash => {
           flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
           flash.style.opacity = '0';
           flash.style.transform = 'translateY(-6px)';
@@ -142,7 +149,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
         });
       }, 2000);
     });
-    
+
     (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');

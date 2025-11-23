@@ -51,7 +51,7 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
       <div class="create-page">
         <div class="create-header">
           <h1>New post</h1>
-          <a href="./profile.php" class="btn-ghost pill">Back to profile</a>
+          <a href="./index.php" class="btn-ghost pill">Back to home</a>
         </div>
 
         <form method="post" action="./actions/user/post_picture.php" enctype="multipart/form-data" class="create-form">
