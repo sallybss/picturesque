@@ -1681,6 +1681,10 @@ body.guest-locked {
     align-items: start;
 }
 
+.single-wrap .card .pad {
+    text-align: left;
+}
+
 .subtitle {
     margin: 0;
     font-size: 18px;
@@ -1694,10 +1698,6 @@ body.guest-locked {
     margin: 8px 0 12px;
 }
 
-.comments {
-    margin-top: 20px;
-}
-
 .comment {
     padding: 12px 0;
     border-bottom: 1px solid var(--line);
@@ -1705,10 +1705,39 @@ body.guest-locked {
 
 .c-head {
     display: flex;
+    align-items: flex-start;  /* top-align text */
+    gap: 8px;
+}
+
+.c-head-left {
+    display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 14px;
+    flex: 1;                  /* take all space on the left */
 }
+
+.c-time {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* Fix delete button inside comments */
+.comment .iconbtn.danger,
+.comment .btn-danger {
+    display: inline-flex !important;
+    margin-bottom: 0 !important;
+    padding: 2px 6px !important;
+    border-radius: 6px !important;
+    align-self: flex-start;
+}
+
+
+/* Break very long words inside comments so they don't stretch the layout */
+.comment .c-body {
+  overflow-wrap: break-word; 
+  word-break: break-word;      
+}
+
 
 .c-time {
     color: var(--muted);
@@ -2285,9 +2314,7 @@ body.guest-locked {
     max-height: 80vh;
     object-fit: contain;
     display: block;
-    margin: 0 auto;
 }
-
 
 /* Tablets & small laptops */
 @media (max-width: 768px) {

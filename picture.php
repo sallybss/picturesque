@@ -49,24 +49,29 @@ unset($node);
 
 function render_comment(array $c, int $depth, int $picture_id, bool $isAdmin): void
 {
-  $avatar = img_from_db($c['avatar_photo']);
-  $d = max(0, min(4, $depth));
-?>
-  <div class="comment" id="c-<?= (int)$c['comment_id'] ?>" data-depth="<?= $d ?>">
-    <div class="c-head">
-      <img class="c-avatar" src="<?= $avatar ?>" alt="">
-      <b class="c-name"><?= htmlspecialchars($c['display_name']) ?></b>
-      <span class="c-time"><?= htmlspecialchars(substr($c['created_at'], 0, 16)) ?></span>
+    $avatar = img_from_db($c['avatar_photo']);
+    $d = max(0, min(4, $depth));
+    ?>
+    <div class="comment" id="c-<?= (int)$c['comment_id'] ?>" data-depth="<?= $d ?>">
+      <div class="c-head">
+        <div class="c-head-left">
+          <img class="c-avatar" src="<?= $avatar ?>" alt="">
+          <b class="c-name"><?= htmlspecialchars($c['display_name']) ?></b>
+          <span class="c-time"><?= htmlspecialchars(substr($c['created_at'], 0, 16)) ?></span>
+        </div>
 
-      <?php if ($isAdmin): ?>
-        <form method="post" action="./actions/admin/comment_delete.php" style="display:inline; margin-left:auto">
-          <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
-          <input type="hidden" name="comment_id" value="<?= (int)$c['comment_id'] ?>">
-          <input type="hidden" name="picture_id" value="<?= (int)$picture_id ?>">
-          <button class="iconbtn danger" onclick="return confirm('Delete this comment? Replies will be removed too.');">Delete</button>
-        </form>
-      <?php endif; ?>
-    </div>
+        <?php if ($isAdmin): ?>
+          <form method="post" action="./actions/admin/comment_delete.php" style="display:inline;">
+            <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+            <input type="hidden" name="comment_id" value="<?= (int)$c['comment_id'] ?>">
+            <input type="hidden" name="picture_id" value="<?= (int)$picture_id ?>">
+            <button class="iconbtn danger"
+                    onclick="return confirm('Delete this comment? Replies will be removed too.');">
+              Delete
+            </button>
+          </form>
+        <?php endif; ?>
+      </div>
 
     <div class="c-body"><?= nl2br(htmlspecialchars($c['comment_content'])) ?></div>
 
@@ -78,7 +83,7 @@ function render_comment(array $c, int $depth, int $picture_id, bool $isAdmin): v
       <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
       <input type="hidden" name="picture_id" value="<?= (int)$picture_id ?>">
       <input type="hidden" name="parent_comment_id" value="<?= (int)$c['comment_id'] ?>">
-      <textarea name="comment_content" rows="2" class="input" placeholder="Write a reply…" required></textarea>
+      <textarea name="comment_content" rows="2" class="input" placeholder="Write a reply…" required maxlength="500"></textarea>
       <div class="reply-actions"><button type="submit" class="btn">Reply</button></div>
     </form>
 
@@ -148,9 +153,25 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
             <form class="comment-form" method="post" action="./actions/user/post_comment.php">
               <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
               <input type="hidden" name="picture_id" value="<?= (int)$picture_id ?>">
-              <textarea name="comment_content" rows="3" class="input" placeholder="Write a comment…" required></textarea>
+
+              <div class="contact-label" style="display:flex; justify-content:space-between; align-items:center;">
+                <span>Write a comment…</span>
+                <span id="commentCount" class="field-counter">0 / 500</span>
+              </div>
+
+              <textarea
+                name="comment_content"
+                id="mainComment"
+                rows="3"
+                class="input"
+                placeholder="Write a comment…"
+                maxlength="500"
+                required></textarea>
+
               <div class="form-actions"><button type="submit" class="btn">Post</button></div>
             </form>
+
+
             <div id="comments">
               <?php if (!$rootComments): ?>
                 <p class="muted">No comments yet. Be the first!</p>
@@ -171,7 +192,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
       if (!flashes.length) return;
 
       setTimeout(() => {
-        flashes.forEach(flash => { 
+        flashes.forEach(flash => {
           flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
           flash.style.opacity = '0';
           flash.style.transform = 'translateY(-6px)';
@@ -180,7 +201,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
         });
       }, 2000);
     });
-    
+
     (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
@@ -225,7 +246,36 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
         }
       });
     })();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const COMMENT_MAX = 500;
+      const textarea = document.getElementById('mainComment');
+      const counter = document.getElementById('commentCount');
+
+      if (!textarea || !counter) return;
+
+      function update() {
+        let text = textarea.value;
+        if (text.length > COMMENT_MAX) {
+          text = text.slice(0, COMMENT_MAX);
+          textarea.value = text;
+        }
+        counter.textContent = `${text.length} / ${COMMENT_MAX}`;
+
+        if (text.length >= COMMENT_MAX) {
+          textarea.classList.add('at-limit');
+          counter.classList.add('at-limit');
+        } else {
+          textarea.classList.remove('at-limit');
+          counter.classList.remove('at-limit');
+        }
+      }
+
+      textarea.addEventListener('input', update);
+      update();
+    });
   </script>
+
 </body>
 
 </html>

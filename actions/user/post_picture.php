@@ -5,7 +5,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirect('../../create.php');
 }
 
-if (isset($_POST['csrf']) && !check_csrf($_POST['csrf'])) {
+if (!check_csrf($_POST['csrf'] ?? null)) {
     set_flash('err','Invalid request.');
     redirect('../../create.php');
 }

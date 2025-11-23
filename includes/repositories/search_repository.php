@@ -6,6 +6,8 @@ class SearchRepository extends BaseRepository
 {
     public function peopleByDisplayNameLike(string $like, int $limit = 20): array
     {
+        $limit = max(1, min($limit, 100));
+
         $sql = '
             SELECT profile_id, display_name, avatar_photo
             FROM profiles

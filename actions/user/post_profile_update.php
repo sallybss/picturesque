@@ -5,6 +5,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirect('../../profile_edit.php');
 }
 
+if (!check_csrf($_POST['csrf'] ?? null)) {
+    set_flash('err', 'Invalid request.');
+    redirect('../../profile_edit.php');
+}
+
 $me   = Auth::requireUserOrRedirect('../../auth/login.php');
 $name = trim($_POST['display_name'] ?? '');
 $mail = trim($_POST['email'] ?? '');

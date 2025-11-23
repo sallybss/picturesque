@@ -17,6 +17,7 @@ $parentId  = isset($_POST['parent_comment_id']) && $_POST['parent_comment_id'] !
     ? (int)$_POST['parent_comment_id']
     : null;
 $content   = trim($_POST['comment_content'] ?? '');
+$content = mb_substr($content, 0, 500);
 
 $repo = new CommentRepository();
 
