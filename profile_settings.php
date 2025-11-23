@@ -60,7 +60,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
             <form method="post" action="./actions/user/update_credentials.php" autocomplete="off">
               <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
 
-              <div class="row">
+              <div class="form-row">
                 <label class="label" for="login_email">Login Email</label>
                 <input class="input" id="login_email" type="email" name="login_email"
                   value="<?= htmlspecialchars($currentEmail) ?>" required>
@@ -68,19 +68,19 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
 
               <div class="row sub"><b>Change Password</b></div>
 
-              <div class="row">
+              <div class="form-row">
                 <label class="label" for="current_password">Current Password</label>
                 <input class="input" id="current_password" type="password" name="current_password"
                   placeholder="Enter current password if changing password">
               </div>
 
-              <div class="row">
+              <div class="form-row">
                 <label class="label" for="new_password">New Password</label>
                 <input class="input" id="new_password" type="password" name="new_password"
                   placeholder="Minimum 8 characters">
               </div>
 
-              <div class="row">
+              <div class="form-row">
                 <label class="label" for="confirm_password">Confirm New Password</label>
                 <input class="input" id="confirm_password" type="password" name="confirm_password"
                   placeholder="Repeat new password">
