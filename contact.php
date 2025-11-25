@@ -15,7 +15,7 @@ if (!$meRow) {
 $row = $profiles->getLoginEmailAndRole($me);
 $isAdmin      = strtolower(trim($meRow['role'] ?? '')) === 'admin';
 $prefillName  = $meRow['display_name'] ?? '';
-$prefillEmail = $row['login_email'] ?? '';   // <-- FIXED
+$prefillEmail = $row['login_email'] ?? '';   
 
 $cssPath = __DIR__ . '/public/css/main.css';
 $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
@@ -68,8 +68,8 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 
               <div class="contact-grid2">
                 <div>
-                  <div class="contact-label">Name</div>
-                  <input class="contact-input" name="name" value="<?= htmlspecialchars($prefillName) ?>" disabled>
+                  <div class="contact-label">Username</div>
+                  <input class="contact-input" name="name" value="<?= htmlspecialchars($prefillName) ?>" readonly>
                 </div>
                 <div>
                   <div class="contact-label">Company (Optional)</div>
@@ -80,7 +80,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
               <div class="contact-grid2">
                 <div>
                   <div class="contact-label">Email</div>
-                  <input class="contact-input" type="email" name="email" value="<?= htmlspecialchars($prefillEmail) ?>" disabled>
+                  <input class="contact-input" type="email" name="email" value="<?= htmlspecialchars($prefillEmail) ?>" readonly>
                 </div>
                 <div>
                   <div class="contact-label" style="display:flex; justify-content:space-between;">
@@ -158,7 +158,6 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 
     document.addEventListener("DOMContentLoaded", () => {
 
-  /* ===== SUBJECT (100 chars) ===== */
   const subject = document.getElementById("subjectInput");
   const subjectCount = document.getElementById("subjectCount");
   const SUBJECT_MAX = 100;
