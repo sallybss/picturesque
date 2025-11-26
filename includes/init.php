@@ -66,3 +66,4 @@ require_once __DIR__ . '/repositories/search_repository.php';
 require_once __DIR__ . '/repositories/featured_repository.php';
 require_once __DIR__ . '/repositories/categories_repository.php';
 require_once __DIR__ . '/repositories/contact_repository.php';
+require_once __DIR__ . '/repositories/password_reset_repository.php';

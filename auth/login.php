@@ -58,7 +58,7 @@ require_once __DIR__ . '/../includes/init.php';
 
           <div class="row">
             <span></span>
-            <a class="link" href="#">Forgot Password?</a>
+            <a class="link" href="./forgot_password.php">Forgot Password?</a>
           </div>
 
           <button class="btn btn-primary" type="submit">Sign In</button>
