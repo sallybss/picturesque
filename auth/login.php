@@ -1,5 +1,8 @@
 <?php
 require_once __DIR__ . '/../includes/init.php';
+$captchaA = random_int(1, 9);
+$captchaB = random_int(1, 9);
+$_SESSION['login_captcha_answer'] = $captchaA + $captchaB;
 ?>
 <!doctype html>
 <html lang="en">
@@ -30,8 +33,10 @@ require_once __DIR__ . '/../includes/init.php';
           <div class="flash ok"><?= htmlspecialchars($m) ?></div>
         <?php endif; ?>
 
-        <form method="post" action="../actions/auth/post_login.php" autocomplete="off">
+        <form id="loginForm" method="post" action="../actions/auth/post_login.php" autocomplete="off">
           <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+          <input type="hidden" name="login_captcha" id="loginCaptchaHidden">
+
 
           <label class="label">Email</label>
           <input 
@@ -72,6 +77,26 @@ require_once __DIR__ . '/../includes/init.php';
 
   </div>
 
+  <div class="captcha-modal-backdrop" id="captchaModalBackdrop"></div>
+  <div class="captcha-modal" id="captchaModal" aria-hidden="true">
+    <div class="captcha-modal__card">
+      <h2 class="captcha-modal__title">Are you human?</h2>
+      <p class="p-muted">Please solve this quick question to continue.</p>
+      <p class="captcha-question">What is <?= $captchaA ?> + <?= $captchaB ?> ?</p>
+      <input
+        class="input"
+        type="number"
+        id="captchaInput"
+        placeholder="Answer"
+      >
+      <div class="captcha-error" id="captchaError">Please enter the answer.</div>
+      <div class="captcha-actions">
+        <button type="button" class="btn-secondary" id="captchaCancel">Cancel</button>
+        <button type="button" class="btn btn-primary" id="captchaConfirm">Verify &amp; Sign In</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".password-toggle").forEach(btn => {
@@ -90,6 +115,62 @@ require_once __DIR__ . '/../includes/init.php';
           }
         });
       });
+
+      const form           = document.getElementById("loginForm");
+      const modal          = document.getElementById("captchaModal");
+      const backdrop       = document.getElementById("captchaModalBackdrop");
+      const captchaInput   = document.getElementById("captchaInput");
+      const captchaHidden  = document.getElementById("loginCaptchaHidden");
+      const captchaError   = document.getElementById("captchaError");
+      const btnConfirm     = document.getElementById("captchaConfirm");
+      const btnCancel      = document.getElementById("captchaCancel");
+
+      function openModal() {
+        modal.classList.add("is-open");
+        backdrop.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        captchaError.style.display = "none";
+        captchaInput.value = "";
+        setTimeout(() => captchaInput.focus(), 50);
+      }
+
+      function closeModal() {
+        modal.classList.remove("is-open");
+        backdrop.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+      }
+
+      form.addEventListener("submit", (e) => {
+        if (captchaHidden.value) {
+          return;
+        }
+        e.preventDefault();
+        openModal();
+      });
+
+      btnCancel.addEventListener("click", () => {
+        closeModal();
+      });
+
+      btnConfirm.addEventListener("click", () => {
+        const val = captchaInput.value.trim();
+        if (!val) {
+          captchaError.style.display = "block";
+          return;
+        }
+        captchaError.style.display = "none";
+        captchaHidden.value = val;
+        closeModal();
+        form.submit(); 
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && modal.classList.contains("is-open")) {
+          closeModal();
+        }
+      });
+
+      backdrop.addEventListener("click", closeModal);
     });
   </script>
 

@@ -224,6 +224,75 @@ textarea {
 }
 
 /* AUTH PAGE */
+
+.captcha-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.35);
+    backdrop-filter: blur(2px);
+    display: none;
+    z-index: 40;
+  }
+
+  .captcha-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+.captcha-modal.is-open {
+    display: flex;
+  }
+  
+.captcha-modal-backdrop.is-open {
+    display: block;
+  }
+
+.captcha-modal__card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.25);
+    padding: 24px 24px 20px;
+    max-width: 420px;
+    width: 90%;
+  }
+
+.captcha-modal__title {
+    margin: 0 0 6px;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+.captcha-question {
+    margin: 12px 0 8px;
+    font-weight: 500;
+  }
+
+.captcha-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+.captcha-error {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: #dc2626;
+    display: none;
+  }
+  
+.btn-secondary {
+    border-radius: 999px;
+    padding: 10px 18px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
 .auth-card .btn {
     width: 100%;
     margin-top: 20px;
