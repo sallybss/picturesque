@@ -6,15 +6,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 if (!check_csrf($_POST['csrf'] ?? null)) {
-    set_flash('err','Invalid request.');
+    set_flash('err', 'Invalid request.');
     redirect('../../create.php');
 }
 
 $me = Auth::requireUserOrRedirect('../../auth/login.php');
+
 $title = trim($_POST['picture_title'] ?? $_POST['title'] ?? '');
-$title = mb_substr($title, 0, 50); 
+$title = mb_substr($title, 0, 50);
+
 $desc  = trim($_POST['picture_description'] ?? $_POST['desc'] ?? '');
 $desc  = mb_substr($desc, 0, 250);
+
 $file  = $_FILES['photo'] ?? null;
 $catId = (int)($_POST['category_id'] ?? 0);
 $redirect = isset($_POST['redirect']) ? (string)$_POST['redirect'] : '';
@@ -27,8 +30,24 @@ if ($redirect === '' && !empty($_SERVER['HTTP_REFERER'])) {
 }
 
 if ($redirect === '') {
-    $redirect = '../../index.php';
+    $redirect = '../../index.php'; 
 }
+
+$picturesRepo = new PictureRepository();
+$recentCount  = $picturesRepo->countRecentForUser((int)$me);
+$maxPer5Min   = 5;
+
+if ($recentCount >= $maxPer5Min) {
+    $_SESSION['post_limit_until'] = time() + 5 * 60;
+    $_SESSION['post_limit_max']   = $maxPer5Min;
+
+    set_flash(
+        'err',
+        'You reached the maximum of 5 posts in 5 minutes. Please wait a bit before posting again.'
+    );
+    redirect('../../create.php');
+}
+
 
 if ($catId <= 0) {
     set_flash('err', 'Please choose a category.');
@@ -62,7 +81,7 @@ if ($code !== UPLOAD_ERR_OK) {
         UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk.',
         UPLOAD_ERR_EXTENSION  => 'A PHP extension stopped the file upload.',
     ];
-    $msg = $map[$code] ?? ('Unknown upload error: '.$code);
+    $msg = $map[$code] ?? ('Unknown upload error: ' . $code);
     set_flash('err', 'Upload failed: ' . $msg);
     redirect('../../create.php');
 }
@@ -81,6 +100,7 @@ $allowed = [
     'image/gif'  => 'gif',
     'image/webp' => 'webp',
 ];
+
 if (!isset($allowed[$mime])) {
     set_flash('err', 'Only JPG/PNG/GIF/WEBP allowed.');
     redirect('../../create.php');
@@ -103,9 +123,7 @@ if (!move_uploaded_file($tmp, $dest)) {
 @chmod($dest, 0644);
 
 $storedPath = $name;
-
-$repo = new PictureRepository();
-$repo->create($me, $title, $desc, $storedPath, $catId);
+$picturesRepo->create($me, $title, $desc, $storedPath, $catId);
 
 set_flash('ok', 'Picture posted!');
 redirect($redirect);

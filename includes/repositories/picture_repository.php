@@ -12,7 +12,31 @@ class PictureRepository extends BaseRepository
             default => 'p.created_at DESC'
         };
     }
-    
+
+    public function countRecentForUser(int $profileId): int
+    {
+        $sql = "
+            SELECT COUNT(*) AS c
+            FROM pictures
+            WHERE profile_id = ?
+              AND created_at >= (NOW() - INTERVAL 5 MINUTE)
+        ";
+
+        $mysqli = DB::get();
+        $stmt   = $mysqli->prepare($sql);
+        if (!$stmt) {
+            throw new RuntimeException("prepare failed: " . $mysqli->error);
+        }
+
+        $stmt->bind_param('i', $profileId);
+        $stmt->execute();
+
+        $res = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        return (int)($res['c'] ?? 0);
+    }
+
     public function feed(
         int $viewerId,
         ?string $q = null,

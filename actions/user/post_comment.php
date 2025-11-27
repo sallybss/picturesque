@@ -2,41 +2,59 @@
 require_once __DIR__ . '/../../includes/init.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    redirect('../../index.php'); 
+    redirect('../../index.php');
 }
 
 if (!check_csrf($_POST['csrf'] ?? null)) {
     set_flash('err', 'Invalid request.');
-    redirect('../../index.php'); 
+    redirect('../../index.php');
 }
 
-$me = Auth::requireUserOrRedirect('../../auth/login.php'); 
+$me = Auth::requireUserOrRedirect('../../auth/login.php');
 
 $pictureId = (int)($_POST['picture_id'] ?? 0);
 $parentId  = isset($_POST['parent_comment_id']) && $_POST['parent_comment_id'] !== ''
     ? (int)$_POST['parent_comment_id']
     : null;
-$content   = trim($_POST['comment_content'] ?? '');
+
+$content = trim($_POST['comment_content'] ?? '');
 $content = mb_substr($content, 0, 500);
 
-$repo = new CommentRepository();
+if ($pictureId <= 0) {
+    set_flash('err', 'Picture not specified.');
+    redirect('../../index.php');
+}
 
-if ($pictureId <= 0 || $content === '') {
+$redirect = '../../picture.php?id=' . $pictureId;
+
+if ($content === '') {
     set_flash('err', 'Please write a comment.');
-    redirect("../../picture.php?id=$pictureId"); 
+    redirect($redirect);
 }
 
-if (!$repo->pictureExists($pictureId)) {
+$commentsRepo = new CommentRepository();
+
+if (!$commentsRepo->pictureExists($pictureId)) {
     set_flash('err', 'Picture not found.');
-    redirect('../../index.php'); 
+    redirect('../../index.php');
 }
 
-if ($parentId !== null && !$repo->parentExists($parentId, $pictureId)) {
-    set_flash('err', 'Invalid reply target.');
-    redirect("../../picture.php?id=$pictureId"); 
+if ($parentId !== null && !$commentsRepo->parentExists($parentId, $pictureId)) {
+    set_flash('err', 'Reply target not found.');
+    redirect($redirect);
 }
 
-$repo->add($pictureId, $me, $content, $parentId);
+$maxPerMinute = 2;
+$recent       = $commentsRepo->countRecentForUser((int)$me, 1); 
 
-set_flash('ok', 'Comment added!');
-redirect("../../picture.php?id=$pictureId"); 
+if ($recent >= $maxPerMinute) {
+    $now = time();
+    $_SESSION['comment_rate_limit_until']   = $now + 60;
+    $_SESSION['comment_rate_limit_picture'] = $pictureId;
+    redirect($redirect);
+}
+
+$commentsRepo->add($pictureId, (int)$me, $content, $parentId);
+
+set_flash('ok', 'Comment posted!');
+redirect($redirect);

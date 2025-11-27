@@ -15,6 +15,23 @@ $isAdmin   = strtolower(trim($meRow['role'] ?? '')) === 'admin';
 
 $cssPath = __DIR__ . '/public/css/main.css';
 $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
+
+$limitPer5Min = 5;
+$pictureRepo  = new PictureRepository();
+$recentCount  = $pictureRepo->countRecentForUser((int)$me);
+$postsLeft    = max(0, $limitPer5Min - $recentCount);
+
+$limitUntil = null;
+if (!empty($_SESSION['post_limit_until'])) {
+    $limitUntil = (int)$_SESSION['post_limit_until'];
+
+    if ($limitUntil <= time()) {
+        unset($_SESSION['post_limit_until']);
+        $limitUntil = null;
+    }
+}
+
+$showRateModal = $limitUntil !== null && $postsLeft <= 0;
 ?>
 <!doctype html>
 <html lang="en">
@@ -53,6 +70,27 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
           <h1>New post</h1>
           <a href="./index.php" class="btn-ghost pill">Back to home</a>
         </div>
+
+        <p class="rate-limit-note">
+          You can upload up to <strong><?= $limitPer5Min ?></strong> pictures every
+          <strong>5 minutes</strong>.
+          <?php if ($postsLeft > 0): ?>
+            <span>(You have <strong><?= $postsLeft ?></strong> left in this window.)</span>
+          <?php else: ?>
+            <span>(Limit reached for this 5-minute window.)</span>
+          <?php endif; ?>
+
+          <?php if ($limitUntil): ?>
+            <span
+              data-rate-limit="wrapper"
+              data-until="<?= $limitUntil ?>"
+              style="margin-left: 6px;"
+            >
+              Next post allowed in
+              <strong><span id="rateLimitTimerText">05:00</span></strong>.
+            </span>
+          <?php endif; ?>
+        </p>
 
         <form method="post" action="./actions/user/post_picture.php" enctype="multipart/form-data" class="create-form">
           <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
@@ -114,21 +152,38 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
   </div>
 
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <div
+    class="rate-modal-backdrop"
+    id="rateLimitModal"
+    <?= $showRateModal ? '' : 'hidden' ?>
+  >
+    <div class="rate-modal">
+      <h2>Posting limit reached</h2>
+      <p>You can upload up to <strong><?= $limitPer5Min ?></strong> pictures every <strong>5 minutes</strong>.</p>
+      <?php if ($limitUntil): ?>
+        <p>
+          Next post allowed in
+          <strong><span id="rateLimitTimerTextModal">05:00</span></strong>.
+        </p>
+      <?php endif; ?>
+      <small>This helps prevent spam and keeps Picturesque fast for everyone.</small>
+      <button type="button" id="rateLimitModalClose" class="btn-primary" style="margin-top:12px;">OK</button>
+    </div>
+  </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const flashes = document.querySelectorAll('.flash-stack .flash');
-      if (!flashes.length) return;
-
-      setTimeout(() => {
-        flashes.forEach(flash => {
-          flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-          flash.style.opacity = '0';
-          flash.style.transform = 'translateY(-6px)';
-
-          setTimeout(() => flash.remove(), 500);
-        });
-      }, 2000);
+      if (flashes.length) {
+        setTimeout(() => {
+          flashes.forEach(flash => {
+            flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            flash.style.opacity = '0';
+            flash.style.transform = 'translateY(-6px)';
+            setTimeout(() => flash.remove(), 500);
+          });
+        }, 2000);
+      }
     });
 
     (function() {
@@ -228,7 +283,6 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
       clearFile();
     });
 
-    // Description live counter (max 250 chars)
     const descField = document.getElementById('descInput');
     const descCounter = document.getElementById('descCount');
     const DESC_MAX = 250;
@@ -258,8 +312,6 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
       updateDescCounter();
     }
 
-
-    // Title character counter (max 50 chars)
     const titleInput = document.getElementById('titleInput');
     const titleCount = document.getElementById('titleCount');
     const TITLE_MAX = 50;
@@ -284,6 +336,52 @@ $ver     = file_exists($cssPath) ? filemtime($cssPath) : time();
       titleInput.addEventListener('input', updateTitleCounter);
       updateTitleCounter();
     }
+
+    (function() {
+      const wrapper = document.querySelector('[data-rate-limit="wrapper"]');
+      if (!wrapper) return;
+
+      const until = parseInt(wrapper.dataset.until || '0', 10);
+      if (!until) return;
+
+      const textMain  = document.getElementById('rateLimitTimerText');
+      const textModal = document.getElementById('rateLimitTimerTextModal');
+
+      function format(diff) {
+        const m = Math.floor(diff / 60);
+        const s = diff % 60;
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      }
+
+      function tick() {
+        const now = Math.floor(Date.now() / 1000);
+        let diff = until - now;
+
+        if (diff <= 0) {
+          if (textMain)  textMain.textContent  = '00:00';
+          if (textModal) textModal.textContent = '00:00';
+          return;
+        }
+
+        const val = format(diff);
+        if (textMain)  textMain.textContent  = val;
+        if (textModal) textModal.textContent = val;
+
+        setTimeout(tick, 1000);
+      }
+
+      tick();
+    })();
+
+    (function() {
+      const modal = document.getElementById('rateLimitModal');
+      const close = document.getElementById('rateLimitModalClose');
+      if (!modal || !close) return;
+
+      close.addEventListener('click', () => {
+        modal.hidden = true;
+      });
+    })();
   </script>
 </body>
 

@@ -4,7 +4,6 @@ require_once __DIR__ . '/base_repository.php';
 
 class CommentRepository extends BaseRepository 
 {
-
     public function listForPictureWithAuthors(int $pictureId): array {
         $sql = "
             SELECT
@@ -74,6 +73,33 @@ class CommentRepository extends BaseRepository
 
         $stmt->execute();
         $stmt->close();
+    }
+
+    public function countRecentForUser(int $profileId, int $minutes = 1): int
+    {
+        if ($minutes < 1)  { $minutes = 1; }
+        if ($minutes > 60) { $minutes = 60; }
+
+        $sql = "
+            SELECT COUNT(*) AS c
+            FROM comments
+            WHERE profile_id = ?
+              AND created_at >= (NOW() - INTERVAL ? MINUTE)
+        ";
+
+        $mysqli = DB::get();
+        $stmt   = $mysqli->prepare($sql);
+        if (!$stmt) {
+            throw new RuntimeException("prepare failed: " . $mysqli->error);
+        }
+
+        // i = int profile_id, i = int minutes
+        $stmt->bind_param('ii', $profileId, $minutes);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc() ?: ['c' => 0];
+        $stmt->close();
+
+        return (int)$row['c'];
     }
 
     public function delete(int $commentId): void {

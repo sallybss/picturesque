@@ -52,7 +52,6 @@ a.link:hover {
    1) GLOBAL UI PRIMITIVES
    ========================================================= */
 
-/* Toast container (top-right corner) */
 .flash-stack {
   position: fixed;
   top: 1rem;
@@ -64,7 +63,6 @@ a.link:hover {
   pointer-events: none;
 }
 
-/* Base toast */
 .flash {
   min-width: 460px;
   max-width: 540px;
@@ -79,7 +77,6 @@ a.link:hover {
   pointer-events: auto;
 }
 
-/* Success / error variants */
 .flash-ok {
   border-left-color: #22c55e;
   background: #deffe9;      
@@ -90,7 +87,6 @@ a.link:hover {
   background: #ffe5e5;   
 }
 
-/* Inputs (shared) */
 .label,
 .label-sm {
     display: block;
@@ -148,7 +144,6 @@ textarea {
     align-items: center;
     margin: 8px 0 24px;
 }
-/* Profile settings form layout */
 .form-row {
     display: flex;
     flex-direction: column;
@@ -166,7 +161,6 @@ textarea {
 }
 
 
-/* Buttons (single source of truth) */
 .btn {
     display: block;
     text-align: center;
@@ -479,7 +473,6 @@ img.c-avatar {
     contain: paint;  
 }
 
-/* Title – single line with ellipsis */
 .card-title-link {
     display: block;
     font-weight: 600;
@@ -491,7 +484,6 @@ img.c-avatar {
     -webkit-box-orient: vertical;
 }
 
-/* Description – max 1 line, then "…" */
 .card-desc {
     margin-top: 4px;
     font-size: 0.9rem;
@@ -513,8 +505,6 @@ img.c-avatar {
     display:block;
     width:100%;
     height:auto;          
-    /* aspect-ratio: 4 / 3; 
-       object-fit: cover; */
     backface-visibility: hidden;
     transform: translateZ(0); 
 }
@@ -529,7 +519,6 @@ img.c-avatar {
     margin: 0;
 }
 
-/* Utility */
 .spacer {
     flex: 1 1 auto;
 }
@@ -737,7 +726,7 @@ img.c-avatar {
 .content-top{
     display:flex;
     align-items:center;
-    justify-content:space-between;  /* search left, avatar right */
+    justify-content:space-between; 
     gap:12px;
     margin-bottom:12px;
   }
@@ -746,7 +735,6 @@ img.c-avatar {
     margin:0;
   }
 
-      /* Compact form layout: input + Go button */
       .content-top .search-wrap {
         display: flex;
         align-items: center;
@@ -1054,7 +1042,6 @@ img.c-avatar {
     margin-top: 26px;
 }
 
-/* Dropzone */
 .file-input {
     position: absolute;
     width: 1px;
@@ -1830,7 +1817,7 @@ body.guest-locked {
 
 .c-head {
     display: flex;
-    align-items: flex-start;  /* top-align text */
+    align-items: flex-start; 
     gap: 8px;
 }
 
@@ -1838,7 +1825,7 @@ body.guest-locked {
     display: flex;
     align-items: center;
     gap: 8px;
-    flex: 1;                  /* take all space on the left */
+    flex: 1;                 
 }
 
 .c-time {
@@ -1846,7 +1833,48 @@ body.guest-locked {
     font-size: 12px;
 }
 
-/* Fix delete button inside comments */
+.rate-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+.rate-modal-backdrop[hidden] { display: none; }
+.rate-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px 28px;
+  max-width: 360px;
+  width: 90%;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.25);
+}
+.rate-modal h2 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+.rate-modal p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+.rate-modal small {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+.rate-limit-note {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 4px 0 16px;
+}
+.rate-limit-note strong {
+  font-weight: 600;
+}
+
 .comment .iconbtn.danger,
 .comment .btn-danger {
     display: inline-flex !important;
@@ -1856,8 +1884,6 @@ body.guest-locked {
     align-self: flex-start;
 }
 
-
-/* Break very long words inside comments so they don't stretch the layout */
 .comment .c-body {
   overflow-wrap: break-word; 
   word-break: break-word;      
@@ -2024,7 +2050,6 @@ body.guest-locked {
     font-size: 0.85rem;
 }
 
-/* Picture page: make two columns stack on mobile */
 @media (max-width: 900px){
   .single-wrap{
     grid-template-columns: 1fr;  
@@ -2387,7 +2412,7 @@ body.guest-locked {
   }
 
   .sidenav {
-    padding-top: 40px; /* adds room for close button */
+    padding-top: 40px; 
   }
 }
 
@@ -2525,32 +2550,27 @@ body.guest-locked {
   .hamburger{ display: inline-block; }
 }
 
-/* Hide hamburger on guest pages (mobile or any screen) */
 body.guest-locked .hamburger {
   display: none !important;
   pointer-events: none;
   opacity: 0.4;
 }
 
-/* Hide sidebar for guests on desktop */
 body.guest-locked .sidenav {
   display: none;
 }
 
-/* Allow feed to stretch full width when sidebar hidden */
 body.guest-locked .guest-main {
   grid-template-columns: 1fr !important;
   padding: 20px 30px;
 }
 
-/* For mobile, keep sidebar functional (if you ever re-enable hamburger) */
 @media (max-width: 1000px) {
   body.guest-locked .sidenav {
     display: none; 
   }
 }
 
-/* Guest page top bar layout */
 .guest-actions {
   display: flex;
   justify-content: flex-end;
@@ -2558,7 +2578,6 @@ body.guest-locked .guest-main {
   flex: 0 0 auto;
 }
 
-/* Make sure search and button align properly */
 body.guest-locked .content-top {
   display: flex;
   align-items: center;
@@ -2567,7 +2586,6 @@ body.guest-locked .content-top {
   gap: 10px;
 }
 
-/* On small screens, stack cleanly with Sign in on top-right */
 @media (max-width: 1000px) {
   body.guest-locked .content-top {
     flex-wrap: wrap;

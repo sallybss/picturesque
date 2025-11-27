@@ -73,31 +73,48 @@ function render_comment(array $c, int $depth, int $picture_id, bool $isAdmin): v
         <?php endif; ?>
       </div>
 
-    <div class="c-body"><?= nl2br(htmlspecialchars($c['comment_content'])) ?></div>
+      <div class="c-body"><?= nl2br(htmlspecialchars($c['comment_content'])) ?></div>
 
-    <div class="c-actions">
-      <button type="button" class="link-btn js-reply" data-target="rf-<?= (int)$c['comment_id'] ?>">Reply</button>
-    </div>
-
-    <form id="rf-<?= (int)$c['comment_id'] ?>" class="reply-form" method="post" action="./actions/user/post_comment.php" style="display:none;">
-      <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
-      <input type="hidden" name="picture_id" value="<?= (int)$picture_id ?>">
-      <input type="hidden" name="parent_comment_id" value="<?= (int)$c['comment_id'] ?>">
-      <textarea name="comment_content" rows="2" class="input" placeholder="Write a reply…" required maxlength="500"></textarea>
-      <div class="reply-actions"><button type="submit" class="btn">Reply</button></div>
-    </form>
-
-    <?php if (!empty($c['children'])): ?>
-      <div class="c-children">
-        <?php foreach ($c['children'] as $child) render_comment($child, $depth + 1, $picture_id, $isAdmin); ?>
+      <div class="c-actions">
+        <button type="button" class="link-btn js-reply" data-target="rf-<?= (int)$c['comment_id'] ?>">Reply</button>
       </div>
-    <?php endif; ?>
-  </div>
-<?php
+
+      <form id="rf-<?= (int)$c['comment_id'] ?>" class="reply-form" method="post" action="./actions/user/post_comment.php" style="display:none;">
+        <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+        <input type="hidden" name="picture_id" value="<?= (int)$picture_id ?>">
+        <input type="hidden" name="parent_comment_id" value="<?= (int)$c['comment_id'] ?>">
+        <textarea name="comment_content" rows="2" class="input" placeholder="Write a reply…" required maxlength="500"></textarea>
+        <div class="reply-actions"><button type="submit" class="btn">Reply</button></div>
+      </form>
+
+      <?php if (!empty($c['children'])): ?>
+        <div class="c-children">
+          <?php foreach ($c['children'] as $child) render_comment($child, $depth + 1, $picture_id, $isAdmin); ?>
+        </div>
+      <?php endif; ?>
+    </div>
+    <?php
 }
 
 $cssPath = __DIR__ . '/public/css/main.css';
 $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
+
+// --- Comment rate limit modal data ---
+$commentLimitSeconds = 0;
+
+if (
+    isset($_SESSION['comment_rate_limit_until'], $_SESSION['comment_rate_limit_picture']) &&
+    (int)$_SESSION['comment_rate_limit_picture'] === $picture_id
+) {
+    $commentLimitSeconds = (int)$_SESSION['comment_rate_limit_until'] - time();
+
+    if ($commentLimitSeconds <= 0) {
+        unset($_SESSION['comment_rate_limit_until'], $_SESSION['comment_rate_limit_picture']);
+        $commentLimitSeconds = 0;
+    } elseif ($commentLimitSeconds > 60) {
+        $commentLimitSeconds = 60;
+    }
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -168,9 +185,12 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
                 maxlength="500"
                 required></textarea>
 
+              <p class="note" style="font-size: 12px; color: #6b7280; margin-top: 4px;">
+                You can post up to <strong>2 comments</strong> per minute.
+              </p>
+
               <div class="form-actions"><button type="submit" class="btn">Post</button></div>
             </form>
-
 
             <div id="comments">
               <?php if (!$rootComments): ?>
@@ -273,6 +293,102 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 
       textarea.addEventListener('input', update);
       update();
+    });
+  </script>
+
+  <!-- Comment rate-limit modal -->
+  <div
+    id="commentLimitModal"
+    data-seconds-left="<?= (int)$commentLimitSeconds ?>"
+    style="
+      display: <?= $commentLimitSeconds > 0 ? 'flex' : 'none' ?>;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    "
+  >
+    <div
+      style="
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 24px 20px 18px;
+        max-width: 420px;
+        width: 90%;
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      "
+    >
+      <h2 style="font-size: 1.2rem; margin: 0 0 8px; color: #111827;">
+        Too many comments
+      </h2>
+
+      <p style="margin: 0 0 8px; color: #4b5563; font-size: 0.95rem;">
+        You reached the limit of <strong>2 comments per minute</strong>.
+      </p>
+
+      <p style="margin: 0 0 8px; color: #374151; font-size: 0.95rem;">
+        Next comment allowed in
+        <strong><span id="commentCountdown">00:00</span></strong>.
+      </p>
+
+      <p style="margin: 0 0 12px; color: #6b7280; font-size: 0.8rem;">
+        This helps us reduce spam and keep conversations clean. ✨
+      </p>
+
+      <div style="text-align: right;">
+        <button
+          type="button"
+          id="commentLimitClose"
+          class="btn"
+          style="padding: 6px 14px; font-size: 0.9rem;"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const modal = document.getElementById('commentLimitModal');
+      if (!modal) return;
+
+      let remaining = parseInt(modal.dataset.secondsLeft || '0', 10);
+      const countdownEl = document.getElementById('commentCountdown');
+      const closeBtn    = document.getElementById('commentLimitClose');
+
+      function formatSeconds(sec) {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+      }
+
+      function tick() {
+        if (!countdownEl) return;
+
+        if (remaining <= 0) {
+          modal.style.display = 'none';
+          return;
+        }
+
+        countdownEl.textContent = formatSeconds(remaining);
+        remaining -= 1;
+        setTimeout(tick, 1000);
+      }
+
+      if (remaining > 0) {
+        modal.style.display = 'flex';
+        tick();
+      } else {
+        modal.style.display = 'none';
+      }
+
+      closeBtn?.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
     });
   </script>
 
