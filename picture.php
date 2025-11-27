@@ -335,7 +335,7 @@ if (
       </p>
 
       <p style="margin: 0 0 12px; color: #6b7280; font-size: 0.8rem;">
-        This helps us reduce spam and keep conversations clean. ✨
+        This helps us reduce spam and keep conversations clean. 
       </p>
 
       <div style="text-align: right;">

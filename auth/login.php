@@ -1,5 +1,19 @@
 <?php
 require_once __DIR__ . '/../includes/init.php';
+
+// --- Brute-force lock info from session ---
+$lockEmail  = $_SESSION['login_lock_email'] ?? null;
+$lockUntil  = (int)($_SESSION['login_lock_until'] ?? 0);
+$now        = time();
+$isLocked   = $lockEmail && $lockUntil > $now;
+$lockRemain = max(0, $lockUntil - $now);
+
+// If lock expired, clean it up
+if (!$isLocked) {
+    unset($_SESSION['login_lock_email'], $_SESSION['login_lock_until']);
+}
+
+// Simple math for CAPTCHA (used in modal)
 $captchaA = random_int(1, 9);
 $captchaB = random_int(1, 9);
 $_SESSION['login_captcha_answer'] = $captchaA + $captchaB;
@@ -33,18 +47,25 @@ $_SESSION['login_captcha_answer'] = $captchaA + $captchaB;
           <div class="flash ok"><?= htmlspecialchars($m) ?></div>
         <?php endif; ?>
 
-        <form id="loginForm" method="post" action="../actions/auth/post_login.php" autocomplete="off">
+        <form
+          id="loginForm"
+          method="post"
+          action="../actions/auth/post_login.php"
+          autocomplete="off"
+          data-locked="<?= $isLocked ? '1' : '0' ?>"
+        >
           <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
           <input type="hidden" name="login_captcha" id="loginCaptchaHidden">
-
 
           <label class="label">Email</label>
           <input 
             class="input" 
             type="email" 
             name="login_email" 
-            placeholder="noelwilson@gmail.com" 
+            placeholder="noelwilson@gmail.com"
+            value="<?= htmlspecialchars($lockEmail ?? '') ?>"
             required
+            <?= $isLocked ? 'readonly' : '' ?>
           >
 
           <label class="label">Password</label>
@@ -55,8 +76,14 @@ $_SESSION['login_captcha_answer'] = $captchaA + $captchaB;
               name="password"
               placeholder="********"
               required
+              <?= $isLocked ? 'readonly' : '' ?>
             >
-            <button type="button" class="password-toggle" aria-label="Show password">
+            <button
+              type="button"
+              class="password-toggle"
+              aria-label="Show password"
+              <?= $isLocked ? 'disabled' : '' ?>
+            >
               <i class="fa-solid fa-eye"></i>
             </button>
           </div>
@@ -66,7 +93,21 @@ $_SESSION['login_captcha_answer'] = $captchaA + $captchaB;
             <a class="link" href="./forgot_password.php">Forgot Password?</a>
           </div>
 
-          <button class="btn btn-primary" type="submit">Sign In</button>
+          <button
+            class="btn btn-primary"
+            type="submit"
+            <?= $isLocked ? 'disabled' : '' ?>
+            style="<?= $isLocked ? 'opacity:0.6; cursor:not-allowed;' : '' ?>"
+          >
+            Sign In
+          </button>
+
+          <?php if ($isLocked): ?>
+            <p class="note" style="font-size: 12px; color:#b91c1c; margin-top:8px;">
+              Login is temporarily disabled for this account due to too many failed attempts.
+              Please try again later.
+            </p>
+          <?php endif; ?>
 
           <p class="note">Not registered? <a href="../home_guest.php">Take a look and change your mind</a></p>
           <p class="note">New User? <a href="./register.php">Sign Up</a></p>
@@ -77,6 +118,7 @@ $_SESSION['login_captcha_answer'] = $captchaA + $captchaB;
 
   </div>
 
+  <!-- CAPTCHA MODAL -->
   <div class="captcha-modal-backdrop" id="captchaModalBackdrop"></div>
   <div class="captcha-modal" id="captchaModal" aria-hidden="true">
     <div class="captcha-modal__card">
@@ -99,7 +141,9 @@ $_SESSION['login_captcha_answer'] = $captchaA + $captchaB;
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // Password toggle
       document.querySelectorAll(".password-toggle").forEach(btn => {
+        if (btn.disabled) return; // locked state
         btn.addEventListener("click", () => {
           const input = btn.parentElement.querySelector(".password-input");
           const icon  = btn.querySelector("i");
@@ -117,6 +161,14 @@ $_SESSION['login_captcha_answer'] = $captchaA + $captchaB;
       });
 
       const form           = document.getElementById("loginForm");
+      if (!form) return;
+
+      const isLocked       = form.dataset.locked === "1";
+      if (isLocked) {
+        // Don't attach CAPTCHA modal if login is locked
+        return;
+      }
+
       const modal          = document.getElementById("captchaModal");
       const backdrop       = document.getElementById("captchaModalBackdrop");
       const captchaInput   = document.getElementById("captchaInput");
@@ -141,6 +193,7 @@ $_SESSION['login_captcha_answer'] = $captchaA + $captchaB;
       }
 
       form.addEventListener("submit", (e) => {
+        // If CAPTCHA already answered, let it go
         if (captchaHidden.value) {
           return;
         }
@@ -161,7 +214,7 @@ $_SESSION['login_captcha_answer'] = $captchaA + $captchaB;
         captchaError.style.display = "none";
         captchaHidden.value = val;
         closeModal();
-        form.submit(); 
+        form.submit();
       });
 
       document.addEventListener("keydown", (e) => {
