@@ -14,16 +14,16 @@ if (!$isAdmin) {
   exit;
 }
 
-$pages         = new PagesRepository();
-$page          = $pages->getAbout();
-$rules         = $pages->getBySlug('rules');
-$rulesTitle    = $rules['title']   ?? 'Rules & Regulations';
-$rulesContent  = $rules['content'] ?? '';
+$pages        = new PagesRepository();
+$page         = $pages->getAbout();
+$rules        = $pages->getBySlug('rules');
+$rulesTitle   = $rules['title']   ?? 'Rules & Regulations';
+$rulesContent = $rules['content'] ?? '';
 
-$pageId     = (int)($page['page_id'] ?? 0);
-$title      = $page['title']      ?? 'About Picturesque';
-$content    = $page['content']    ?? '';
-$imagePath  = $page['image_path'] ?? null;
+$pageId    = (int)($page['page_id'] ?? 0);
+$title     = $page['title']      ?? 'About Picturesque';
+$content   = $page['content']    ?? '';
+$imagePath = $page['image_path'] ?? null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!check_csrf($_POST['csrf'] ?? null)) {
@@ -34,21 +34,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   $action = trim($_POST['action'] ?? '');
 
+  /**
+   * 1) SAVE RULES
+   */
   if ($action === 'save_rules') {
-    $newTitle    = trim($_POST['rules_title']   ?? 'Rules & Regulations');
-    $rawRules    = trim($_POST['rules_content'] ?? '');
+    $newTitle = trim($_POST['rules_title']   ?? 'Rules & Regulations');
+    $rawRules = trim($_POST['rules_content'] ?? '');
 
+    // allow only safe tags
+    $allowedTags = '<h2><h3><p><ul><ol><li><strong><em><b><i><a><br>';
+    $newContent  = strip_tags($rawRules, $allowedTags);
 
-    $allowedTags   = '<h2><h3><p><ul><ol><li><strong><em><b><i><a><br>';
-    $newContent    = strip_tags($rawRules, $allowedTags);
-
-
+    // remove javascript: URLs
     $newContent = preg_replace(
       '~href\s*=\s*["\']\s*javascript:[^"\']*["\']~i',
       'href="#"',
       $newContent
     );
 
+    // remove event handlers + inline style
     $newContent = preg_replace(
       '~\s(on\w+|style)\s*=\s*(".*?"|\'.*?\'|[^\s>]+)~i',
       '',
@@ -60,12 +64,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       header('Location: ./settings.php#rules');
       exit;
     }
+
     $pages->upsert('rules', $newTitle, $newContent, null, $me);
     set_flash('ok', 'Rules & Regulations saved.');
     header('Location: ./settings.php#rules');
     exit;
   }
 
+  /**
+   * 2) ADD CATEGORY
+   */
   if ($action === 'add_cat') {
     $name = trim($_POST['name'] ?? '');
     if ($name === '') {
@@ -87,6 +95,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
   }
 
+  /**
+   * 3) TOGGLE CATEGORY
+   */
   if ($action === 'toggle_cat') {
     $id = (int)($_POST['category_id'] ?? 0);
     if ($id <= 0) {
@@ -103,6 +114,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
   }
 
+  /**
+   * 4) DELETE CATEGORY
+   */
   if ($action === 'delete_cat') {
     $id = (int)($_POST['category_id'] ?? 0);
     if ($id <= 0) {
@@ -123,19 +137,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
   }
 
-  if ($action === '' || $action === 'save_about') {
-    $newTitle    = trim($_POST['title'] ?? '');
-    $rawContent  = trim($_POST['content'] ?? '');
+  /**
+   * 5) SAVE ABOUT PAGE
+   */
+  if ($action === 'save_about') {
+    $newTitle   = trim($_POST['title']   ?? '');
+    $rawContent = trim($_POST['content'] ?? '');
 
+    // allow only safe tags
     $allowedTags = '<h2><h3><p><ul><ol><li><strong><em><b><i><a><br>';
     $newContent  = strip_tags($rawContent, $allowedTags);
 
+    // remove javascript: URLs
     $newContent = preg_replace(
       '~href\s*=\s*["\']\s*javascript:[^"\']*["\']~i',
       'href="#"',
       $newContent
     );
 
+    // remove event handlers + inline style
     $newContent = preg_replace(
       '~\s(on\w+|style)\s*=\s*(".*?"|\'.*?\'|[^\s>]+)~i',
       '',
@@ -155,9 +175,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $newImagePath = null;
     }
 
+    // image upload (optional)
     if (!empty($_FILES['image']['name'])) {
-      $f   = $_FILES['image'];
-      $ok  = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      $f  = $_FILES['image'];
+      $ok = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
       $finfo = finfo_open(FILEINFO_MIME_TYPE);
       $mime  = $finfo ? finfo_file($finfo, $f['tmp_name']) : null;
@@ -202,6 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 
+// ----- LOAD DATA FOR DISPLAY -----
 $cats = DB::get()->query("
   SELECT c.category_id, c.category_name, c.slug, c.active,
          COUNT(p.picture_id) AS pic_count
@@ -236,9 +258,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
   </div>
 
   <div class="layout">
-    <?php
-    render_sidebar(['isAdmin' => true, 'isGuest' => false]);
-    ?>
+    <?php render_sidebar(['isAdmin' => true, 'isGuest' => false]); ?>
 
     <main class="content">
       <div class="content-top">
@@ -252,6 +272,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
         <h1 class="page-title">Admin Settings</h1>
         <p class="sub">Manage categories, Rules &amp; Regulations, and the About page.</p>
 
+        <!-- CATEGORIES -->
         <section class="form-card" id="cats">
           <h2 class="section-title">Categories</h2>
           <p class="sub">Categories are used on the “New post” form. You can add, hide/show, or delete them.</p>
@@ -283,7 +304,6 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
               <input type="hidden" name="action" value="add_cat">
             </div>
           </form>
-
 
           <table class="cats-table">
             <thead>
@@ -331,6 +351,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
           </table>
         </section>
 
+        <!-- RULES -->
         <section class="form-card" id="rules">
           <h2 class="section-title">Rules &amp; Regulations</h2>
           <p class="sub">Define how people should behave on Picturesque. This text is shown on the public rules page.</p>
@@ -371,12 +392,14 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
           </form>
         </section>
 
+        <!-- ABOUT -->
         <section class="form-card" id="about">
           <h2 class="section-title">About Picturesque</h2>
           <p class="sub">Describe what Picturesque is and why it exists. This content is shown on the About page.</p>
 
           <form method="post" action="./settings.php#about" enctype="multipart/form-data">
             <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+            <input type="hidden" name="action" value="save_about">
 
             <div class="form-row">
               <label class="label" for="aboutTitle">Title</label>
@@ -430,7 +453,6 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
         </section>
       </div>
     </main>
-
   </div>
 
   <script>
@@ -510,5 +532,4 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
     })();
   </script>
 </body>
-
 </html>
