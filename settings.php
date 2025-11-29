@@ -36,7 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   $action = trim($_POST['action'] ?? '');
 
-  // ---------- SAVE RULES ----------
   if ($action === 'save_rules') {
     $newTitle = trim($_POST['rules_title']   ?? 'Rules & Regulations');
     $rawRules = trim($_POST['rules_content'] ?? '');
@@ -68,7 +67,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
   }
 
-  // ---------- ADD CATEGORY ----------
   if ($action === 'add_cat') {
     $name = trim($_POST['name'] ?? '');
     if ($name === '') {
@@ -93,7 +91,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
   }
 
-  // ---------- TOGGLE CATEGORY ----------
   if ($action === 'toggle_cat') {
     $id = (int)($_POST['category_id'] ?? 0);
     if ($id <= 0) {
@@ -114,7 +111,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
   }
 
-  // ---------- DELETE CATEGORY ----------
   if ($action === 'delete_cat') {
     $id = (int)($_POST['category_id'] ?? 0);
     if ($id <= 0) {
@@ -139,7 +135,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
   }
 
-  // ---------- SAVE ABOUT ----------
   if ($action === 'save_about') {
     $newTitle   = trim($_POST['title']   ?? '');
     $rawContent = trim($_POST['content'] ?? '');
@@ -219,7 +214,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 
-// ---------- LOAD DATA FOR DISPLAY ----------
 $cats = DB::get()->query("
   SELECT c.category_id, c.category_name, c.slug, c.active,
          COUNT(p.picture_id) AS pic_count
@@ -267,7 +261,6 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
         <h1 class="page-title">Admin Settings</h1>
         <p class="sub">Manage categories, Rules &amp; Regulations, and the About page.</p>
 
-        <!-- CATEGORIES -->
         <section class="form-card" id="cats">
           <h2 class="section-title">Categories</h2>
           <p class="sub">Categories are used on the “New post” form. You can add, hide/show, or delete them.</p>
@@ -340,7 +333,6 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
           </table>
         </section>
 
-        <!-- RULES -->
         <section class="form-card" id="rules">
           <h2 class="section-title">Rules &amp; Regulations</h2>
           <p class="sub">Define how people should behave on Picturesque. This text is shown on the public rules page.</p>
@@ -364,14 +356,14 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
             <div class="form-row">
               <div class="label-row">
                 <label class="label" for="rulesContent">Content</label>
-                <span class="field-counter" id="rulesContentCount">0 / 2000</span>
+                <span class="field-counter" id="rulesContentCount">0 / 3000</span>
               </div>
               <textarea
                 id="rulesContent"
                 class="input textarea"
                 name="rules_content"
                 rows="10"
-                maxlength="2000"
+                maxlength="3000"
                 required><?= htmlspecialchars($rulesContent) ?></textarea>
             </div>
 
@@ -381,7 +373,6 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
           </form>
         </section>
 
-        <!-- ABOUT -->
         <section class="form-card" id="about">
           <h2 class="section-title">About Picturesque</h2>
           <p class="sub">Describe what Picturesque is and why it exists. This content is shown on the About page.</p>
@@ -510,7 +501,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
           update();
         }
 
-        setupCounter('rulesContent', 'rulesContentCount', 2000);
+        setupCounter('rulesContent', 'rulesContentCount', 3000);
         setupCounter('aboutContent', 'aboutContentCount', 2000);
       })();
     })();

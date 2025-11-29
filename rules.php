@@ -39,8 +39,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css')
 
     <main class="content">
       <div class="content-top">
-        <div class="spacer"></div>
-        <div class="top-actions">
+        <div class="top-actions" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
           <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
           <?php if ($isLoggedIn): ?>
             <?php render_topbar_userbox($meRow); ?>
@@ -48,11 +47,17 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css')
         </div>
       </div>
 
-      <section class="pad">
-        <h1 class="page-title"><?= htmlspecialchars($title) ?></h1>
-        <div class="prose">
-          <?= $content ?>
-        </div>
+      <!-- Reuse the About-page layout styles -->
+      <section class="about">
+        <header class="about-header">
+          <h1><?= htmlspecialchars($title) ?></h1>
+        </header>
+
+        <article class="about-card">
+          <div class="about-body">
+            <?= $content ?>
+          </div>
+        </article>
       </section>
     </main>
   </div>
@@ -89,5 +94,4 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css')
     })();
   </script>
 </body>
-
 </html>
