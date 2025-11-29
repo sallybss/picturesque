@@ -34,25 +34,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   $action = trim($_POST['action'] ?? '');
 
-  /**
-   * 1) SAVE RULES
-   */
   if ($action === 'save_rules') {
     $newTitle = trim($_POST['rules_title']   ?? 'Rules & Regulations');
     $rawRules = trim($_POST['rules_content'] ?? '');
 
-    // allow only safe tags
     $allowedTags = '<h2><h3><p><ul><ol><li><strong><em><b><i><a><br>';
     $newContent  = strip_tags($rawRules, $allowedTags);
 
-    // remove javascript: URLs
     $newContent = preg_replace(
       '~href\s*=\s*["\']\s*javascript:[^"\']*["\']~i',
       'href="#"',
       $newContent
     );
 
-    // remove event handlers + inline style
     $newContent = preg_replace(
       '~\s(on\w+|style)\s*=\s*(".*?"|\'.*?\'|[^\s>]+)~i',
       '',
@@ -71,9 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
   }
 
-  /**
-   * 2) ADD CATEGORY
-   */
   if ($action === 'add_cat') {
     $name = trim($_POST['name'] ?? '');
     if ($name === '') {
@@ -81,9 +72,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       header('Location: ./settings.php#cats');
       exit;
     }
+
     $slug = slugify($name);
     try {
-      $st = DB::get()->prepare("INSERT INTO categories (category_name, slug, active) VALUES (?, ?, 1)");
+      $st = DB::get()->prepare(
+        "INSERT INTO categories (category_name, slug, active) VALUES (?, ?, 1)"
+      );
       $st->bind_param('ss', $name, $slug);
       $st->execute();
       $st->close();
@@ -95,9 +89,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
   }
 
-  /**
-   * 3) TOGGLE CATEGORY
-   */
   if ($action === 'toggle_cat') {
     $id = (int)($_POST['category_id'] ?? 0);
     if ($id <= 0) {
@@ -105,18 +96,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       header('Location: ./settings.php#cats');
       exit;
     }
-    $st = DB::get()->prepare("UPDATE categories SET active = 1 - active WHERE category_id=?");
+
+    $st = DB::get()->prepare(
+      "UPDATE categories SET active = 1 - active WHERE category_id=?"
+    );
     $st->bind_param('i', $id);
     $st->execute();
     $st->close();
+
     set_flash('ok', 'Toggled.');
     header('Location: ./settings.php#cats');
     exit;
   }
 
-  /**
-   * 4) DELETE CATEGORY
-   */
   if ($action === 'delete_cat') {
     $id = (int)($_POST['category_id'] ?? 0);
     if ($id <= 0) {
@@ -124,7 +116,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       header('Location: ./settings.php#cats');
       exit;
     }
-    $st = DB::get()->prepare("DELETE FROM categories WHERE category_id = ?");
+
+    $st = DB::get()->prepare(
+      "DELETE FROM categories WHERE category_id = ?"
+    );
     $st->bind_param('i', $id);
     try {
       $st->execute();
@@ -133,29 +128,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       set_flash('err', 'Could not delete category.');
     }
     $st->close();
+
     header('Location: ./settings.php#cats');
     exit;
   }
 
-  /**
-   * 5) SAVE ABOUT PAGE
-   */
   if ($action === 'save_about') {
     $newTitle   = trim($_POST['title']   ?? '');
     $rawContent = trim($_POST['content'] ?? '');
 
-    // allow only safe tags
     $allowedTags = '<h2><h3><p><ul><ol><li><strong><em><b><i><a><br>';
     $newContent  = strip_tags($rawContent, $allowedTags);
 
-    // remove javascript: URLs
     $newContent = preg_replace(
       '~href\s*=\s*["\']\s*javascript:[^"\']*["\']~i',
       'href="#"',
       $newContent
     );
 
-    // remove event handlers + inline style
     $newContent = preg_replace(
       '~\s(on\w+|style)\s*=\s*(".*?"|\'.*?\'|[^\s>]+)~i',
       '',
@@ -175,7 +165,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $newImagePath = null;
     }
 
-    // image upload (optional)
     if (!empty($_FILES['image']['name'])) {
       $f  = $_FILES['image'];
       $ok = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -223,7 +212,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 
-// ----- LOAD DATA FOR DISPLAY -----
 $cats = DB::get()->query("
   SELECT c.category_id, c.category_name, c.slug, c.active,
          COUNT(p.picture_id) AS pic_count
@@ -238,20 +226,17 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
 ?>
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <title>Admin Settings · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css?v=<?= $cssVer ?>">
 </head>
-
 <body>
   <div id="flash-stack" class="flash-stack">
     <?php if ($m = get_flash('ok')): ?>
       <div class="flash flash-ok"><?= htmlspecialchars($m) ?></div>
     <?php endif; ?>
-
     <?php if ($m = get_flash('err')): ?>
       <div class="flash flash-err"><?= htmlspecialchars($m) ?></div>
     <?php endif; ?>
@@ -272,7 +257,6 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
         <h1 class="page-title">Admin Settings</h1>
         <p class="sub">Manage categories, Rules &amp; Regulations, and the About page.</p>
 
-        <!-- CATEGORIES -->
         <section class="form-card" id="cats">
           <h2 class="section-title">Categories</h2>
           <p class="sub">Categories are used on the “New post” form. You can add, hide/show, or delete them.</p>
@@ -281,7 +265,6 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
             <div>
               <label class="label" for="catName">Name</label>
             </div>
-
             <div>
               <div class="cat-add-row">
                 <input
@@ -292,14 +275,9 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
                   maxlength="40"
                   placeholder="e.g. Night"
                   required>
-
-                <button type="submit" class="btn-primary cat-add-btn">
-                  Add
-                </button>
+                <button type="submit" class="btn-primary cat-add-btn">Add</button>
               </div>
-
               <small class="help">Max 40 characters. Keep names short and descriptive.</small>
-
               <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
               <input type="hidden" name="action" value="add_cat">
             </div>
@@ -351,7 +329,6 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
           </table>
         </section>
 
-        <!-- RULES -->
         <section class="form-card" id="rules">
           <h2 class="section-title">Rules &amp; Regulations</h2>
           <p class="sub">Define how people should behave on Picturesque. This text is shown on the public rules page.</p>
@@ -392,7 +369,6 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
           </form>
         </section>
 
-        <!-- ABOUT -->
         <section class="form-card" id="about">
           <h2 class="section-title">About Picturesque</h2>
           <p class="sub">Describe what Picturesque is and why it exists. This content is shown on the About page.</p>
@@ -433,9 +409,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
               <?php if ($imgUrl): ?>
                 <div class="image-preview-wrapper">
                   <img class="preview" src="<?= $imgUrl ?>" alt="Current About image">
-                  <button type="submit" name="reset_image" value="1" class="remove-image" title="Remove image">
-                    ×
-                  </button>
+                  <button type="submit" name="reset_image" value="1" class="remove-image" title="Remove image">×</button>
                 </div>
               <?php endif; ?>
 
@@ -455,23 +429,19 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
     </main>
   </div>
 
-<h1 class="page-title">Admin Settings (LIVE TEST)</h1>
-
-
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const flashes = document.querySelectorAll('.flash-stack .flash');
-      if (!flashes.length) return;
-
-      setTimeout(() => {
-        flashes.forEach(flash => {
-          flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-          flash.style.opacity = '0';
-          flash.style.transform = 'translateY(-6px)';
-
-          setTimeout(() => flash.remove(), 500);
-        });
-      }, 2000);
+      if (flashes.length) {
+        setTimeout(() => {
+          flashes.forEach(flash => {
+            flash.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            flash.style.opacity = '0';
+            flash.style.transform = 'translateY(-6px)';
+            setTimeout(() => flash.remove(), 500);
+          });
+        }, 2000);
+      }
     });
 
     (function() {
@@ -513,7 +483,6 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
               text = text.slice(0, max);
               field.value = text;
             }
-
             counter.textContent = `${text.length} / ${max}`;
             if (text.length >= max) {
               field.classList.add('at-limit');
@@ -531,7 +500,6 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
         setupCounter('rulesContent', 'rulesContentCount', 2000);
         setupCounter('aboutContent', 'aboutContentCount', 2000);
       })();
-
     })();
   </script>
 </body>
