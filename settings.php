@@ -193,8 +193,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
 
     <main class="content">
       <div class="content-top">
-        <div class="spacer"></div>
-        <div class="top-actions">
+        <div class="top-actions" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
           <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
           <?php render_topbar_userbox($meRow); ?>
         </div>
@@ -202,121 +201,187 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
 
       <div class="settings-wrap">
         <h1 class="page-title">Admin Settings</h1>
-        <p class="sub">Edit the About page and Rules &amp; Regulations.</p>
+        <p class="sub">Manage categories, Rules &amp; Regulations, and the About page.</p>
 
-        <section id="cats" class="card pad" style="margin-bottom:1rem">
-          <h2 class="section-title" style="margin-bottom:.75rem">Categories</h2>
+        <section class="form-card" id="cats">
+          <h2 class="section-title">Categories</h2>
+          <p class="sub">Categories are used on the “New post” form. You can add, hide/show, or delete them.</p>
 
-          <form class="flex-row" method="post" action="settings.php" style="gap:.5rem; align-items:center; margin-bottom:1rem">
-            <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
-            <input type="hidden" name="action" value="add_cat">
-            <label class="label" style="margin:0">Name</label>
-            <input class="input" name="name" placeholder="e.g. Night" required style="max-width:260px">
-            <button class="btn-primary" type="submit">Add</button>
+          <form method="post" action="./settings.php#cats" class="form-grid" style="margin-bottom:18px;">
+            <div>
+              <label class="label" for="catName">Name</label>
+            </div>
+
+            <div>
+              <div class="cat-add-row">
+                <input
+                  id="catName"
+                  class="input"
+                  type="text"
+                  name="name"
+                  maxlength="40"
+                  placeholder="e.g. Night"
+                  required>
+
+                <button type="submit" class="btn-primary cat-add-btn">
+                  Add
+                </button>
+              </div>
+
+              <small class="help">Max 40 characters. Keep names short and descriptive.</small>
+
+              <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+              <input type="hidden" name="action" value="add_cat">
+            </div>
           </form>
 
-          <table class="cats-table">
-            <tr>
-              <th>Name</th>
-              <th>Photos</th>
-              <th>Status</th>
-              <th style="white-space:nowrap">Actions</th>
-            </tr>
-            <?php foreach ($cats as $c): ?>
-              <tr>
-                <td><?= htmlspecialchars($c['category_name']) ?></td>
-                <td>
-                  <?= (int)$c['pic_count'] ?>
-                  <?php if ((int)$c['pic_count'] > 0): ?>
-                    • <a class="btn-link" href="index.php?cat=<?= urlencode($c['slug']) ?>" target="_blank" rel="noopener">View</a>
-                  <?php endif; ?>
-                </td>
-                <td>
-                  <?php if ((int)$c['active'] === 1): ?>
-                    <span class="badge badge-green">Active</span>
-                  <?php else: ?>
-                    <span class="badge badge-gray">Hidden</span>
-                  <?php endif; ?>
-                </td>
-                <td style="white-space:nowrap">
-                  <form method="post" action="settings.php" style="display:inline">
-                    <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
-                    <input type="hidden" name="action" value="toggle_cat">
-                    <input type="hidden" name="category_id" value="<?= (int)$c['category_id'] ?>">
-                    <button class="btn-ghost" type="submit">
-                      <?= (int)$c['active'] ? 'Hide' : 'Show' ?>
-                    </button>
-                  </form>
 
-                  <form method="post" action="settings.php" style="display:inline"
-                    onsubmit="return confirm('Delete this category? Photos will keep their image but lose this category.');">
-                    <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
-                    <input type="hidden" name="action" value="delete_cat">
-                    <input type="hidden" name="category_id" value="<?= (int)$c['category_id'] ?>">
-                    <button class="btn-danger" type="submit">Delete</button>
-                  </form>
-                </td>
+          <table class="cats-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Photos</th>
+                <th>Status</th>
+                <th style="text-align:right;">Actions</th>
               </tr>
-            <?php endforeach; ?>
+            </thead>
+            <tbody>
+              <?php foreach ($cats as $cat): ?>
+                <tr>
+                  <td><?= htmlspecialchars($cat['category_name']) ?></td>
+                  <td><?= (int)$cat['pic_count'] ?></td>
+                  <td>
+                    <?php if ($cat['active']): ?>
+                      <span class="badge badge-green">Active</span>
+                    <?php else: ?>
+                      <span class="badge badge-gray">Hidden</span>
+                    <?php endif; ?>
+                  </td>
+                  <td style="text-align:right; white-space:nowrap;">
+                    <form method="post" action="./settings.php#cats" style="display:inline;">
+                      <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+                      <input type="hidden" name="action" value="toggle_cat">
+                      <input type="hidden" name="category_id" value="<?= (int)$cat['category_id'] ?>">
+                      <button type="submit" class="btn-ghost pill" style="padding:6px 10px;font-size:13px;">
+                        <?= $cat['active'] ? 'Hide' : 'Show' ?>
+                      </button>
+                    </form>
+
+                    <form method="post" action="./settings.php#cats" style="display:inline;" onsubmit="return confirm('Delete this category? Pictures keeping this category will lose it.');">
+                      <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+                      <input type="hidden" name="action" value="delete_cat">
+                      <input type="hidden" name="category_id" value="<?= (int)$cat['category_id'] ?>">
+                      <button type="submit" class="btn-danger pill" style="padding:6px 10px;font-size:13px;">
+                        Delete
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
           </table>
         </section>
 
-        <section id="rules" class="card pad" style="margin-bottom:1rem">
-          <h2 class="section-title" style="margin-bottom:.75rem">Rules &amp; Regulations</h2>
-          <form method="post" action="settings.php#rules" class="form-grid">
+        <section class="form-card" id="rules">
+          <h2 class="section-title">Rules &amp; Regulations</h2>
+          <p class="sub">Define how people should behave on Picturesque. This text is shown on the public rules page.</p>
+
+          <form method="post" action="./settings.php#rules">
             <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
             <input type="hidden" name="action" value="save_rules">
 
-            <div class="label">Title</div>
-            <div class="row"><input class="input" name="rules_title" value="<?= htmlspecialchars($rulesTitle) ?>" required></div>
+            <div class="form-row">
+              <label class="label" for="rulesTitle">Title</label>
+              <input
+                id="rulesTitle"
+                class="input"
+                type="text"
+                name="rules_title"
+                maxlength="80"
+                value="<?= htmlspecialchars($rulesTitle) ?>"
+                required>
+            </div>
 
-            <div class="label">Content</div>
-            <div class="row"><textarea class="textarea" name="rules_content" rows="10" required><?= htmlspecialchars($rulesContent) ?></textarea></div>
+            <div class="form-row">
+              <div class="label-row">
+                <label class="label" for="rulesContent">Content</label>
+                <span class="field-counter" id="rulesContentCount">0 / 2000</span>
+              </div>
+              <textarea
+                id="rulesContent"
+                class="input textarea"
+                name="rules_content"
+                rows="10"
+                maxlength="2000"
+                required><?= htmlspecialchars($rulesContent) ?></textarea>
+            </div>
 
-            <div></div>
             <div class="btns">
-              <button class="btn-primary" type="submit">Save Rules</button>
-              <a class="btn-ghost" href="./rules.php" target="_blank" rel="noopener">View Public Page</a>
+              <button type="submit" class="btn-primary">Save Rules</button>
             </div>
           </form>
         </section>
 
-        <form class="about-card" method="post" action="settings.php" enctype="multipart/form-data">
-          <div class="pad form-grid">
-            <div class="label">Title</div>
-            <div class="row"><input class="input" name="title" value="<?= htmlspecialchars($title) ?>" required></div>
+        <section class="form-card" id="about">
+          <h2 class="section-title">About Picturesque</h2>
+          <p class="sub">Describe what Picturesque is and why it exists. This content is shown on the About page.</p>
 
-            <div class="label">Content</div>
-            <div class="row"><textarea class="textarea" name="content" required><?= htmlspecialchars($content) ?></textarea></div>
+          <form method="post" action="./settings.php#about" enctype="multipart/form-data">
+            <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
 
-            <div class="label">Page Image</div>
-            <div class="row">
-              <div class="image-preview-wrapper">
-                <img id="preview" class="preview"
-                  src="<?= $imgUrl ?: 'https://placehold.co/800x260?text=No+image' ?>" alt="About image">
-                <?php if ($imgUrl): ?>
-                  <button type="button" class="remove-image" id="removeImageBtn" title="Remove image">×</button>
-                <?php endif; ?>
+            <div class="form-row">
+              <label class="label" for="aboutTitle">Title</label>
+              <input
+                id="aboutTitle"
+                class="input"
+                type="text"
+                name="title"
+                maxlength="80"
+                value="<?= htmlspecialchars($title) ?>"
+                required>
+            </div>
+
+            <div class="form-row">
+              <div class="label-row">
+                <label class="label" for="aboutContent">Content</label>
+                <span class="field-counter" id="aboutContentCount">0 / 1200</span>
               </div>
+              <textarea
+                id="aboutContent"
+                class="input textarea"
+                name="content"
+                rows="8"
+                maxlength="1200"
+                required><?= htmlspecialchars($content) ?></textarea>
+            </div>
 
-              <input type="hidden" name="reset_image" id="resetImage" value="">
+            <div class="form-row">
+              <label class="label">Page image</label>
+
+              <?php if ($imgUrl): ?>
+                <div class="image-preview-wrapper">
+                  <img class="preview" src="<?= $imgUrl ?>" alt="Current About image">
+                  <button type="submit" name="reset_image" value="1" class="remove-image" title="Remove image">
+                    ×
+                  </button>
+                </div>
+              <?php endif; ?>
+
               <div class="filebar">
-                <label for="img" class="filebtn">Choose image…</label>
-                <input id="img" type="file" name="image" accept="image/*">
-                <span class="help">JPG, PNG, WEBP, GIF. Max 6MB.</span>
+                <label class="filebtn" for="aboutImage">Choose image…</label>
+                <input id="aboutImage" type="file" name="image" accept="image/*">
+                <span class="help">JPG, PNG, WEBP or GIF, max 6&nbsp;MB.</span>
               </div>
             </div>
 
-            <div></div>
             <div class="btns">
-              <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
-              <button class="btn-primary" type="submit">Save Changes</button>
-              <a class="btn-ghost" href="./about.php">View About Page</a>
+              <button type="submit" class="btn-primary">Save About Page</button>
             </div>
-          </div>
-        </form>
+          </form>
+        </section>
       </div>
     </main>
+
   </div>
 
   <script>
@@ -332,7 +397,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
 
           setTimeout(() => flash.remove(), 500);
         });
-      }, 2000); 
+      }, 2000);
     });
 
     (function() {
@@ -361,6 +426,38 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
       document.addEventListener('keydown', e => {
         if (e.key === 'Escape') closeMenu();
       });
+
+      (function() {
+        function setupCounter(fieldId, counterId, max) {
+          const field = document.getElementById(fieldId);
+          const counter = document.getElementById(counterId);
+          if (!field || !counter) return;
+
+          const update = () => {
+            let text = field.value || "";
+            if (text.length > max) {
+              text = text.slice(0, max);
+              field.value = text;
+            }
+
+            counter.textContent = `${text.length} / ${max}`;
+            if (text.length >= max) {
+              field.classList.add('at-limit');
+              counter.classList.add('at-limit');
+            } else {
+              field.classList.remove('at-limit');
+              counter.classList.remove('at-limit');
+            }
+          };
+
+          field.addEventListener('input', update);
+          update();
+        }
+
+        setupCounter('rulesContent', 'rulesContentCount', 2000);
+        setupCounter('aboutContent', 'aboutContentCount', 1200);
+      })();
+
     })();
   </script>
 </body>

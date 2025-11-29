@@ -994,13 +994,20 @@ img.c-avatar {
    4) FORMS (Create, shared)
    ========================================================= */
 .form-card {
-    max-width: 740px;
+    max-width: 800px;
     margin: 22px auto;
     background: #fff;
     border: 1px solid var(--line);
     border-radius: 16px;
     padding: 16px;
 }
+
+.settings-wrap .form-card {
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+}
+
 
 .form-row {
     margin: 18px 0;
@@ -1484,8 +1491,8 @@ img.c-avatar {
 }
 
 .settings-wrap {
-    max-width: 920px;
-    margin: 20px auto;
+    max-width: 800px;      
+    margin: 20px auto 40px;
 }
 
 .sub {
@@ -2682,3 +2689,28 @@ body.sidebar-open .sidebar-backdrop{
   font-weight: 500;
 }
 
+.cat-add-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cat-add-row .input {
+  flex: 1;
+}
+
+.cat-add-btn {
+  margin-top: 0; 
+  white-space: nowrap; 
+}
+
+.cats-table td:last-child {
+  text-align: right;
+  white-space: nowrap;
+  width: 1%;
+}
+
+.cats-table form {
+  display: inline-flex;
+  margin-left: 4px;
+}
