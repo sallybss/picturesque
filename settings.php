@@ -354,7 +354,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
                       </button>
                     </form>
 
-                    <form method="post" action="./settings.php#cats" style="display:inline;" onsubmit="return confirm('Delete this category? Pictures keeping this category will lose it.');">
+                    <form method="post" action="<?= htmlspecialchars($basePath) ?>#cats" style="display:inline;" onsubmit="return confirm('Delete this category? Pictures keeping this category will lose it.');">
                       <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                       <input type="hidden" name="action" value="delete_cat">
                       <input type="hidden" name="category_id" value="<?= (int)$cat['category_id'] ?>">
