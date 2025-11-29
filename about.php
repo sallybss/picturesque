@@ -4,7 +4,6 @@ require_once __DIR__ . '/includes/views/topbar.php';
 require_once __DIR__ . '/includes/views/sidebar.php';
 
 $me = Auth::requireUserOrRedirect('./auth/login.php');
-
 $paths    = new Paths();
 $profiles = new ProfileRepository();
 $meRow    = $profiles->getHeader($me);
@@ -21,6 +20,10 @@ $title    = $page['title']      ?? 'About Picturesque';
 $content  = $page['content']    ?? '';
 $imageRel = $page['image_path'] ?? null;
 $imgUrl   = $imageRel ? $paths->uploads . $imageRel : null;
+$leadText = trim(strip_tags($content));
+if ($leadText === '') {
+  $leadText = 'Welcome to Picturesque!';
+}
 
 $cssVer = file_exists(__DIR__ . '/public/css/main.css')
   ? filemtime(__DIR__ . '/public/css/main.css')
@@ -59,12 +62,21 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css')
       </div>
 
       <section class="about">
-        <h1><?= htmlspecialchars($title) ?></h1>
-        <p class="lead"><?= nl2br(htmlspecialchars($content)) ?></p>
+        <header class="about-header">
+          <h1><?= htmlspecialchars($title) ?></h1>
+        </header>
 
         <?php if ($imgUrl): ?>
-          <img src="<?= htmlspecialchars($imgUrl) ?>" alt="About image" class="about-image">
+          <div class="about-image-wrap">
+            <img src="<?= htmlspecialchars($imgUrl) ?>" alt="About image" class="about-image">
+          </div>
         <?php endif; ?>
+
+        <article class="about-card">
+          <div class="about-body">
+            <?= $content ?>
+          </div>
+        </article>
       </section>
     </main>
   </div>

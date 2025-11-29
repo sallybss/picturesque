@@ -35,8 +35,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $action = trim($_POST['action'] ?? '');
 
   if ($action === 'save_rules') {
-    $newTitle   = trim($_POST['rules_title']   ?? 'Rules & Regulations');
-    $newContent = trim($_POST['rules_content'] ?? '');
+    $newTitle    = trim($_POST['rules_title']   ?? 'Rules & Regulations');
+    $rawRules    = trim($_POST['rules_content'] ?? '');
+
+
+    $allowedTags   = '<h2><h3><p><ul><ol><li><strong><em><b><i><a><br>';
+    $newContent    = strip_tags($rawRules, $allowedTags);
+
+
+    $newContent = preg_replace(
+      '~href\s*=\s*["\']\s*javascript:[^"\']*["\']~i',
+      'href="#"',
+      $newContent
+    );
+
+    $newContent = preg_replace(
+      '~\s(on\w+|style)\s*=\s*(".*?"|\'.*?\'|[^\s>]+)~i',
+      '',
+      $newContent
+    );
+
     if ($newTitle === '' || $newContent === '') {
       set_flash('err', 'Rules title and content are required.');
       header('Location: ./settings.php#rules');
@@ -105,52 +123,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
   }
 
-  $newTitle   = trim($_POST['title'] ?? '');
-  $newContent = trim($_POST['content'] ?? '');
-  $resetImg   = !empty($_POST['reset_image']);
-  if ($newTitle === '' || $newContent === '') {
-    set_flash('err', 'Title and content are required.');
-    header('Location: ./settings.php');
+  if ($action === '' || $action === 'save_about') {
+    $newTitle    = trim($_POST['title'] ?? '');
+    $rawContent  = trim($_POST['content'] ?? '');
+
+    $allowedTags = '<h2><h3><p><ul><ol><li><strong><em><b><i><a><br>';
+    $newContent  = strip_tags($rawContent, $allowedTags);
+
+    $newContent = preg_replace(
+      '~href\s*=\s*["\']\s*javascript:[^"\']*["\']~i',
+      'href="#"',
+      $newContent
+    );
+
+    $newContent = preg_replace(
+      '~\s(on\w+|style)\s*=\s*(".*?"|\'.*?\'|[^\s>]+)~i',
+      '',
+      $newContent
+    );
+
+    $resetImg = !empty($_POST['reset_image']);
+
+    if ($newTitle === '' || $newContent === '') {
+      set_flash('err', 'Title and content are required.');
+      header('Location: ./settings.php#about');
+      exit;
+    }
+
+    $newImagePath = $imagePath;
+    if ($resetImg) {
+      $newImagePath = null;
+    }
+
+    if (!empty($_FILES['image']['name'])) {
+      $f   = $_FILES['image'];
+      $ok  = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+      $finfo = finfo_open(FILEINFO_MIME_TYPE);
+      $mime  = $finfo ? finfo_file($finfo, $f['tmp_name']) : null;
+      if ($finfo) {
+        finfo_close($finfo);
+      }
+
+      if (!in_array($mime, $ok, true)) {
+        set_flash('err', 'Upload JPG, PNG, WEBP or GIF.');
+        header('Location: ./settings.php#about');
+        exit;
+      }
+
+      if ($f['size'] > 6 * 1024 * 1024) {
+        set_flash('err', 'Image too large (max 6MB).');
+        header('Location: ./settings.php#about');
+        exit;
+      }
+
+      $ext  = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
+      $name = 'about_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+      $dest = __DIR__ . '/uploads/' . $name;
+
+      if (!move_uploaded_file($f['tmp_name'], $dest)) {
+        set_flash('err', 'Upload failed.');
+        header('Location: ./settings.php#about');
+        exit;
+      }
+
+      $newImagePath = $name;
+    }
+
+    if ($pageId > 0) {
+      $pages->updateAbout($pageId, $newTitle, $newContent, $newImagePath, $me);
+    } else {
+      $pages->insertAbout($newTitle, $newContent, $newImagePath, $me);
+    }
+
+    set_flash('ok', 'About page updated.');
+    header('Location: ./settings.php#about');
     exit;
   }
-
-  $newImagePath = $imagePath;
-  if ($resetImg) $newImagePath = null;
-
-  if (!empty($_FILES['image']['name'])) {
-    $f = $_FILES['image'];
-    $ok = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    if (!in_array($f['type'], $ok)) {
-      set_flash('err', 'Upload JPG, PNG, WEBP or GIF.');
-      header('Location: ./settings.php');
-      exit;
-    }
-    if ($f['size'] > 6 * 1024 * 1024) {
-      set_flash('err', 'Image too large (max 6MB).');
-      header('Location: ./settings.php');
-      exit;
-    }
-
-    $ext  = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
-    $name = 'about_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-    $dest = __DIR__ . '/uploads/' . $name;
-    if (!move_uploaded_file($f['tmp_name'], $dest)) {
-      set_flash('err', 'Upload failed.');
-      header('Location: ./settings.php');
-      exit;
-    }
-    $newImagePath = $name;
-  }
-
-  if ($pageId > 0) {
-    $pages->updateAbout($pageId, $newTitle, $newContent, $newImagePath, $me);
-  } else {
-    $pages->insertAbout($newTitle, $newContent, $newImagePath, $me);
-  }
-
-  set_flash('ok', 'About page updated.');
-  header('Location: ./settings.php');
-  exit;
 }
 
 $cats = DB::get()->query("
@@ -344,14 +393,14 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
             <div class="form-row">
               <div class="label-row">
                 <label class="label" for="aboutContent">Content</label>
-                <span class="field-counter" id="aboutContentCount">0 / 1200</span>
+                <span class="field-counter" id="aboutContentCount">0 / 2000</span>
               </div>
               <textarea
                 id="aboutContent"
                 class="input textarea"
                 name="content"
                 rows="8"
-                maxlength="1200"
+                maxlength="2000"
                 required><?= htmlspecialchars($content) ?></textarea>
             </div>
 
@@ -455,7 +504,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
         }
 
         setupCounter('rulesContent', 'rulesContentCount', 2000);
-        setupCounter('aboutContent', 'aboutContentCount', 1200);
+        setupCounter('aboutContent', 'aboutContentCount', 2000);
       })();
 
     })();
