@@ -14,6 +14,8 @@ if (!$isAdmin) {
   exit;
 }
 
+$basePath = strtok($_SERVER['REQUEST_URI'], '?');
+
 $pages        = new PagesRepository();
 $page         = $pages->getAbout();
 $rules        = $pages->getBySlug('rules');
@@ -28,7 +30,7 @@ $imagePath = $page['image_path'] ?? null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (!check_csrf($_POST['csrf'] ?? null)) {
     set_flash('err', 'Invalid CSRF token.');
-    header('Location: ./settings.php');
+    header("Location: {$basePath}");
     exit;
   }
 
@@ -56,13 +58,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($newTitle === '' || $newContent === '') {
       set_flash('err', 'Rules title and content are required.');
-      header('Location: ./settings.php#rules');
+      header("Location: {$basePath}#rules");
       exit;
     }
 
     $pages->upsert('rules', $newTitle, $newContent, null, $me);
     set_flash('ok', 'Rules & Regulations saved.');
-    header('Location: ./settings.php#rules');
+    header("Location: {$basePath}#rules");
     exit;
   }
 
@@ -71,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     if ($name === '') {
       set_flash('err', 'Category name required.');
-      header('Location: ./settings.php#cats');
+      header("Location: {$basePath}#cats");
       exit;
     }
 
@@ -87,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } catch (mysqli_sql_exception $e) {
       set_flash('err', 'Could not add (duplicate name/slug?).');
     }
-    header('Location: ./settings.php#cats');
+    header("Location: {$basePath}#cats");
     exit;
   }
 
@@ -96,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = (int)($_POST['category_id'] ?? 0);
     if ($id <= 0) {
       set_flash('err', 'Bad id.');
-      header('Location: ./settings.php#cats');
+      header("Location: {$basePath}#cats");
       exit;
     }
 
@@ -108,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $st->close();
 
     set_flash('ok', 'Toggled.');
-    header('Location: ./settings.php#cats');
+    header("Location: {$basePath}#cats");
     exit;
   }
 
@@ -117,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = (int)($_POST['category_id'] ?? 0);
     if ($id <= 0) {
       set_flash('err', 'Bad id.');
-      header('Location: ./settings.php#cats');
+      header("Location: {$basePath}#cats");
       exit;
     }
 
@@ -133,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $st->close();
 
-    header('Location: ./settings.php#cats');
+    header("Location: {$basePath}#cats");
     exit;
   }
 
@@ -161,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($newTitle === '' || $newContent === '') {
       set_flash('err', 'Title and content are required.');
-      header('Location: ./settings.php#about');
+      header("Location: {$basePath}#about");
       exit;
     }
 
@@ -182,13 +184,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       if (!in_array($mime, $ok, true)) {
         set_flash('err', 'Upload JPG, PNG, WEBP or GIF.');
-        header('Location: ./settings.php#about');
+        header("Location: {$basePath}#about");
         exit;
       }
 
       if ($f['size'] > 6 * 1024 * 1024) {
         set_flash('err', 'Image too large (max 6MB).');
-        header('Location: ./settings.php#about');
+        header("Location: {$basePath}#about");
         exit;
       }
 
@@ -198,7 +200,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       if (!move_uploaded_file($f['tmp_name'], $dest)) {
         set_flash('err', 'Upload failed.');
-        header('Location: ./settings.php#about');
+        header("Location: {$basePath}#about");
         exit;
       }
 
@@ -212,7 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     set_flash('ok', 'About page updated.');
-    header('Location: ./settings.php#about');
+    header("Location: {$basePath}#about");
     exit;
   }
 }
@@ -232,12 +234,14 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
 ?>
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>Admin Settings · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="./public/css/main.css?v=<?= $cssVer ?>">
 </head>
+
 <body>
   <div id="flash-stack" class="flash-stack">
     <?php if ($m = get_flash('ok')): ?>
@@ -268,7 +272,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
           <h2 class="section-title">Categories</h2>
           <p class="sub">Categories are used on the “New post” form. You can add, hide/show, or delete them.</p>
 
-          <form method="post" action="./settings.php#cats" class="form-grid" style="margin-bottom:18px;">
+          <form method="post" action="<?= htmlspecialchars($basePath) ?>#cats" class="form-grid" style="margin-bottom:18px;">
             <div>
               <label class="label" for="catName">Name</label>
             </div>
@@ -312,7 +316,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
                     <?php endif; ?>
                   </td>
                   <td style="text-align:right; white-space:nowrap;">
-                    <form method="post" action="./settings.php#cats" style="display:inline;">
+                    <form method="post" action="<?= htmlspecialchars($basePath) ?>#cats" style="display:inline;">
                       <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
                       <input type="hidden" name="action" value="toggle_cat">
                       <input type="hidden" name="category_id" value="<?= (int)$cat['category_id'] ?>">
@@ -341,7 +345,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
           <h2 class="section-title">Rules &amp; Regulations</h2>
           <p class="sub">Define how people should behave on Picturesque. This text is shown on the public rules page.</p>
 
-          <form method="post" action="./settings.php#rules">
+          <form method="post" action="<?= htmlspecialchars($basePath) ?>#rules">
             <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
             <input type="hidden" name="action" value="save_rules">
 
@@ -382,7 +386,7 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
           <h2 class="section-title">About Picturesque</h2>
           <p class="sub">Describe what Picturesque is and why it exists. This content is shown on the About page.</p>
 
-          <form method="post" action="./settings.php#about" enctype="multipart/form-data">
+          <form method="post" action="<?= htmlspecialchars($basePath) ?>#about" enctype="multipart/form-data">
             <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
             <input type="hidden" name="action" value="save_about">
 
@@ -463,10 +467,12 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
         body.classList.add('sidebar-open');
         btn?.setAttribute('aria-expanded', 'true');
       }
+
       function closeMenu() {
         body.classList.remove('sidebar-open');
         btn?.setAttribute('aria-expanded', 'false');
       }
+
       function toggle() {
         body.classList.contains('sidebar-open') ? closeMenu() : openMenu();
       }
@@ -510,4 +516,5 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
     })();
   </script>
 </body>
+
 </html>
