@@ -14,6 +14,8 @@ if (!$isAdmin) {
   exit;
 }
 
+$MAX_CATEGORIES = 10;
+
 $basePath = strtok($_SERVER['REQUEST_URI'], '?');
 
 $pages        = new PagesRepository();
@@ -71,6 +73,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     if ($name === '') {
       set_flash('err', 'Category name required.');
+      header("Location: {$basePath}#cats");
+      exit;
+    }
+
+    $res = DB::get()->query("SELECT COUNT(*) AS cnt FROM categories");
+    $row = $res->fetch_assoc();
+    $currentCount = (int)($row['cnt'] ?? 0);
+
+    if ($currentCount >= $MAX_CATEGORIES) {
+      set_flash('err', "You can have at most {$MAX_CATEGORIES} categories.");
       header("Location: {$basePath}#cats");
       exit;
     }
@@ -189,7 +201,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
       }
 
-      $ext  = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
+      $ext = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
+      $allowedExt = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+      if (!in_array($ext, $allowedExt, true)) {
+        set_flash('err', 'Upload JPG, PNG, WEBP or GIF.');
+        header("Location: {$basePath}#about");
+        exit;
+      }
       $name = 'about_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
       $dest = __DIR__ . '/uploads/' . $name;
 
@@ -222,6 +240,8 @@ $cats = DB::get()->query("
   GROUP BY c.category_id, c.category_name, c.slug, c.active
   ORDER BY c.active DESC, c.category_name
 ")->fetch_all(MYSQLI_ASSOC);
+
+$catLimitReached = (count($cats) >= $MAX_CATEGORIES);
 
 $imgUrl = $imagePath ? ($paths->uploads . htmlspecialchars($imagePath)) : null;
 $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/public/css/main.css') : time();
@@ -278,14 +298,30 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
                   name="name"
                   maxlength="40"
                   placeholder="e.g. Night"
+                  <?= $catLimitReached ? 'disabled' : '' ?>
                   required>
-                <button type="submit" class="btn-primary cat-add-btn">Add</button>
+
+                <button
+                  type="submit"
+                  class="btn-primary cat-add-btn"
+                  <?= $catLimitReached ? 'disabled' : '' ?>>
+                  Add
+                </button>
               </div>
-              <small class="help">Max 40 characters. Keep names short and descriptive.</small>
+
+              <small class="help">
+                Max 40 characters. Keep names short and descriptive.
+                <?php if ($catLimitReached): ?>
+                  <br>You reached the limit of <?= $MAX_CATEGORIES ?> categories.
+                  Delete one if you need to add another.
+                <?php endif; ?>
+              </small>
+
               <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
               <input type="hidden" name="action" value="add_cat">
             </div>
           </form>
+
 
           <table class="cats-table">
             <thead>
