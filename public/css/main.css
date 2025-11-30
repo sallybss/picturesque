@@ -2819,3 +2819,523 @@ body.sidebar-open .sidebar-backdrop{
     font-size: 1.5rem;
   }
 }
+
+
+/* --- User settings dropdown --- */
+.user-settings {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-menu-toggle {
+  border: none;
+  background:#8ec6df ;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 9px;
+  color: #fff;
+}
+
+.user-menu-toggle:hover {
+  background:#3eb1d4;
+}
+
+.user-menu {
+  position: absolute;
+  right: 0;
+  top: 120%;
+  min-width: 180px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+  padding: 10px;
+  display: none;
+  z-index: 50;
+}
+
+.user-menu.open {
+  display: block;
+}
+
+.user-menu-section + .user-menu-section {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.user-menu-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #888;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.user-menu-item {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 4px 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.user-menu-item:hover {
+  background: #f3f4f6;
+}
+
+/* --- Font sizes --- */
+body.font-small   { font-size: 14px; }
+body.font-medium  { font-size: 16px; }
+body.font-large   { font-size: 18px; }
+
+
+/* =======================================================
+   TOPBAR — LIGHT MODE
+======================================================= */
+.topbar-userbox {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 8px 0 12px;
+  margin-left: auto;
+}
+
+.userbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #333;               /* light mode color */
+}
+
+.userbox-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid #e0e0e0;
+  flex-shrink: 0;
+}
+
+/* =======================================================
+  TOPBAR — DARK MODE FIX
+======================================================= */
+body.theme-dark .userbox,
+body.theme-dark .userbox-name,
+body.theme-dark .topbar-userbox a {
+  color: #e5e7eb !important;
+}
+
+body.theme-dark .avatar {
+  border-color: #334155 !important; /* dark blue-gray border */
+}
+
+
+/* ============================
+   THEME: LIGHT / DARK
+   ============================ */
+
+/* Light theme (default) */
+body.theme-light {
+  background: #f5f5f5;
+  color: #111827;
+}
+
+/* Dark theme base */
+body.theme-dark {
+  background: #020617;      
+  color: #e5e7eb;   
+  border: #1e293b;
+}
+
+/* Main layout areas */
+body.theme-dark .layout,
+body.theme-dark .content {
+  background: #020617;
+}
+
+/* ============================
+   CARDS & FEED
+   ============================ */
+
+body.theme-dark .card,
+body.theme-dark .hot-card {
+  background: #111b32;         /* dark slate */
+  color: #e5e7eb;
+  border-radius: 16px;
+  border: 1px solid #1e293b;
+}
+
+body.theme-dark .card-title,
+body.theme-dark .card-title a {
+  color: #f1f5f9;
+}
+
+body.theme-dark .card-desc {
+  color: #d1d5db;
+}
+
+body.theme-dark .author-name,
+body.theme-dark .author-link span {
+  color: #e5e7eb;
+}
+
+body.theme-dark .counts,
+body.theme-dark .counts a,
+body.theme-dark .muted,
+body.theme-dark .meta span,
+body.theme-dark .card .muted {
+  color: #cbd5e1;
+}
+
+body.theme-dark .hot-card span {
+  color: #f1f5f9;
+}
+
+/* ============================
+   SEARCH, FILTERS & PILLS
+   ============================ */
+
+body.theme-dark .search,
+body.theme-dark .filter-select {
+  background: #020617;
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+}
+
+body.theme-dark .search::placeholder {
+  color: #6b7280;
+}
+
+body.theme-dark .filter-select-wrap {
+  background: #020617;
+  border-radius: 999px;
+}
+
+body.theme-dark .pill {
+  background: #020617;
+  border: 1px solid #1f2937;
+  color: #e5e7eb;
+}
+
+body.theme-dark .pill.is-selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #e5e7eb;
+}
+
+body.theme-dark .filter-label {
+  color: #e5e7eb;
+}
+
+/* datalist suggestions */
+body.theme-dark option {
+  background: #020617;
+  color: #e5e7eb;
+}
+
+/* ============================
+   BUTTONS
+   ============================ */
+
+body.theme-dark .btn-primary,
+body.theme-dark .search-btn {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #e5e7eb;
+}
+
+body.theme-dark .btn-primary:hover,
+body.theme-dark .search-btn:hover {
+  background: var(--primary);
+}
+
+/* ============================
+   FLASH MESSAGES
+   ============================ */
+
+body.theme-dark .flash {
+  background: #0f172a;
+  color: #e5e7eb;
+  border: 1px solid #1e293b;
+}
+
+body.theme-dark .flash-ok {
+  border-left: 4px solid #22c55e;
+}
+
+body.theme-dark .flash-err {
+  border-left: 4px solid #f97373;
+}
+
+/* ============================
+   DROPDOWN (DISPLAY SETTINGS)
+   ============================ */
+
+body.theme-dark .user-menu {
+  background: #111b32;
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+}
+
+body.theme-dark .user-menu-title,
+body.theme-dark .user-menu-item {
+  color: #e5e7eb;
+}
+
+body.theme-dark .user-menu-item:hover {
+  background: #111b32;
+}
+
+/* ============================
+   SIDENAV (LEFT MENU)
+   ============================ */
+
+body.theme-dark .sidenav {
+  background: #111b32;
+  color: #e5e7eb;
+  border: 1px solid #1e293b;
+
+}
+
+/* all text & links */
+body.theme-dark .sidenav *,
+body.theme-dark .sidenav a,
+body.theme-dark .sidenav button {
+  color: #e5e7eb;
+}
+
+/* nav links normal */
+body.theme-dark .sidenav a {
+  background: transparent;
+}
+
+/* hover & active */
+body.theme-dark .sidenav a:hover,
+body.theme-dark .sidenav a.active {
+  background: #0b1120;
+  color: #ffffff;
+}
+
+/* icons in sidenav */
+body.theme-dark .sidenav svg path,
+body.theme-dark .sidenav svg line,
+body.theme-dark .sidenav svg polyline,
+body.theme-dark .sidenav svg circle {
+  fill: #e5e7eb !important;
+  stroke: #e5e7eb !important;
+}
+
+/* remove any halo/shadow on icons */
+body.theme-dark .sidenav a svg {
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+/* "Create" button at top of sidenav */
+body.theme-dark .sidenav .create-btn {
+  background: #3eb1d4;
+  color: #ffffff;
+  border: none;
+}
+
+body.theme-dark .sidenav .create-btn:hover {
+  filter: brightness(1.1);
+}
+
+/* ============================
+   TOP-RIGHT USER BOX ("Mada")
+   ============================ */
+
+/* make everything in the user-settings area light */
+body.theme-dark .user-settings,
+body.theme-dark .user-settings * {
+  color: #e5e7eb !important;
+}
+
+/* just in case the name has its own special class */
+body.theme-dark .userbox-name,
+body.theme-dark .topbar-userbox span {
+  color: #e5e7eb !important;
+}
+
+/* the small "Theme / Font size" labels in the dropdown */
+body.theme-dark .section-title {
+  color: #e5e7eb;
+}
+
+/* =========================================
+   SETTINGS PAGE – GENERAL LAYOUT
+   ========================================= */
+
+.content-top {
+  padding: 16px 0 8px;
+}
+
+.top-actions{
+  display:flex;
+  align-items:center;
+
+  gap:8px;
+}
+
+/* Avatar + name + blue settings button */
+.user-settings {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* kill the inline margin from render_topbar_userbox */
+.user-settings .topbar {
+  margin: 0 !important;
+}
+
+/* Dropdown */
+.user-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;         /* align under the blue icon on the right */
+  margin-top: 8px;
+  display: none;
+  z-index: 20;
+}
+
+.user-menu.open {
+  display: block;
+}
+
+/* =========================================
+   SETTINGS PAGE – DARK MODE
+   ========================================= */
+
+/* Card wrapper */
+body.theme-dark .form-card {
+  background: #111b32;
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+}
+
+/* Titles + subtitles */
+body.theme-dark .page-title,
+body.theme-dark .section-title {
+  color: #e5e7eb !important;
+}
+
+body.theme-dark .label,
+body.theme-dark .settings-wrap .sub {
+  color: #cbd5e1 !important;
+}
+
+/* Tables + inputs */
+body.theme-dark .input,
+body.theme-dark .textarea,
+body.theme-dark input.input,
+body.theme-dark textarea.input,
+body.theme-dark .cats-table,
+body.theme-dark .cats-table th,
+body.theme-dark .cats-table td {
+  background: #020617;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+body.theme-dark .input::placeholder,
+body.theme-dark .textarea::placeholder {
+  color: #6b7280 !important;
+}
+
+/* Help text */
+body.theme-dark .help {
+  color: #9ca3af !important;
+}
+
+/* File input button */
+body.theme-dark .filebar {
+  background: transparent !important;
+}
+
+body.theme-dark .filebtn {
+  background: #0b1120 !important;
+  color: #e5e7eb !important;
+  border: 1px solid #1e293b !important;
+}
+
+body.theme-dark .filebtn:hover {
+  background: #1e293b !important;
+}
+
+/* Primary buttons inside settings cards */
+body.theme-dark .form-card .btn-primary {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+body.theme-dark .form-card .btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+.content-spacer {
+    flex: 1;
+}
+
+/* ===== Rules / About page — Dark mode ===== */
+
+body.theme-dark .about-header h1,
+body.theme-dark .about-header .lead {
+  color: #e5e7eb;
+}
+
+body.theme-dark .about-card {
+  background: #111b32;
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+}
+
+body.theme-dark .about-body {
+  color: #e5e7eb;
+}
+
+/* links inside rules content */
+body.theme-dark .about-body a {
+  color: var(--primary);
+}
+
+/* Contact page — dark mode */
+
+body.theme-dark .contact-pane h1,
+body.theme-dark .contact-pane .sub,
+body.theme-dark .contact-label {
+  color: #e5e7eb;
+}
+
+body.theme-dark .contact-input,
+body.theme-dark .contact-textarea {
+  background: #020617;
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+}
+
+body.theme-dark .contact-input::placeholder,
+body.theme-dark .contact-textarea::placeholder {
+  color: #6b7280;
+}
+
+body.theme-dark .contact-media {
+  background: #020617;
+}
+

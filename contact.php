@@ -15,7 +15,7 @@ if (!$meRow) {
 $row = $profiles->getLoginEmailAndRole($me);
 $isAdmin      = strtolower(trim($meRow['role'] ?? '')) === 'admin';
 $prefillName  = $meRow['display_name'] ?? '';
-$prefillEmail = $row['login_email'] ?? '';   
+$prefillEmail = $row['login_email'] ?? '';
 
 $cssPath = __DIR__ . '/public/css/main.css';
 $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
@@ -46,9 +46,36 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 
     <main class="content">
       <div class="content-top">
-        <div class="top-actions" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+          <div class="content-spacer"></div>
+        <div class="top-actions">
           <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
-          <?php render_topbar_userbox($meRow); ?>
+
+          <div class="user-settings">
+            <?php render_topbar_userbox($meRow); ?>
+
+            <!-- Display settings button (3 dots icon) -->
+            <button class="user-menu-toggle" id="userMenuToggle" aria-label="Display settings" aria-expanded="false">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#ffffffff" viewBox="0 0 256 256">
+                <path d="M64,105V40a8,8,0,0,0-16,0v65a32,32,0,0,0,0,62v49a8,8,0,0,0,16,0V167a32,32,0,0,0,0-62Zm-8,47a16,16,0,1,1,16-16A16,16,0,0,1,56,152Zm80-95V40a8,8,0,0,0-16,0V57a32,32,0,0,0,0,62v97a8,8,0,0,0,16,0V119a32,32,0,0,0,0-62Zm-8,47a16,16,0,1,1,16-16A16,16,0,0,1,128,104Zm104,64a32.06,32.06,0,0,0-24-31V40a8,8,0,0,0-16,0v97a32,32,0,0,0,0,62v17a8,8,0,0,0,16,0V199A32.06,32.06,0,0,0,232,168Zm-32,16a16,16,0,1,1,16-16A16,16,0,0,1,200,184Z"></path>
+              </svg>
+            </button>
+
+            <!-- Theme / font dropdown -->
+            <div class="user-menu" id="userMenu">
+              <div class="user-menu-section">
+                <span class="user-menu-title">Theme</span>
+                <button type="button" class="user-menu-item" data-theme="light">Light mode</button>
+                <button type="button" class="user-menu-item" data-theme="dark">Dark mode</button>
+              </div>
+
+              <div class="user-menu-section">
+                <span class="user-menu-title">Font size</span>
+                <button type="button" class="user-menu-item" data-font="small">Small</button>
+                <button type="button" class="user-menu-item" data-font="medium">Medium</button>
+                <button type="button" class="user-menu-item" data-font="large">Large</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -113,6 +140,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <script>
+    // Auto-hide flash messages
     document.addEventListener('DOMContentLoaded', () => {
       const flashes = document.querySelectorAll('.flash-stack .flash');
       if (!flashes.length) return;
@@ -128,6 +156,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
       }, 2000);
     });
 
+    // Sidebar toggle
     (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
@@ -156,57 +185,144 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
       });
     })();
 
+    // Apply saved theme + font on load
+    (function() {
+      const body = document.body;
+      const THEME_KEY = 'pq_theme';
+      const FONT_KEY = 'pq_font';
+
+      function applyTheme(theme) {
+        body.classList.remove('theme-light', 'theme-dark');
+        body.classList.add('theme-' + theme);
+      }
+
+      function applyFont(size) {
+        body.classList.remove('font-small', 'font-medium', 'font-large');
+        body.classList.add('font-' + size);
+      }
+
+      const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+      const savedFont = localStorage.getItem(FONT_KEY) || 'medium';
+
+      applyTheme(savedTheme);
+      applyFont(savedFont);
+    })();
+
+    // Theme/font dropdown logic
+    (function() {
+      const body = document.body;
+      const menuToggle = document.getElementById('userMenuToggle');
+      const menu = document.getElementById('userMenu');
+
+      if (!menuToggle || !menu) return;
+
+      const THEME_KEY = 'pq_theme';
+      const FONT_KEY = 'pq_font';
+
+      function applyTheme(theme) {
+        body.classList.remove('theme-light', 'theme-dark');
+        body.classList.add('theme-' + theme);
+        localStorage.setItem(THEME_KEY, theme);
+      }
+
+      function applyFont(size) {
+        body.classList.remove('font-small', 'font-medium', 'font-large');
+        body.classList.add('font-' + size);
+        localStorage.setItem(FONT_KEY, size);
+      }
+
+      // Load saved settings
+      const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+      const savedFont = localStorage.getItem(FONT_KEY) || 'medium';
+      applyTheme(savedTheme);
+      applyFont(savedFont);
+
+      function closeMenu() {
+        menu.classList.remove('open');
+        menuToggle.setAttribute('aria-expanded', 'false');
+      }
+
+      function openMenu() {
+        menu.classList.add('open');
+        menuToggle.setAttribute('aria-expanded', 'true');
+      }
+
+      menuToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (menu.classList.contains('open')) {
+          closeMenu();
+        } else {
+          openMenu();
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!menu.contains(e.target) && e.target !== menuToggle) {
+          closeMenu();
+        }
+      });
+
+      menu.querySelectorAll('[data-theme]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          applyTheme(btn.getAttribute('data-theme'));
+        });
+      });
+
+      menu.querySelectorAll('[data-font]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          applyFont(btn.getAttribute('data-font'));
+        });
+      });
+    })();
+
+    // Character counters (subject + message)
     document.addEventListener("DOMContentLoaded", () => {
+      const subject = document.getElementById("subjectInput");
+      const subjectCount = document.getElementById("subjectCount");
+      const SUBJECT_MAX = 100;
 
-  const subject = document.getElementById("subjectInput");
-  const subjectCount = document.getElementById("subjectCount");
-  const SUBJECT_MAX = 100;
+      if (subject) {
+        subject.addEventListener("input", () => {
+          let text = subject.value;
+          if (text.length > SUBJECT_MAX) {
+            text = text.slice(0, SUBJECT_MAX);
+            subject.value = text;
+          }
+          subjectCount.textContent = `${text.length} / ${SUBJECT_MAX}`;
 
-  if (subject) {
-    subject.addEventListener("input", () => {
-      let text = subject.value;
-      if (text.length > SUBJECT_MAX) {
-        text = text.slice(0, SUBJECT_MAX);
-        subject.value = text;
+          if (text.length >= SUBJECT_MAX) {
+            subject.classList.add("at-limit");
+            subjectCount.classList.add("at-limit");
+          } else {
+            subject.classList.remove("at-limit");
+            subjectCount.classList.remove("at-limit");
+          }
+        });
       }
-      subjectCount.textContent = `${text.length} / ${SUBJECT_MAX}`;
 
-      if (text.length >= SUBJECT_MAX) {
-        subject.classList.add("at-limit");
-        subjectCount.classList.add("at-limit");
-      } else {
-        subject.classList.remove("at-limit");
-        subjectCount.classList.remove("at-limit");
+      const msg = document.getElementById("msgInput");
+      const msgCount = document.getElementById("msgCount");
+      const MSG_MAX = 500;
+
+      if (msg) {
+        msg.addEventListener("input", () => {
+          let text = msg.value;
+          if (text.length > MSG_MAX) {
+            text = text.slice(0, MSG_MAX);
+            msg.value = text;
+          }
+          msgCount.textContent = `${text.length} / ${MSG_MAX}`;
+
+          if (text.length >= MSG_MAX) {
+            msg.classList.add("at-limit");
+            msgCount.classList.add("at-limit");
+          } else {
+            msg.classList.remove("at-limit");
+            msgCount.classList.remove("at-limit");
+          }
+        });
       }
     });
-  }
-
-  /* ===== MESSAGE (500 chars) ===== */
-  const msg = document.getElementById("msgInput");
-  const msgCount = document.getElementById("msgCount");
-  const MSG_MAX = 500;
-
-  if (msg) {
-    msg.addEventListener("input", () => {
-      let text = msg.value;
-      if (text.length > MSG_MAX) {
-        text = text.slice(0, MSG_MAX);
-        msg.value = text;
-      }
-      msgCount.textContent = `${text.length} / ${MSG_MAX}`;
-
-      if (text.length >= MSG_MAX) {
-        msg.classList.add("at-limit");
-        msgCount.classList.add("at-limit");
-      } else {
-        msg.classList.remove("at-limit");
-        msgCount.classList.remove("at-limit");
-      }
-    });
-  }
-});
-
   </script>
 </body>
-
 </html>
