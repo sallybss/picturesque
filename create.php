@@ -23,12 +23,12 @@ $postsLeft    = max(0, $limitPer5Min - $recentCount);
 
 $limitUntil = null;
 if (!empty($_SESSION['post_limit_until'])) {
-    $limitUntil = (int)$_SESSION['post_limit_until'];
+  $limitUntil = (int)$_SESSION['post_limit_until'];
 
-    if ($limitUntil <= time()) {
-        unset($_SESSION['post_limit_until']);
-        $limitUntil = null;
-    }
+  if ($limitUntil <= time()) {
+    unset($_SESSION['post_limit_until']);
+    $limitUntil = null;
+  }
 }
 
 $showRateModal = $limitUntil !== null && $postsLeft <= 0;
@@ -59,10 +59,38 @@ $showRateModal = $limitUntil !== null && $postsLeft <= 0;
 
     <main class="content">
       <div class="content-top">
-        <div class="top-actions" style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+        <div class="content-spacer"></div>
+        <div class="top-actions">
           <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
-          <?php render_topbar_userbox($meRow); ?>
+
+          <div class="user-settings">
+            <?php render_topbar_userbox($meRow); ?>
+
+            <!-- Display settings button -->
+            <button class="user-menu-toggle" id="userMenuToggle" aria-label="Display settings" aria-expanded="false">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#fff" viewBox="0 0 256 256">
+                <path d="M64,105V40a8,8,0,0,0-16,0v65a32,32,0,0,0,0,62v49a8,8,0,0,0,16,0V167a32,32,0,0,0,0-62Zm-8,47a16,16,0,1,1,16-16A16,16,0,0,1,56,152Zm80-95V40a8,8,0,0,0-16,0V57a32,32,0,0,0,0,62v97a8,8,0,0,0,16,0V119a32,32,0,0,0,0-62Zm-8,47a16,16,0,1,1,16-16A16,16,0,0,1,128,104Zm104,64a32.06,32.06,0,0,0-24-31V40a8,8,0,0,0-16,0v97a32,32,0,0,0,0,62v17a8,8,0,0,0,16,0V199A32.06,32.06,0,0,0,232,168Zm-32,16a16,16,0,1,1,16-16A16,16,0,0,1,200,184Z"></path>
+              </svg>
+            </button>
+
+            <!-- Theme / font dropdown -->
+            <div class="user-menu" id="userMenu">
+              <div class="user-menu-section">
+                <span class="user-menu-title">Theme</span>
+                <button type="button" class="user-menu-item" data-theme="light">Light</button>
+                <button type="button" class="user-menu-item" data-theme="dark">Dark</button>
+              </div>
+
+              <div class="user-menu-section">
+                <span class="user-menu-title">Font size</span>
+                <button type="button" class="user-menu-item" data-font="small">Small</button>
+                <button type="button" class="user-menu-item" data-font="medium">Medium</button>
+                <button type="button" class="user-menu-item" data-font="large">Large</button>
+              </div>
+            </div>
+          </div>
         </div>
+
       </div>
 
       <div class="create-page">
@@ -84,8 +112,7 @@ $showRateModal = $limitUntil !== null && $postsLeft <= 0;
             <span
               data-rate-limit="wrapper"
               data-until="<?= $limitUntil ?>"
-              style="margin-left: 6px;"
-            >
+              style="margin-left: 6px;">
               Next post allowed in
               <strong><span id="rateLimitTimerText">05:00</span></strong>.
             </span>
@@ -155,8 +182,7 @@ $showRateModal = $limitUntil !== null && $postsLeft <= 0;
   <div
     class="rate-modal-backdrop"
     id="rateLimitModal"
-    <?= $showRateModal ? '' : 'hidden' ?>
-  >
+    <?= $showRateModal ? '' : 'hidden' ?>>
     <div class="rate-modal">
       <h2>Posting limit reached</h2>
       <p>You can upload up to <strong><?= $limitPer5Min ?></strong> pictures every <strong>5 minutes</strong>.</p>
@@ -344,7 +370,7 @@ $showRateModal = $limitUntil !== null && $postsLeft <= 0;
       const until = parseInt(wrapper.dataset.until || '0', 10);
       if (!until) return;
 
-      const textMain  = document.getElementById('rateLimitTimerText');
+      const textMain = document.getElementById('rateLimitTimerText');
       const textModal = document.getElementById('rateLimitTimerTextModal');
 
       function format(diff) {
@@ -358,13 +384,13 @@ $showRateModal = $limitUntil !== null && $postsLeft <= 0;
         let diff = until - now;
 
         if (diff <= 0) {
-          if (textMain)  textMain.textContent  = '00:00';
+          if (textMain) textMain.textContent = '00:00';
           if (textModal) textModal.textContent = '00:00';
           return;
         }
 
         const val = format(diff);
-        if (textMain)  textMain.textContent  = val;
+        if (textMain) textMain.textContent = val;
         if (textModal) textModal.textContent = val;
 
         setTimeout(tick, 1000);
@@ -380,6 +406,63 @@ $showRateModal = $limitUntil !== null && $postsLeft <= 0;
 
       close.addEventListener('click', () => {
         modal.hidden = true;
+      });
+    })();
+
+    (function() {
+      const body = document.body;
+      const menuToggle = document.getElementById('userMenuToggle');
+      const menu = document.getElementById('userMenu');
+
+      if (!menuToggle || !menu) return;
+
+      const THEME_KEY = 'pq_theme';
+      const FONT_KEY = 'pq_font';
+
+      function applyTheme(theme) {
+        body.classList.remove('theme-light', 'theme-dark');
+        body.classList.add('theme-' + theme);
+        localStorage.setItem(THEME_KEY, theme);
+      }
+
+      function applyFont(size) {
+        body.classList.remove('font-small', 'font-medium', 'font-large');
+        body.classList.add('font-' + size);
+        localStorage.setItem(FONT_KEY, size);
+      }
+
+      const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+      const savedFont = localStorage.getItem(FONT_KEY) || 'medium';
+      applyTheme(savedTheme);
+      applyFont(savedFont);
+
+      function closeMenu() {
+        menu.classList.remove('open');
+        menuToggle.setAttribute('aria-expanded', 'false');
+      }
+
+      function openMenu() {
+        menu.classList.add('open');
+        menuToggle.setAttribute('aria-expanded', 'true');
+      }
+
+      menuToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menu.classList.contains('open') ? closeMenu() : openMenu();
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!menu.contains(e.target) && e.target !== menuToggle) {
+          closeMenu();
+        }
+      });
+
+      menu.querySelectorAll('[data-theme]').forEach(btn => {
+        btn.addEventListener('click', () => applyTheme(btn.dataset.theme));
+      });
+
+      menu.querySelectorAll('[data-font]').forEach(btn => {
+        btn.addEventListener('click', () => applyFont(btn.dataset.font));
       });
     })();
   </script>

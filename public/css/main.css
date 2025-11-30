@@ -3339,3 +3339,197 @@ body.theme-dark .contact-media {
   background: #020617;
 }
 
+/* About page — dark mode card & text */
+body.theme-dark .about-card {
+  background: #111b32;
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+}
+
+body.theme-dark .about-header h1 {
+  color: #e5e7eb;
+}
+
+body.theme-dark .about-body {
+  color: #e5e7eb;
+}
+
+/* ============================
+   ADMIN PAGE – DARK MODE
+   ============================ */
+
+body.theme-dark .admin-subtitle {
+  color: #cbd5e1;
+}
+
+body.theme-dark .admin-item {
+  background: #020617;              /* same dark bg as layout */
+  border: 1px solid #1e293b;
+  box-shadow: 0 10px 25px rgba(15,23,42,0.45);
+}
+
+body.theme-dark .ai-name {
+  color: #e5e7eb;
+}
+
+body.theme-dark .ai-sub {
+  color: #94a3b8;
+}
+
+/* status + role badges */
+body.theme-dark .status-badge {
+  background: #020617;
+  border-color: #1e293b;
+  color: #e5e7eb;
+}
+
+body.theme-dark .status-active {
+  background: #022c22;
+  border-color: #16a34a;
+  color: #bbf7d0;
+}
+
+body.theme-dark .status-blocked {
+  background: #451a03;
+  border-color: #f97316;
+  color: #fed7aa;
+}
+
+body.theme-dark .status-banned {
+  background: #450a0a;
+  border-color: #ef4444;
+  color: #fecaca;
+}
+
+body.theme-dark .role-badge {
+  background: #020617;
+  border-color: #1d4ed8;
+  color: #bfdbfe;
+}
+
+/* ============================
+   PROFILE – DARK MODE
+   ============================ */
+
+body.theme-dark .profile-cover {
+  background: #020617;
+}
+
+body.theme-dark .profile-hero {
+  background: #111b32;
+  border-color: #1e293b;
+}
+
+body.theme-dark .profile-name {
+  color: #e5e7eb;
+}
+
+body.theme-dark .profile-email {
+  color: #cbd5e1;
+}
+
+body.theme-dark .profile-stats {
+  color: #94a3b8;
+}
+
+/* optional: tweak the small cover buttons */
+body.theme-dark .profile-cover .btn-ghost.small {
+  background: #020617;
+  border-color: #1e293b;
+  color: #e5e7eb;
+}
+
+/* ===========================
+   UNIVERSAL INPUT DARK MODE FIX
+   =========================== */
+
+body.theme-dark input,
+body.theme-dark textarea,
+body.theme-dark select {
+  background: #020617 !important;
+  border: 1px solid #1e293b !important;
+  color: #e5e7eb !important;
+}
+
+body.theme-dark input::placeholder,
+body.theme-dark textarea::placeholder {
+  color: #6b7280 !important;
+}
+
+/* Smaller input variant (profile edit) */
+body.theme-dark .input-sm,
+body.theme-dark input.input-sm {
+  background: #020617 !important;
+  border: 1px solid #1e293b !important;
+  color: #e5e7eb !important;
+}
+
+/* File input button */
+body.theme-dark .file-input {
+  background: #0b1120 !important;
+  color: #e5e7eb !important;
+  border: 1px solid #1e293b !important;
+}
+
+/* Dropzone */
+body.theme-dark .dropzone {
+  background: #0b1120 !important;
+  border: 2px dashed #1e293b !important;
+}
+
+body.theme-dark .dz-empty,
+body.theme-dark .dz-preview {
+  background: #020617 !important;
+  color: #e5e7eb !important;
+}
+
+/* Labels */
+body.theme-dark .label-sm,
+body.theme-dark .label {
+  color: #cbd5e1 !important;
+}
+
+/* =========================================================
+   TRUE FIX — Dark Mode Create Form Container
+   ========================================================= */
+body.theme-dark .create-form {
+    background: #111b32 !important;
+    border: 1px solid #0b1120 !important;
+    box-shadow: none !important;
+}
+
+/* Make text readable */
+body.theme-dark .create-form * {
+    color: #e5e7eb !important;
+}
+
+/* Fix label text */
+body.theme-dark .create-form .label,
+body.theme-dark .create-form .label-row label {
+    color: #cbd5e1 !important;
+}
+
+/* Fix placeholder */
+body.theme-dark .create-form input::placeholder,
+body.theme-dark .create-form textarea::placeholder {
+    color: #6b7280 !important;
+}
+
+/* ===== Dark mode fix for ghost buttons ===== */
+
+body.theme-dark .btn-ghost {
+  background: #0f172a !important;     /* dark slate */
+  color: #e5e7eb !important;          /* light text */
+  border: 1px solid #334155 !important;
+}
+
+body.theme-dark .btn-ghost:hover {
+  background: #1e293b !important;     /* slightly lighter on hover */
+  color: #ffffff !important;
+}
+
+.admin-topbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+}
+
