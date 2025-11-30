@@ -1,7 +1,6 @@
 DROP DATABASE IF EXISTS PicturesqueDB;
 CREATE DATABASE PicturesqueDB;
 USE PicturesqueDB;
-
 CREATE TABLE app_settings (
   name  VARCHAR(64) NOT NULL,
   value TEXT        NOT NULL,
@@ -200,7 +199,7 @@ VALUES
 
 CREATE TABLE login_attempts (
   id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  email      VARCHAR(255) NOT NULL,
+  email      VARCHAR(190) NOT NULL,
   ip_address VARCHAR(45),
   success    TINYINT(1) NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
