@@ -100,7 +100,7 @@ $hotCount     = count($hotIds);
             <button class="user-menu-toggle" id="userMenuToggle" aria-label="Display settings" aria-expanded="false">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#ffffffff" viewBox="0 0 256 256">
                 <path d="M64,105V40a8,8,0,0,0-16,0v65a32,32,0,0,0,0,62v49a8,8,0,0,0,16,0V167a32,32,0,0,0,0-62Zm-8,47a16,16,0,1,1,16-16A16,16,0,0,1,56,152Zm80-95V40a8,8,0,0,0-16,0V57a32,32,0,0,0,0,62v97a8,8,0,0,0,16,0V119a32,32,0,0,0,0-62Zm-8,47a16,16,0,1,1,16-16A16,16,0,0,1,128,104Zm104,64a32.06,32.06,0,0,0-24-31V40a8,8,0,0,0-16,0v97a32,32,0,0,0,0,62v17a8,8,0,0,0,16,0V199A32.06,32.06,0,0,0,232,168Zm-32,16a16,16,0,1,1,16-16A16,16,0,0,1,200,184Z"></path>
-              </svg> 
+              </svg>
             </button>
             <div class="user-menu" id="userMenu">
               <div class="user-menu-section">
@@ -121,21 +121,32 @@ $hotCount     = count($hotIds);
       </div>
 
       <div class="controls-row">
-        <div class="pills">
-          <?php
-          $qs = function (array $params) {
-            return http_build_query(array_filter($params, fn($v) => $v !== '' && $v !== null));
-          };
-          ?>
-          <a class="pill<?= $cat === '' ? ' is-selected' : '' ?>"
-            href="index.php?<?= $qs(['q' => $q, 'sort' => $sort]) ?>">All</a>
+        <div class="pills-wrapper">
+          <div class="pills" id="catPills">
+            <?php
+            $qs = function (array $params) {
+              return http_build_query(array_filter($params, fn($v) => $v !== '' && $v !== null));
+            };
+            ?>
+            <a class="pill<?= $cat === '' ? ' is-selected' : '' ?>"
+              href="index.php?<?= $qs(['q' => $q, 'sort' => $sort]) ?>">All</a>
 
-          <?php foreach ($cats as $c): ?>
-            <?php $href = 'index.php?' . $qs(['cat' => $c['slug'], 'q' => $q, 'sort' => $sort]); ?>
-            <a class="pill<?= $cat === $c['slug'] ? ' is-selected' : '' ?>" href="<?= $href ?>">
-              <?= htmlspecialchars($c['name']) ?>
-            </a>
-          <?php endforeach; ?>
+            <?php foreach ($cats as $c): ?>
+              <?php $href = 'index.php?' . $qs(['cat' => $c['slug'], 'q' => $q, 'sort' => $sort]); ?>
+              <a class="pill<?= $cat === $c['slug'] ? ' is-selected' : '' ?>" href="<?= $href ?>">
+                <?= htmlspecialchars($c['name']) ?>
+              </a>
+            <?php endforeach; ?>
+          </div>
+
+          <button
+            type="button"
+            class="pill-more"
+            id="pillToggle"
+            aria-expanded="false"
+            hidden>
+            See more
+          </button>
         </div>
 
         <form class="filter-form" method="get" action="index.php">
@@ -371,6 +382,33 @@ $hotCount     = count($hotIds);
         });
       });
     })();
+
+      (function() {
+    const pills  = document.getElementById('catPills');
+    const toggle = document.getElementById('pillToggle');
+    if (!pills || !toggle) return;
+
+    const COLLAPSED_MAX = 40; // must match .pills max-height in CSS
+
+    function updateToggleVisibility() {
+      // If content is taller than collapsed height, show "See more" button
+      if (pills.scrollHeight > COLLAPSED_MAX + 5) {
+        toggle.hidden = false;
+      } else {
+        toggle.hidden = true;
+      }
+    }
+
+    toggle.addEventListener('click', () => {
+      const expanded = pills.classList.toggle('is-expanded');
+      toggle.textContent = expanded ? 'See less' : 'See more';
+      toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    });
+
+    // Run once after layout
+    updateToggleVisibility();
+    window.addEventListener('resize', updateToggleVisibility);
+  })();
   </script>
 </body>
 

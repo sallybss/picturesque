@@ -821,22 +821,67 @@ img.c-avatar {
     margin: 10px 0 18px;
 }
 
-.pills {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin: 10px 0 18px;
+.pills-wrapper {
+  flex: 1;          
+  min-width: 0;
 }
-
+/* Normal pill */
 .pill {
     padding: 8px 12px;
     border: 1px solid var(--line);
     border-radius: 999px;
     font-size: 12px;
-    background: #fff;
-    color: #374151;
-    box-shadow: 0 1px 0 rgba(0, 0, 0, .02);
+    background: #ffffff;
+    color: #374151;              /* neutral gray */
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.02);
 }
+
+/* On hover */
+.pill:hover {
+  background: #f3f4f6;        
+}
+
+/* Selected pill */
+.pill.is-selected {
+    background: #e8f0fe;         
+    border-color: #93c5fd;
+    color: #000000;             
+    font-weight: 500;
+}
+
+
+/* main pills row (merged both definitions) */
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0 6px;
+  max-height: 34px;    
+  overflow: hidden;
+}
+
+
+.pills.is-expanded {
+  max-height: 500px;         
+}
+
+/* “See more” link under the pills, left aligned */
+.pill-more {
+    border: none;
+    background: none;
+    padding: 0 2px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #374151;          
+}
+
+.pill-more:hover {
+    color: #111827;         
+    text-decoration: underline;
+}
+
 
 .filter-btn {
     display: inline-flex;
