@@ -43,11 +43,11 @@ $_SESSION['register_captcha_answer'] = $captchaA + $captchaB;
           <input type="hidden" name="register_captcha" id="registerCaptchaHidden">
 
           <label class="label">Email (login)</label>
-          <input class="input" type="email" name="login_email" required>
+          <input class="input" type="email" name="login_email" required maxlength="255">
 
           <label class="label">Display name</label>
-          <input class="input" type="text" name="display_name" required>
-
+          <input class="input" type="text" name="display_name" required maxlength="50">
+          
           <label class="label">Password</label>
           <div class="password-field">
             <input

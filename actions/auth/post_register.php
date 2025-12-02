@@ -22,8 +22,8 @@ if ($expected === null || $captchaAnswer === '' || (int)$captchaAnswer !== $expe
     redirect('../../auth/register.php');
 }
 
-$email = trim($_POST['login_email'] ?? '');
-$name  = trim($_POST['display_name'] ?? '');
+$email = mb_substr(trim($_POST['login_email'] ?? ''), 0, 255);
+$name  = mb_substr(trim($_POST['display_name'] ?? ''), 0, 50);
 $pass  = (string)($_POST['password'] ?? '');
 
 if ($email === '' || $name === '' || $pass === '') {

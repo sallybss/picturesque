@@ -10,7 +10,19 @@ if (!check_csrf($_POST['csrf'] ?? null)) {
     redirect('../../auth/login.php');
 }
 
-$emailRaw = trim($_POST['login_email'] ?? '');
+$captchaAnswer = trim($_POST['login_captcha'] ?? '');
+$expected      = isset($_SESSION['login_captcha_answer'])
+    ? (int)$_SESSION['login_captcha_answer']
+    : null;
+
+unset($_SESSION['login_captcha_answer']);
+
+if ($expected === null || $captchaAnswer === '' || (int)$captchaAnswer !== $expected) {
+    set_flash('err', 'Captcha failed. Please try again.');
+    redirect('../../auth/login.php');
+}
+
+$emailRaw = mb_substr(trim($_POST['login_email'] ?? ''), 0, 255);
 $pass     = (string)($_POST['password'] ?? '');
 
 if ($emailRaw === '' || $pass === '') {

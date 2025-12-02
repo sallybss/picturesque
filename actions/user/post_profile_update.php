@@ -11,7 +11,7 @@ if (!check_csrf($_POST['csrf'] ?? null)) {
 }
 
 $me   = Auth::requireUserOrRedirect('../../auth/login.php');
-$name = trim($_POST['display_name'] ?? '');
+$name = mb_substr(trim($_POST['display_name'] ?? ''), 0, 50);
 $mail = trim($_POST['email'] ?? '');
 $file = $_FILES['avatar'] ?? null;
 
@@ -28,28 +28,53 @@ if ($mail !== '' && !filter_var($mail, FILTER_VALIDATE_EMAIL)) {
 $newAvatar = null;
 
 if ($file && !empty($file['name'])) {
-    $ok = ['image/jpeg','image/png','image/webp','image/gif'];
-    if (!in_array($file['type'] ?? '', $ok, true)) {
+    $allowedMime = ['image/jpeg','image/png','image/webp','image/gif'];
+    $allowedExt  = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+
+    // Check upload result
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        set_flash('err','Upload failed.');
+        redirect('../../profile_edit.php');
+    }
+
+    // MIME type via finfo
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime  = $finfo ? finfo_file($finfo, $file['tmp_name']) : null;
+    if ($finfo) {
+        finfo_close($finfo);
+    }
+
+    if (!in_array($mime, $allowedMime, true)) {
         set_flash('err','Only JPG, PNG, WEBP or GIF.');
         redirect('../../profile_edit.php');
     }
-    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-        set_flash('err','Upload failed.');
+
+    // Extension allowlist
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if (!in_array($ext, $allowedExt, true)) {
+        set_flash('err','Only JPG, PNG, WEBP or GIF.');
+        redirect('../../profile_edit.php');
+    }
+
+    // Optional: max size e.g. 5 MB
+    if (!empty($file['size']) && $file['size'] > 5 * 1024 * 1024) {
+        set_flash('err','Max 5MB.');
         redirect('../../profile_edit.php');
     }
 
     $dir = dirname(__DIR__) . '/../uploads/';
     if (!is_dir($dir)) { mkdir($dir, 0775, true); }
 
-    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     $nameFile = "avt_{$me}_" . time() . ".$ext";
 
     if (!move_uploaded_file($file['tmp_name'], $dir . $nameFile)) {
         set_flash('err','Could not save avatar.');
         redirect('../../profile_edit.php');
     }
+
     $newAvatar = $nameFile;
 }
+
 
 $profiles = new ProfileRepository();
 

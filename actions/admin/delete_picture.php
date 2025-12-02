@@ -24,7 +24,7 @@ if (!$row) {
 
 $repo->deleteById($pictureId);
 
-$file = dirname(__DIR__) . '/uploads/' . $row['picture_url'];
+$file = dirname(__DIR__) . '/../uploads/' . $row['picture_url'];
 if (is_file($file)) {
     @unlink($file);
 }

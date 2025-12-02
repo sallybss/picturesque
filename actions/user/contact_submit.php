@@ -26,12 +26,16 @@ $meRow    = $profiles->getById($me);
 $name  = trim($meRow['display_name'] ?? '');
 $email = trim($meRow['email'] ?? ($meRow['login_email'] ?? ''));
 
-$company = trim($_POST['company'] ?? '');
+$company = mb_substr(trim($_POST['company'] ?? ''), 0, 100);
 $subject = trim($_POST['subject'] ?? '');
 $message = trim($_POST['message'] ?? '');
 
+// Strip newlines from subject to be safe for mail headers
+$subject = str_replace(["\r", "\n"], ' ', $subject);
+
 $subject = mb_substr($subject, 0, 100);
 $message = mb_substr($message, 0, 500);
+
 
 if ($subject === '' || $message === '') {
     set_flash('err', 'Please fill out all required fields.');

@@ -26,11 +26,31 @@ if (!$file || empty($file['name'])) {
     redirect('../../profile.php');
 }
 
-$ok = ['image/jpeg','image/png','image/webp','image/gif'];
-if (!in_array($file['type'] ?? '', $ok, true)) {
+if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+    set_flash('err','Upload failed.');
+    redirect('../../profile.php');
+}
+
+$allowedMime = ['image/jpeg','image/png','image/webp','image/gif'];
+$allowedExt  = ['jpg','jpeg','png','webp','gif'];
+
+$finfo = finfo_open(FILEINFO_MIME_TYPE);
+$mime  = $finfo ? finfo_file($finfo, $file['tmp_name']) : null;
+if ($finfo) {
+    finfo_close($finfo);
+}
+
+if (!in_array($mime, $allowedMime, true)) {
     set_flash('err','Use JPG/PNG/WEBP/GIF.');
     redirect('../../profile.php');
 }
+
+$ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+if (!in_array($ext, $allowedExt, true)) {
+    set_flash('err','Use JPG/PNG/WEBP/GIF.');
+    redirect('../../profile.php');
+}
+
 if (!empty($file['size']) && $file['size'] > 5*1024*1024) {
     set_flash('err','Max 5MB.');
     redirect('../../profile.php');
@@ -39,7 +59,6 @@ if (!empty($file['size']) && $file['size'] > 5*1024*1024) {
 $dir = dirname(__DIR__) . '/../uploads/';
 if (!is_dir($dir)) { mkdir($dir, 0775, true); }
 
-$ext    = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 $fname  = "cover_{$me}_" . time() . ".$ext";
 $target = $dir . $fname;
 

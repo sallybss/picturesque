@@ -4,104 +4,75 @@ require_once __DIR__ . '/../../includes/init.php';
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirect('../../profile.php');
 }
-
 if (!check_csrf($_POST['csrf'] ?? null)) {
-    set_flash('err', 'Invalid form.');
+    set_flash('err','Invalid request.');
     redirect('../../profile.php');
 }
 
-$me    = Auth::requireUserOrRedirect('../../auth/login.php');
-$pid   = (int)($_POST['picture_id'] ?? 0);
-$title = trim($_POST['picture_title'] ?? $_POST['title'] ?? '');
-$desc  = trim($_POST['picture_description'] ?? $_POST['desc'] ?? '');
-$reset = !empty($_POST['reset_image']);
-$catId = (int)($_POST['category_id'] ?? 0);
-$title = mb_substr($title, 0, 50);  
-$desc  = mb_substr($desc, 0, 250);  
+$me  = Auth::requireUserOrRedirect('../../auth/login.php');
+$act = $_POST['action'] ?? 'upload';
 
+$profiles = new ProfileRepository();
 
-if ($pid <= 0 || $title === '' || $catId <= 0) {
-    set_flash('err', 'Invalid form.');
-    redirect("../../edit_picture.php?id=$pid");
-}
-
-$catsRepo = new CategoriesRepository();
-if (!$catsRepo->isActive($catId)) {
-    set_flash('err', 'Invalid category.');
-    redirect("../../edit_picture.php?id=$pid");
-}
-
-$repo = new PictureRepository();
-$old  = $repo->getUrlIfOwned($pid, $me);
-
-if ($old === null) {
-    set_flash('err', 'Picture not found or not yours.');
+if ($act === 'reset') {
+    $profiles->setCoverPhoto($me, null);
+    set_flash('ok','Cover reset.');
     redirect('../../profile.php');
 }
 
-$uploadDir = dirname(__DIR__) . '/../uploads/';
-if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0775, true);
-}
-
-$newFilename = null;
-
-if ($reset && empty($_FILES['photo']['name'])) {
-    if ($old && is_file($uploadDir . $old)) {
-        @unlink($uploadDir . $old);
-    }
-    $repo->updateOwned($pid, $me, $title, $desc, null, $catId);
-    set_flash('ok', 'Picture updated.');
+$file = $_FILES['cover'] ?? null;
+if (!$file || empty($file['name'])) {
+    set_flash('err','Choose an image.');
     redirect('../../profile.php');
 }
 
-if (!empty($_FILES['photo']['name'])) {
-    $file = $_FILES['photo'];
-
-    $finfo = new finfo(FILEINFO_MIME_TYPE);
-    $mime  = $finfo->file($file['tmp_name']);
-
-    $allowed = ['image/jpeg','image/png','image/gif','image/webp'];
-
-    if (!in_array($mime, $allowed, true)) {
-        set_flash('err', 'Only JPG/PNG/GIF/WEBP allowed.');
-        redirect("../../edit_picture.php?id=$pid");
-    }
-
-    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-        set_flash('err', 'Upload failed.');
-        redirect("../../edit_picture.php?id=$pid");
-    }
-
-    if (($file['size'] ?? 0) > 10 * 1024 * 1024) {
-        set_flash('err', 'Max size is 10MB.');
-        redirect("../../edit_picture.php?id=$pid");
-    }
-
-    $extMap = [
-        'image/jpeg' => 'jpg',
-        'image/png'  => 'png',
-        'image/gif'  => 'gif',
-        'image/webp' => 'webp',
-    ];
-
-    $ext  = $extMap[$mime] ?? pathinfo($file['name'], PATHINFO_EXTENSION);
-    $name = time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-    $dest = $uploadDir . $name;
-
-    if (!move_uploaded_file($file['tmp_name'], $dest)) {
-        set_flash('err', 'Could not save file.');
-        redirect("../../edit_picture.php?id=$pid");
-    }
-
-    if ($old && is_file($uploadDir . $old)) {
-        @unlink($uploadDir . $old);
-    }
-
-    $newFilename = $name;
+if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
+    set_flash('err','Upload failed. Please try again.');
+    redirect('../../profile.php');
 }
 
-$repo->updateOwned($pid, $me, $title, $desc, $newFilename, $catId);
+if (!empty($file['size']) && $file['size'] > 5 * 1024 * 1024) {
+    set_flash('err','Max 5MB.');
+    redirect('../../profile.php');
+}
 
-set_flash('ok', 'Picture updated.');
+if (!is_uploaded_file($file['tmp_name'])) {
+    set_flash('err','Invalid upload.');
+    redirect('../../profile.php');
+}
+
+$allowed = [
+    'image/jpeg' => 'jpg',
+    'image/png'  => 'png',
+    'image/gif'  => 'gif',
+    'image/webp' => 'webp',
+];
+
+$finfo = new finfo(FILEINFO_MIME_TYPE);
+$mime  = $finfo->file($file['tmp_name']);
+
+if (!isset($allowed[$mime])) {
+    set_flash('err','Use JPG/PNG/WEBP/GIF.');
+    redirect('../../profile.php');
+}
+
+$ext   = $allowed[$mime];
+$dir   = dirname(__DIR__) . '/../uploads/';
+if (!is_dir($dir)) {
+    mkdir($dir, 0775, true);
+}
+
+$fname  = "cover_{$me}_" . time() . '.' . $ext;
+$target = $dir . $fname;
+
+if (!move_uploaded_file($file['tmp_name'], $target)) {
+    set_flash('err','Upload failed.');
+    redirect('../../profile.php');
+}
+
+@chmod($target, 0644);
+
+$profiles->setCoverPhoto($me, $fname);
+
+set_flash('ok','Cover updated.');
 redirect('../../profile.php');

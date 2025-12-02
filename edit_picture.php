@@ -132,6 +132,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
               name="title"
               value="<?= htmlspecialchars($pic['picture_title']) ?>"
               placeholder="Give your photo a title"
+              maxlength="50"
               required>
           </div>
 
@@ -372,7 +373,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
       }
 
       const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
-      const savedFont  = localStorage.getItem(FONT_KEY) || 'medium';
+      const savedFont = localStorage.getItem(FONT_KEY) || 'medium';
       applyTheme(savedTheme);
       applyFont(savedFont);
 
