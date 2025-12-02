@@ -98,7 +98,7 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
           ?>
           <div class="admin-item">
             <div class="ai-left">
-              <img class="ai-avatar" src="<?= $a ?>" alt="">
+            <img class="ai-avatar" src="<?= htmlspecialchars($a) ?>" alt="">
               <div class="ai-meta">
                 <div class="ai-name"><?= htmlspecialchars($u['display_name']) ?></div>
                 <div class="ai-sub">
@@ -143,7 +143,6 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <script>
-    // Auto-hide flash messages
     document.addEventListener('DOMContentLoaded', () => {
       const flashes = document.querySelectorAll('.flash-stack .flash');
       if (!flashes.length) return;
@@ -159,7 +158,6 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
       }, 2000);
     });
 
-    // Sidebar toggle for mobile
     (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
@@ -188,7 +186,6 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
       });
     })();
 
-    // Apply saved theme & font on load
     (function() {
       const body = document.body;
       const THEME_KEY = 'pq_theme';
@@ -211,7 +208,6 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
       applyFont(savedFont);
     })();
 
-    // Theme + font dropdown behaviour
     (function() {
       const body = document.body;
       const menuToggle = document.getElementById('userMenuToggle');
@@ -234,7 +230,6 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
         localStorage.setItem(FONT_KEY, size);
       }
 
-      // Respect saved settings
       const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
       const savedFont = localStorage.getItem(FONT_KEY) || 'medium';
       applyTheme(savedTheme);

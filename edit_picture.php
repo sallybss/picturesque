@@ -67,14 +67,12 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
           <div class="user-settings">
             <?php render_topbar_userbox($meRow); ?>
 
-            <!-- Display settings button -->
             <button class="user-menu-toggle" id="userMenuToggle" aria-label="Display settings" aria-expanded="false">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#fff" viewBox="0 0 256 256">
                 <path d="M64,105V40a8,8,0,0,0-16,0v65a32,32,0,0,0,0,62v49a8,8,0,0,0,16,0V167a32,32,0,0,0,0-62Zm-8,47a16,16,0,1,1,16-16A16,16,0,0,1,56,152Zm80-95V40a8,8,0,0,0-16,0V57a32,32,0,0,0,0,62v97a8,8,0,0,0,16,0V119a32,32,0,0,0,0-62Zm-8,47a16,16,0,1,1,16-16A16,16,0,0,1,128,104Zm104,64a32.06,32.06,0,0,0-24-31V40a8,8,0,0,0-16,0v97a32,32,0,0,0,0,62v17a8,8,0,0,0,16,0V199A32.06,32.06,0,0,0,232,168Zm-32,16a16,16,0,1,1,16-16A16,16,0,0,1,200,184Z"></path>
               </svg>
             </button>
 
-            <!-- Theme / font dropdown -->
             <div class="user-menu" id="userMenu">
               <div class="user-menu-section">
                 <span class="user-menu-title">Theme</span>
@@ -185,7 +183,6 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
       }, 2000);
     });
 
-    /* Sidebar hamburger */
     (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
@@ -214,7 +211,6 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
       });
     })();
 
-    /* Dropzone + image handling */
     const input = document.getElementById('photo');
     const dz = document.getElementById('dropzone');
     const dzEmpty = document.getElementById('dzEmpty');
@@ -299,7 +295,6 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
       clearFile();
     });
 
-    /* Description live counter (max 250) */
     const descField = document.getElementById('descInput');
     const descCounter = document.getElementById('descCount');
     const DESC_MAX = 250;
@@ -329,7 +324,6 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
       updateDescCounter();
     }
 
-    /* Title counter (max 50) */
     const titleInput = document.getElementById('titleInput');
     const titleCount = document.getElementById('titleCount');
     const TITLE_MAX = 50;
@@ -355,7 +349,6 @@ $cssVer  = file_exists($cssPath) ? filemtime($cssPath) : time();
       updateTitleCounter();
     }
 
-    /* Theme + font size dropdown (same as create.php) */
     (function() {
       const body = document.body;
       const menuToggle = document.getElementById('userMenuToggle');

@@ -53,14 +53,12 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
           <div class="user-settings">
             <?php render_topbar_userbox($meRow); ?>
 
-            <!-- Display settings button (3 dots icon) -->
             <button class="user-menu-toggle" id="userMenuToggle" aria-label="Display settings" aria-expanded="false">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#ffffffff" viewBox="0 0 256 256">
                 <path d="M64,105V40a8,8,0,0,0-16,0v65a32,32,0,0,0,0,62v49a8,8,0,0,0,16,0V167a32,32,0,0,0,0-62Zm-8,47a16,16,0,1,1,16-16A16,16,0,0,1,56,152Zm80-95V40a8,8,0,0,0-16,0V57a32,32,0,0,0,0,62v97a8,8,0,0,0,16,0V119a32,32,0,0,0,0-62Zm-8,47a16,16,0,1,1,16-16A16,16,0,0,1,128,104Zm104,64a32.06,32.06,0,0,0-24-31V40a8,8,0,0,0-16,0v97a32,32,0,0,0,0,62v17a8,8,0,0,0,16,0V199A32.06,32.06,0,0,0,232,168Zm-32,16a16,16,0,1,1,16-16A16,16,0,0,1,200,184Z"></path>
               </svg>
             </button>
 
-            <!-- Theme / font dropdown -->
             <div class="user-menu" id="userMenu">
               <div class="user-menu-section">
                 <span class="user-menu-title">Theme</span>
@@ -140,7 +138,6 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
   <script>
-    // Auto-hide flash messages
     document.addEventListener('DOMContentLoaded', () => {
       const flashes = document.querySelectorAll('.flash-stack .flash');
       if (!flashes.length) return;
@@ -156,7 +153,6 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
       }, 2000);
     });
 
-    // Sidebar toggle
     (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
@@ -185,7 +181,6 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
       });
     })();
 
-    // Apply saved theme + font on load
     (function() {
       const body = document.body;
       const THEME_KEY = 'pq_theme';
@@ -208,7 +203,6 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
       applyFont(savedFont);
     })();
 
-    // Theme/font dropdown logic
     (function() {
       const body = document.body;
       const menuToggle = document.getElementById('userMenuToggle');
@@ -231,7 +225,6 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
         localStorage.setItem(FONT_KEY, size);
       }
 
-      // Load saved settings
       const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
       const savedFont = localStorage.getItem(FONT_KEY) || 'medium';
       applyTheme(savedTheme);
@@ -275,7 +268,6 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
       });
     })();
 
-    // Character counters (subject + message)
     document.addEventListener("DOMContentLoaded", () => {
       const subject = document.getElementById("subjectInput");
       const subjectCount = document.getElementById("subjectCount");

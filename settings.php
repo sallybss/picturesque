@@ -15,6 +15,7 @@ if (!$isAdmin) {
 }
 
 $MAX_CATEGORIES = 10;
+$catsRepo       = new CategoriesRepository();   // 👈 NEW
 
 $basePath = strtok($_SERVER['REQUEST_URI'], '?');
 
@@ -38,32 +39,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   $action = trim($_POST['action'] ?? '');
 
-  if ($action === 'save_rules') {
+    if ($action === 'save_rules') {
     $newTitle = trim($_POST['rules_title']   ?? 'Rules & Regulations');
     $rawRules = trim($_POST['rules_content'] ?? '');
 
-    $allowedTags = '<h2><h3><p><ul><ol><li><strong><em><b><i><a><br>';
-    $newContent  = strip_tags($rawRules, $allowedTags);
-
-    $newContent = preg_replace(
-      '~href\s*=\s*["\']\s*javascript:[^"\']*["\']~i',
-      'href="#"',
-      $newContent
-    );
-
-    $newContent = preg_replace(
-      '~\s(on\w+|style)\s*=\s*(".*?"|\'.*?\'|[^\s>]+)~i',
-      '',
-      $newContent
-    );
-
-    if ($newTitle === '' || $newContent === '') {
+    // required fields
+    if ($newTitle === '' || $rawRules === '') {
       set_flash('err', 'Rules title and content are required.');
       header("Location: {$basePath}#rules");
       exit;
     }
 
+    // length limits (plain text)
+    $newTitle   = mb_substr($newTitle, 0, 80);
+    $newContent = mb_substr($rawRules, 0, 3000);
+
+    // store as plain text (no HTML)
     $pages->upsert('rules', $newTitle, $newContent, null, $me);
+
     set_flash('ok', 'Rules & Regulations saved.');
     header("Location: {$basePath}#rules");
     exit;
@@ -77,10 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       exit;
     }
 
-    $res = DB::get()->query("SELECT COUNT(*) AS cnt FROM categories");
-    $row = $res->fetch_assoc();
-    $currentCount = (int)($row['cnt'] ?? 0);
-
+    $currentCount = $catsRepo->countAll();
     if ($currentCount >= $MAX_CATEGORIES) {
       set_flash('err', "You can have at most {$MAX_CATEGORIES} categories.");
       header("Location: {$basePath}#cats");
@@ -88,17 +78,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $slug = slugify($name);
-    try {
-      $st = DB::get()->prepare(
-        "INSERT INTO categories (category_name, slug, active) VALUES (?, ?, 1)"
-      );
-      $st->bind_param('ss', $name, $slug);
-      $st->execute();
-      $st->close();
+
+    $ok = $catsRepo->create($name, $slug);
+    if ($ok) {
       set_flash('ok', 'Category added.');
-    } catch (mysqli_sql_exception $e) {
+    } else {
       set_flash('err', 'Could not add (duplicate name/slug?).');
     }
+
     header("Location: {$basePath}#cats");
     exit;
   }
@@ -111,12 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       exit;
     }
 
-    $st = DB::get()->prepare(
-      "UPDATE categories SET active = 1 - active WHERE category_id=?"
-    );
-    $st->bind_param('i', $id);
-    $st->execute();
-    $st->close();
+    $catsRepo->toggleActive($id);
 
     set_flash('ok', 'Toggled.');
     header("Location: {$basePath}#cats");
@@ -131,17 +113,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       exit;
     }
 
-    $st = DB::get()->prepare(
-      "DELETE FROM categories WHERE category_id = ?"
-    );
-    $st->bind_param('i', $id);
-    try {
-      $st->execute();
+    $ok = $catsRepo->delete($id);
+    if ($ok) {
       set_flash('ok', 'Category deleted.');
-    } catch (mysqli_sql_exception $e) {
+    } else {
       set_flash('err', 'Could not delete category.');
     }
-    $st->close();
 
     header("Location: {$basePath}#cats");
     exit;
@@ -149,24 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   if ($action === 'save_about') {
     $newTitle   = trim($_POST['title']   ?? '');
-    $rawContent = trim($_POST['content'] ?? '');
-
-    $allowedTags = '<h2><h3><p><ul><ol><li><strong><em><b><i><a><br>';
-    $newContent  = strip_tags($rawContent, $allowedTags);
-
-    $newContent = preg_replace(
-      '~href\s*=\s*["\']\s*javascript:[^"\']*["\']~i',
-      'href="#"',
-      $newContent
-    );
-
-    $newContent = preg_replace(
-      '~\s(on\w+|style)\s*=\s*(".*?"|\'.*?\'|[^\s>]+)~i',
-      '',
-      $newContent
-    );
-
-    $resetImg = !empty($_POST['reset_image']);
+    $newContent = trim($_POST['content'] ?? '');
 
     if ($newTitle === '' || $newContent === '') {
       set_flash('err', 'Title and content are required.');
@@ -174,7 +134,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       exit;
     }
 
+    $newTitle   = mb_substr($newTitle,   0, 80);
+    $newContent = mb_substr($newContent, 0, 3000);
+
+    $resetImg     = !empty($_POST['reset_image']);
     $newImagePath = $imagePath;
+
     if ($resetImg) {
       $newImagePath = null;
     }
@@ -208,6 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: {$basePath}#about");
         exit;
       }
+
       $name = 'about_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
       $dest = __DIR__ . '/uploads/' . $name;
 
@@ -232,14 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 
-$cats = DB::get()->query("
-  SELECT c.category_id, c.category_name, c.slug, c.active,
-         COUNT(p.picture_id) AS pic_count
-  FROM categories c
-  LEFT JOIN pictures p ON p.category_id = c.category_id
-  GROUP BY c.category_id, c.category_name, c.slug, c.active
-  ORDER BY c.active DESC, c.category_name
-")->fetch_all(MYSQLI_ASSOC);
+$cats = $catsRepo->listWithPicCount();
 
 $catLimitReached = (count($cats) >= $MAX_CATEGORIES);
 
@@ -271,21 +230,19 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
 
     <main class="content">
       <div class="content-top">
-         <div class="content-spacer"></div>
+        <div class="content-spacer"></div>
         <div class="top-actions">
           <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
 
           <div class="user-settings">
             <?php render_topbar_userbox($meRow); ?>
 
-            <!-- Display settings button (3 dots icon) -->
             <button class="user-menu-toggle" id="userMenuToggle" aria-label="Display settings" aria-expanded="false">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#ffffffff" viewBox="0 0 256 256">
                 <path d="M64,105V40a8,8,0,0,0-16,0v65a32,32,0,0,0,0,62v49a8,8,0,0,0,16,0V167a32,32,0,0,0,0-62Zm-8,47a16,16,0,1,1,16-16A16,16,0,0,1,56,152Zm80-95V40a8,8,0,0,0-16,0V57a32,32,0,0,0,0,62v97a8,8,0,0,0,16,0V119a32,32,0,0,0,0-62Zm-8,47a16,16,0,1,1,16-16A16,16,0,0,1,128,104Zm104,64a32.06,32.06,0,0,0-24-31V40a8,8,0,0,0-16,0v97a32,32,0,0,0,0,62v17a8,8,0,0,0,16,0V199A32.06,32.06,0,0,0,232,168Zm-32,16a16,16,0,1,1,16-16A16,16,0,0,1,200,184Z"></path>
               </svg>
             </button>
 
-            <!-- Dropdown menu -->
             <div class="user-menu" id="userMenu">
               <div class="user-menu-section">
                 <span class="user-menu-title">Theme</span>
@@ -614,13 +571,11 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
         localStorage.setItem(FONT_KEY, size);
       }
 
-      // Load saved settings
       const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
       const savedFont = localStorage.getItem(FONT_KEY) || 'medium';
       applyTheme(savedTheme);
       applyFont(savedFont);
 
-      // Toggle dropdown
       function closeMenu() {
         menu.classList.remove('open');
         menuToggle.setAttribute('aria-expanded', 'false');
@@ -640,21 +595,18 @@ $cssVer = file_exists(__DIR__ . '/public/css/main.css') ? filemtime(__DIR__ . '/
         }
       });
 
-      // Click outside closes menu
       document.addEventListener('click', (e) => {
         if (!menu.contains(e.target) && e.target !== menuToggle) {
           closeMenu();
         }
       });
 
-      // Theme buttons
       menu.querySelectorAll('[data-theme]').forEach(btn => {
         btn.addEventListener('click', () => {
           applyTheme(btn.getAttribute('data-theme'));
         });
       });
 
-      // Font size buttons
       menu.querySelectorAll('[data-font]').forEach(btn => {
         btn.addEventListener('click', () => {
           applyFont(btn.getAttribute('data-font'));

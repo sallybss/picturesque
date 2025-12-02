@@ -25,7 +25,6 @@ if (!$pic) {
 $commentsRepo = new CommentRepository();
 $rows = $commentsRepo->listForPictureWithAuthors($picture_id);
 
-/* Build nested comments */
 $byId = [];
 foreach ($rows as $r) {
   $r['children'] = [];
@@ -102,7 +101,6 @@ function render_comment(array $c, int $depth, int $picture_id, bool $isAdmin): v
 $cssPath = __DIR__ . '/public/css/main.css';
 $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 
-/* Comment rate-limiting */
 $commentLimitSeconds = 0;
 
 if (
@@ -137,8 +135,6 @@ if (
     <?php render_sidebar(['isAdmin' => $isAdmin]); ?>
 
     <main class="content">
-
-      <!-- TOP BAR (same structure as profile_edit.php) -->
       <div class="content-top">
         <div class="content-spacer"></div>
 
@@ -148,14 +144,12 @@ if (
           <div class="user-settings">
             <?php render_topbar_userbox($meRow); ?>
 
-            <!-- Display settings button -->
             <button class="user-menu-toggle" id="userMenuToggle" aria-label="Display settings" aria-expanded="false">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#ffffffff" viewBox="0 0 256 256">
                 <path d="M64,105V40a8,8,0,0,0-16,0v65a32,32,0,0,0,0,62v49a8,8,0,0,0,16,0V167a32,32,0,0,0,0-62Zm-8,47a16,16,0,1,1,16-16A16,16,0,0,1,56,152Zm80-95V40a8,8,0,0,0-16,0V57a32,32,0,0,0,0,62v97a8,8,0,0,0,16,0V119a32,32,0,0,0,0-62Zm-8,47a16,16,0,1,1,16-16A16,16,0,0,1,128,104Zm104,64a32.06,32.06,0,0,0-24-31V40a8,8,0,0,0-16,0v97a32,32,0,0,0,0,62v17a8,8,0,0,0,16,0V199A32.06,32.06,0,0,0,232,168Zm-32,16a16,16,0,1,1,16-16A16,16,0,0,1,200,184Z"></path>
               </svg>
             </button>
 
-            <!-- Theme / font dropdown -->
             <div class="user-menu" id="userMenu">
               <div class="user-menu-section">
                 <span class="user-menu-title">Theme</span>
@@ -174,11 +168,11 @@ if (
         </div>
       </div>
 
-      <!-- MAIN PICTURE -->
       <div class="single-wrap">
 
         <div class="card">
-          <img src="<?= img_from_db($pic['picture_url']) ?>" alt="">
+        <img src="<?= htmlspecialchars(img_from_db($pic['picture_url'])) ?>" alt="">
+
           <div class="pad">
             <h2 class="title"><?= htmlspecialchars($pic['picture_title']) ?></h2>
 
@@ -194,7 +188,6 @@ if (
           </div>
         </div>
 
-        <!-- COMMENTS -->
         <div class="card">
           <div class="pad">
 
@@ -245,9 +238,7 @@ if (
 
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-  <!-- JS -->
   <script>
-    /* Flash auto-hide */
     document.addEventListener('DOMContentLoaded', () => {
       const flashes = document.querySelectorAll('.flash-stack .flash');
       if (!flashes.length) return;
@@ -262,7 +253,6 @@ if (
       }, 2000);
     });
 
-    /* Sidebar toggle + reply toggles */
     (function() {
       const body = document.body;
       const btn = document.getElementById('hamburger');
@@ -288,7 +278,6 @@ if (
       closeBtn?.addEventListener('click', closeMenu);
       document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
 
-      /* Toggle reply forms */
       document.addEventListener('click', e => {
         const btn = e.target.closest('.js-reply');
         if (!btn) return;
@@ -300,7 +289,6 @@ if (
       });
     })();
 
-    /* Comment counter */
     document.addEventListener('DOMContentLoaded', () => {
       const MAX = 500;
       const textarea = document.getElementById('mainComment');
@@ -328,7 +316,6 @@ if (
     });
   </script>
 
-  <!-- Rate Limit Modal -->
   <div
     class="rate-modal-backdrop"
     id="commentLimitModal"
@@ -351,7 +338,6 @@ if (
   </div>
 
   <script>
-    /* Countdown modal */
     document.addEventListener('DOMContentLoaded', () => {
       const modal = document.getElementById('commentLimitModal');
       if (!modal) return;
@@ -390,7 +376,6 @@ if (
       });
     });
 
-    /* Theme + font dropdown (same as profile_edit.php) */
     (function() {
       const body = document.body;
       const menuToggle = document.getElementById('userMenuToggle');
@@ -413,7 +398,6 @@ if (
         localStorage.setItem(FONT_KEY, size);
       }
 
-      // Load saved settings
       const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
       const savedFont  = localStorage.getItem(FONT_KEY) || 'medium';
       applyTheme(savedTheme);

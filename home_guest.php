@@ -97,7 +97,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
           ?>
           <article class="card">
             <div class="card-cover">
-              <img src="<?= $coverUrl ?>" alt="">
+            <img src="<?= htmlspecialchars($coverUrl) ?>" alt="">
             </div>
 
             <div class="card-body">

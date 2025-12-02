@@ -1,19 +1,16 @@
 <?php
 require_once __DIR__ . '/../includes/init.php';
 
-// --- Brute-force lock info from session ---
 $lockEmail  = $_SESSION['login_lock_email'] ?? null;
 $lockUntil  = (int)($_SESSION['login_lock_until'] ?? 0);
 $now        = time();
 $isLocked   = $lockEmail && $lockUntil > $now;
 $lockRemain = max(0, $lockUntil - $now);
 
-// If lock expired, clean it up
 if (!$isLocked) {
     unset($_SESSION['login_lock_email'], $_SESSION['login_lock_until']);
 }
 
-// Simple math for CAPTCHA (used in modal)
 $captchaA = random_int(1, 9);
 $captchaB = random_int(1, 9);
 $_SESSION['login_captcha_answer'] = $captchaA + $captchaB;
@@ -118,7 +115,6 @@ $_SESSION['login_captcha_answer'] = $captchaA + $captchaB;
 
   </div>
 
-  <!-- CAPTCHA MODAL -->
   <div class="captcha-modal-backdrop" id="captchaModalBackdrop"></div>
   <div class="captcha-modal" id="captchaModal" aria-hidden="true">
     <div class="captcha-modal__card">
@@ -141,9 +137,8 @@ $_SESSION['login_captcha_answer'] = $captchaA + $captchaB;
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      // Password toggle
       document.querySelectorAll(".password-toggle").forEach(btn => {
-        if (btn.disabled) return; // locked state
+        if (btn.disabled) return; 
         btn.addEventListener("click", () => {
           const input = btn.parentElement.querySelector(".password-input");
           const icon  = btn.querySelector("i");
@@ -165,7 +160,6 @@ $_SESSION['login_captcha_answer'] = $captchaA + $captchaB;
 
       const isLocked       = form.dataset.locked === "1";
       if (isLocked) {
-        // Don't attach CAPTCHA modal if login is locked
         return;
       }
 
@@ -193,7 +187,6 @@ $_SESSION['login_captcha_answer'] = $captchaA + $captchaB;
       }
 
       form.addEventListener("submit", (e) => {
-        // If CAPTCHA already answered, let it go
         if (captchaHidden.value) {
           return;
         }
