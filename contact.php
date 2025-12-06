@@ -17,6 +17,20 @@ $isAdmin      = strtolower(trim($meRow['role'] ?? '')) === 'admin';
 $prefillName  = $meRow['display_name'] ?? '';
 $prefillEmail = $row['login_email'] ?? '';
 
+$contactLimitSeconds = 0;
+
+if (isset($_SESSION['contact_rate_limit_until'])) {
+  $contactLimitSeconds = (int)$_SESSION['contact_rate_limit_until'] - time();
+
+  if ($contactLimitSeconds <= 0) {
+    unset($_SESSION['contact_rate_limit_until']);
+    $contactLimitSeconds = 0;
+  } elseif ($contactLimitSeconds > 180) {
+    $contactLimitSeconds = 180;
+  }
+}
+
+
 $cssPath = __DIR__ . '/public/css/main.css';
 $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 ?>
@@ -46,7 +60,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
 
     <main class="content">
       <div class="content-top">
-          <div class="content-spacer"></div>
+        <div class="content-spacer"></div>
         <div class="top-actions">
           <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
 
@@ -125,7 +139,12 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
               </div>
 
               <div class="contact-actions">
-                <button type="submit" class="btn-primary">Submit</button>
+                <button
+                  type="submit"
+                  class="btn-primary"
+                  id="contactSubmitBtn">
+                  Submit
+                </button>
               </div>
             </form>
 
@@ -136,6 +155,28 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
   </div>
 
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div
+    class="rate-modal-backdrop"
+    id="contactLimitModal"
+    data-seconds-left="<?= (int)$contactLimitSeconds ?>"
+    <?= $contactLimitSeconds > 0 ? '' : 'hidden' ?>>
+    <div class="rate-modal">
+      <h2>Too many messages</h2>
+      <p>You reached the limit of <strong>1 message every 3 minutes</strong>.</p>
+      <p>
+        Next message allowed in
+        <strong><span id="contactCountdown">00:00</span></strong>.
+      </p>
+      <p class="rate-limit-note">
+        This helps us reduce spam and keep our inbox clean.
+      </p>
+      <div style="text-align:right; margin-top: 10px;">
+        <button type="button" id="contactLimitClose" class="btn-primary">OK</button>
+      </div>
+    </div>
+  </div>
+
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -315,6 +356,49 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
         });
       }
     });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const modal = document.getElementById('contactLimitModal');
+      if (!modal) return;
+
+      let remaining = parseInt(modal.dataset.secondsLeft || '0', 10);
+      const elCountdown = document.getElementById('contactCountdown');
+      const btnClose = document.getElementById('contactLimitClose');
+      const submitBtn = document.getElementById('contactSubmitBtn');
+
+      function format(sec) {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      }
+
+      function tick() {
+        if (!elCountdown) return;
+
+        if (remaining <= 0) {
+          modal.hidden = true;
+          if (submitBtn) submitBtn.disabled = false;
+          return;
+        }
+
+        elCountdown.textContent = format(remaining--);
+        setTimeout(tick, 1000);
+      }
+
+      if (remaining > 0) {
+        modal.hidden = false;
+        if (submitBtn) submitBtn.disabled = true;
+        elCountdown.textContent = format(remaining);
+        tick();
+      } else {
+        modal.hidden = true;
+      }
+
+      btnClose?.addEventListener('click', () => {
+        modal.hidden = true;
+      });
+    });
   </script>
 </body>
+
 </html>

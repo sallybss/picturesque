@@ -20,6 +20,22 @@ if (!check_csrf($_POST['csrf'] ?? null)) {
 
 $me = Auth::requireUserOrRedirect('../../auth/login.php');
 
+$now      = time();
+$COOLDOWN = 180; 
+
+$limitUntil = (int)($_SESSION['contact_rate_limit_until'] ?? 0);
+
+if ($limitUntil > $now) {
+    $remaining = $limitUntil - $now;
+    $mins = max(1, ceil($remaining / 60));
+
+    set_flash(
+        'err',
+        'You can only send one message every 3 minutes. Please wait about ' . $mins . ' minute(s) and try again.'
+    );
+    redirect('../../contact.php');
+}
+
 $profiles = new ProfileRepository();
 $meRow    = $profiles->getById($me);
 
@@ -50,6 +66,7 @@ if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
 $ip   = $_SERVER['REMOTE_ADDR'] ?? null;
 $repo = new ContactRepository();
 $repo->create($me, $name, $email, $company, $subject, $message, $ip);
+$_SESSION['contact_rate_limit_until'] = $now + $COOLDOWN;
 
 // ---------------------------
 // Send email with PHPMailer 
