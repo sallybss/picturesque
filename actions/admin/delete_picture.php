@@ -22,7 +22,11 @@ if (!$row) {
     redirect('../admin.php');
 }
 
-$repo->deleteById($pictureId);
+$ok = $repo->deleteById($pictureId);
+if (!$ok) {
+    set_flash('err', 'Could not delete picture (database error).');
+    redirect('../admin.php');
+}
 
 $file = dirname(__DIR__) . '/../uploads/' . $row['picture_url'];
 if (is_file($file)) {
