@@ -8,13 +8,11 @@ class PasswordResetRepository
         $tokenHash = hash('sha256', $token);
         $expiresAt = (new DateTimeImmutable("+{$ttlSeconds} seconds"))->format('Y-m-d H:i:s');
 
-        // Delete old tokens for this user
         $stmt = $mysqli->prepare("DELETE FROM password_resets WHERE user_id = ?");
         $stmt->bind_param('i', $userId);
         $stmt->execute();
         $stmt->close();
 
-        // Insert new token
         $stmt = $mysqli->prepare("
             INSERT INTO password_resets (user_id, token_hash, expires_at)
             VALUES (?, ?, ?)

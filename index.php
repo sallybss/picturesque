@@ -388,10 +388,9 @@ $hotCount     = count($hotIds);
     const toggle = document.getElementById('pillToggle');
     if (!pills || !toggle) return;
 
-    const COLLAPSED_MAX = 40; // must match .pills max-height in CSS
+    const COLLAPSED_MAX = 40; 
 
     function updateToggleVisibility() {
-      // If content is taller than collapsed height, show "See more" button
       if (pills.scrollHeight > COLLAPSED_MAX + 5) {
         toggle.hidden = false;
       } else {
@@ -405,7 +404,6 @@ $hotCount     = count($hotIds);
       toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     });
 
-    // Run once after layout
     updateToggleVisibility();
     window.addEventListener('resize', updateToggleVisibility);
   })();

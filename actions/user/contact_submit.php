@@ -71,10 +71,6 @@ $repo->create($me, $name, $email, $company, $subject, $message, $ip);
 $_SESSION['contact_last_sent'] = $now;
 unset($_SESSION['contact_rate_limit_until']);
 
-// ---------------------------
-// Send email with PHPMailer 
-// ---------------------------
-
 $smtpHost  = $mailConfig['smtp_host']  ?? '';
 $smtpUser  = $mailConfig['smtp_user']  ?? '';
 $smtpPass  = $mailConfig['smtp_pass']  ?? '';

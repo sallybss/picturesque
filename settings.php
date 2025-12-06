@@ -43,18 +43,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $newTitle = trim($_POST['rules_title']   ?? 'Rules & Regulations');
     $rawRules = trim($_POST['rules_content'] ?? '');
 
-    // required fields
     if ($newTitle === '' || $rawRules === '') {
       set_flash('err', 'Rules title and content are required.');
       header("Location: {$basePath}#rules");
       exit;
     }
 
-    // length limits (plain text)
     $newTitle   = mb_substr($newTitle, 0, 80);
     $newContent = mb_substr($rawRules, 0, 3000);
 
-    // store as plain text (no HTML)
     $pages->upsert('rules', $newTitle, $newContent, null, $me);
 
     set_flash('ok', 'Rules & Regulations saved.');

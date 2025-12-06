@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/../../includes/init.php';
 
-// Only POST + valid CSRF
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !check_csrf($_POST['csrf'] ?? null)) {
     set_flash('err', 'Invalid request.');
     redirect('../../index.php');  

@@ -31,13 +31,11 @@ if ($file && !empty($file['name'])) {
     $allowedMime = ['image/jpeg','image/png','image/webp','image/gif'];
     $allowedExt  = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
 
-    // Check upload result
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
         set_flash('err','Upload failed.');
         redirect('../../profile_edit.php');
     }
 
-    // MIME type via finfo
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $mime  = $finfo ? finfo_file($finfo, $file['tmp_name']) : null;
     if ($finfo) {
@@ -49,14 +47,12 @@ if ($file && !empty($file['name'])) {
         redirect('../../profile_edit.php');
     }
 
-    // Extension allowlist
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     if (!in_array($ext, $allowedExt, true)) {
         set_flash('err','Only JPG, PNG, WEBP or GIF.');
         redirect('../../profile_edit.php');
     }
 
-    // Optional: max size e.g. 5 MB
     if (!empty($file['size']) && $file['size'] > 5 * 1024 * 1024) {
         set_flash('err','Max 5MB.');
         redirect('../../profile_edit.php');
