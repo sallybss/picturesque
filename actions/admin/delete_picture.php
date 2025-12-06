@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !check_csrf($_POST['csrf'] ?? null)
     redirect('../../admin.php');
 }
 
-$me = Auth::requireAdminOrRedirect('../index.php');
+$me = Auth::requireAdminOrRedirect('../../index.php');
 
 $pictureId = (int)($_POST['picture_id'] ?? 0);
 if ($pictureId <= 0) {
