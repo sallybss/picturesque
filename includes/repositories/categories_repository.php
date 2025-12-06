@@ -4,7 +4,8 @@ require_once __DIR__ . '/base_repository.php';
 
 class CategoriesRepository extends BaseRepository
 {
-    public function listActive(): array {
+    public function listActive(): array
+    {
         $res = $this->db->query("
             SELECT category_id,
                    category_name AS name,
@@ -16,7 +17,8 @@ class CategoriesRepository extends BaseRepository
         return $res->fetch_all(MYSQLI_ASSOC);
     }
 
-    public function getById(int $id): ?array {
+    public function getById(int $id): ?array
+    {
         $st = $this->db->prepare("SELECT * FROM categories WHERE category_id=? LIMIT 1");
         $st->bind_param('i', $id);
         $st->execute();
@@ -87,16 +89,24 @@ class CategoriesRepository extends BaseRepository
     }
 
     public function delete(int $id): bool
-    {
-        try {
-            $st = $this->db->prepare("DELETE FROM categories WHERE category_id = ?");
-            $st->bind_param('i', $id);
-            $st->execute();
-            $affected = $st->affected_rows;
-            $st->close();
-            return $affected > 0;
-        } catch (\mysqli_sql_exception $e) {
+    {       
+        $stmt = $this->db->prepare("SELECT COUNT(*) AS cnt FROM pictures WHERE category_id = ?");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $res = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        $cnt = (int)($res['cnt'] ?? 0);
+        if ($cnt > 0) {
             return false;
         }
+
+        $stmt = $this->db->prepare("DELETE FROM categories WHERE category_id = ?");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $ok = ($stmt->affected_rows === 1);
+        $stmt->close();
+
+        return $ok;
     }
 }
