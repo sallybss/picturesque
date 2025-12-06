@@ -39,7 +39,7 @@ if ($lastSent > 0 && ($now - $lastSent) < $COOLDOWN) {
 }
 
 $profiles = new ProfileRepository();
-$meRow    = $profiles->getById($me);
+$meRow    = $profiles->getHeader($me); 
 
 $name  = trim($meRow['display_name'] ?? '');
 $email = trim($meRow['email'] ?? ($meRow['login_email'] ?? ''));
