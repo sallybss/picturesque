@@ -24,12 +24,13 @@ $profiles = new ProfileRepository();
 $meRow    = $profiles->getById($me);
 
 $name  = trim($meRow['display_name'] ?? '');
-$email = trim($meRow['email'] ?? ($meRow['login_email'] ?? ''));
-
+$emailFromForm = trim($_POST['email'] ?? '');
+$dbEmail = trim($meRow['email'] ?? ($meRow['login_email'] ?? ''));
+$email = $emailFromForm !== '' ? $emailFromForm : $dbEmail;
 $company = trim($_POST['company'] ?? '');
 $subject = trim($_POST['subject'] ?? '');
-$message = trim($_POST['message'] ?? '');
 
+$message = trim($_POST['message'] ?? '');
 $subject = mb_substr($subject, 0, 100);
 $message = mb_substr($message, 0, 500);
 
