@@ -106,4 +106,4 @@ if ($smtpHost && $smtpUser && $smtpPass && $toAddress) {
     set_flash('ok', 'Thank you! Your message was saved.');
 }
 
-redirect('../../contact.php'); - like this?
+redirect('../../contact.php');
