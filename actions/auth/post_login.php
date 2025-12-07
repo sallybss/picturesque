@@ -10,7 +10,19 @@ if (!check_csrf($_POST['csrf'] ?? null)) {
     redirect('../../auth/login.php');
 }
 
-$emailRaw = trim($_POST['login_email'] ?? '');
+$captchaAnswer = trim($_POST['login_captcha'] ?? '');
+$expected      = isset($_SESSION['login_captcha_answer'])
+    ? (int)$_SESSION['login_captcha_answer']
+    : null;
+
+unset($_SESSION['login_captcha_answer']);
+
+if ($expected === null || $captchaAnswer === '' || (int)$captchaAnswer !== $expected) {
+    set_flash('err', 'Captcha failed. Please try again.');
+    redirect('../../auth/login.php');
+}
+
+$emailRaw = mb_substr(trim($_POST['login_email'] ?? ''), 0, 255);
 $pass     = (string)($_POST['password'] ?? '');
 
 if ($emailRaw === '' || $pass === '') {
@@ -18,17 +30,14 @@ if ($emailRaw === '' || $pass === '') {
     redirect('../../auth/login.php');
 }
 
-// Normalize for tracking login attempts
 $email = mb_strtolower($emailRaw);
 $ip    = $_SERVER['REMOTE_ADDR'] ?? '';
 
 $mysqli = DB::get();
 
-// ----------------- BRUTE FORCE PROTECTION -----------------
-$maxAttempts   = 5;   // max failed attempts
-$windowMinutes = 10;  // time window in minutes
+$maxAttempts   = 5;  
+$windowMinutes = 10; 
 
-// Count failed attempts for this email in last X minutes
 $checkSql = "
     SELECT COUNT(*) AS c
     FROM login_attempts
@@ -49,7 +58,6 @@ if ($check) {
 }
 
 if ($failCount >= $maxAttempts) {
-    // Store lock info in session so login.php can disable form
     $_SESSION['login_lock_email'] = $email;
     $_SESSION['login_lock_until'] = time() + ($windowMinutes * 60);
 
@@ -59,16 +67,12 @@ if ($failCount >= $maxAttempts) {
     );
     redirect('../../auth/login.php');
 }
-// ----------------- END BRUTE FORCE CHECK -----------------
 
-
-// Load user by email (your repo probably expects raw email)
 $profiles = new ProfileRepository();
 $user     = $profiles->findAuthByEmail($emailRaw);
 
 $isValid = $user && password_verify($pass, $user['password_hash']);
 
-// Log this attempt (success or fail)
 $logSql = "
     INSERT INTO login_attempts (email, ip_address, success)
     VALUES (?, ?, ?)
@@ -81,19 +85,16 @@ if ($log) {
     $log->close();
 }
 
-// If invalid credentials
 if (!$isValid) {
     set_flash('err', 'Invalid email or password.');
     redirect('../../auth/login.php');
 }
 
-// If account not active
 if (($user['status'] ?? '') !== 'active') {
     set_flash('err', 'Your account is not active.');
     redirect('../../auth/login.php');
 }
 
-// Successful login → clear any previous lock
 unset($_SESSION['login_lock_email'], $_SESSION['login_lock_until']);
 
 $_SESSION['profile_id']   = (int)$user['profile_id'];

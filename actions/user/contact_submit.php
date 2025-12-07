@@ -20,19 +20,49 @@ if (!check_csrf($_POST['csrf'] ?? null)) {
 
 $me = Auth::requireUserOrRedirect('../../auth/login.php');
 
+$now      = time();
+$COOLDOWN = 180;
+
+$lastSent = (int)($_SESSION['contact_last_sent'] ?? 0);
+
+if ($lastSent > 0 && ($now - $lastSent) < $COOLDOWN) {
+    $remaining = $COOLDOWN - ($now - $lastSent);
+
+    $_SESSION['contact_rate_limit_until'] = $now + $remaining;
+
+    $mins = max(1, ceil($remaining / 60));
+    set_flash(
+        'err',
+        'You can only send one message every 3 minutes. Please wait about ' . $mins . ' minute(s) and try again.'
+    );
+    redirect('../../contact.php');
+}
+
 $profiles = new ProfileRepository();
-$meRow    = $profiles->getById($me);
+$meRow    = $profiles->getHeader($me); 
 
 $name  = trim($meRow['display_name'] ?? '');
+<<<<<<< HEAD
 $emailFromForm = trim($_POST['email'] ?? '');
 $dbEmail = trim($meRow['email'] ?? ($meRow['login_email'] ?? ''));
 $email = $emailFromForm !== '' ? $emailFromForm : $dbEmail;
 $company = trim($_POST['company'] ?? '');
+=======
+$email = trim($meRow['email'] ?? ($meRow['login_email'] ?? ''));
+
+$company = mb_substr(trim($_POST['company'] ?? ''), 0, 100);
+>>>>>>> 5e559c27eddbc37b3a9ba30f1d076e6418ad17e1
 $subject = trim($_POST['subject'] ?? '');
 
+<<<<<<< HEAD
 $message = trim($_POST['message'] ?? '');
+=======
+$subject = str_replace(["\r", "\n"], ' ', $subject);
+
+>>>>>>> 5e559c27eddbc37b3a9ba30f1d076e6418ad17e1
 $subject = mb_substr($subject, 0, 100);
 $message = mb_substr($message, 0, 500);
+
 
 if ($subject === '' || $message === '') {
     set_flash('err', 'Please fill out all required fields.');
@@ -48,9 +78,8 @@ $ip   = $_SERVER['REMOTE_ADDR'] ?? null;
 $repo = new ContactRepository();
 $repo->create($me, $name, $email, $company, $subject, $message, $ip);
 
-// ---------------------------
-// Send email with PHPMailer 
-// ---------------------------
+$_SESSION['contact_last_sent'] = $now;
+unset($_SESSION['contact_rate_limit_until']);
 
 $smtpHost  = $mailConfig['smtp_host']  ?? '';
 $smtpUser  = $mailConfig['smtp_user']  ?? '';

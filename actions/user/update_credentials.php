@@ -11,7 +11,7 @@ if (!check_csrf($_POST['csrf'] ?? null)) {
 
 $me = Auth::requireUserOrRedirect('../../auth/login.php');
 
-$email = trim($_POST['login_email'] ?? '');
+$email = mb_substr(trim($_POST['login_email'] ?? ''), 0, 255);
 $cur   = (string)($_POST['current_password'] ?? '');
 $pass  = (string)($_POST['new_password'] ?? '');
 $conf  = (string)($_POST['confirm_password'] ?? '');

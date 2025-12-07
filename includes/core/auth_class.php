@@ -14,7 +14,6 @@ class Auth {
     public static function requireAdminOrRedirect(string $redirect = './index.php'): int {
         $id = self::requireUserOrRedirect('./auth/login.php');
 
-        // No dependency on ProfileRepository:
         $stmt = DB::get()->prepare('SELECT role FROM profiles WHERE profile_id = ? LIMIT 1');
         $stmt->bind_param('i', $id);
         $stmt->execute();

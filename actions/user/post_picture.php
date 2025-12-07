@@ -92,6 +92,11 @@ if (!is_uploaded_file($tmp)) {
     redirect('../../create.php');
 }
 
+if (!empty($file['size']) && $file['size'] > 10 * 1024 * 1024) {
+    set_flash('err', 'Image too large (max 10MB).');
+    redirect('../../create.php');
+}
+
 $finfo   = new finfo(FILEINFO_MIME_TYPE);
 $mime    = $finfo->file($tmp);
 $allowed = [

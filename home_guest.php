@@ -97,7 +97,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
           ?>
           <article class="card">
             <div class="card-cover">
-              <img src="<?= $coverUrl ?>" alt="">
+            <img src="<?= htmlspecialchars($coverUrl) ?>" alt="">
             </div>
 
             <div class="card-body">
@@ -154,7 +154,7 @@ $ver = file_exists($cssPath) ? filemtime($cssPath) : time();
       const body = document.body;
       const btn = document.getElementById('hamburger');
       const backdrop = document.getElementById('sidebarBackdrop');
-      const closeBtn = document.getElementById('closeSidebar'); // from sidebar.php
+      const closeBtn = document.getElementById('closeSidebar'); 
 
       function openMenu() {
         body.classList.add('sidebar-open');

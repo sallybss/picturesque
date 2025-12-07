@@ -4,104 +4,137 @@ require_once __DIR__ . '/../../includes/init.php';
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirect('../../profile.php');
 }
-
 if (!check_csrf($_POST['csrf'] ?? null)) {
-    set_flash('err', 'Invalid form.');
+    set_flash('err', 'Invalid request.');
     redirect('../../profile.php');
 }
 
-$me    = Auth::requireUserOrRedirect('../../auth/login.php');
-$pid   = (int)($_POST['picture_id'] ?? 0);
-$title = trim($_POST['picture_title'] ?? $_POST['title'] ?? '');
-$desc  = trim($_POST['picture_description'] ?? $_POST['desc'] ?? '');
-$reset = !empty($_POST['reset_image']);
-$catId = (int)($_POST['category_id'] ?? 0);
-$title = mb_substr($title, 0, 50);  
-$desc  = mb_substr($desc, 0, 250);  
+$me = Auth::requireUserOrRedirect('../../auth/login.php');
 
-
-if ($pid <= 0 || $title === '' || $catId <= 0) {
-    set_flash('err', 'Invalid form.');
-    redirect("../../edit_picture.php?id=$pid");
+$pid = (int)($_POST['picture_id'] ?? 0);
+if ($pid <= 0) {
+    set_flash('err', 'Invalid picture.');
+    redirect('../../profile.php');
 }
 
-$catsRepo = new CategoriesRepository();
-if (!$catsRepo->isActive($catId)) {
-    set_flash('err', 'Invalid category.');
-    redirect("../../edit_picture.php?id=$pid");
-}
-
-$repo = new PictureRepository();
-$old  = $repo->getUrlIfOwned($pid, $me);
-
-if ($old === null) {
+$pictures = new PictureRepository();
+$pic = $pictures->getEditableByOwner($pid, $me);
+if (!$pic) {
     set_flash('err', 'Picture not found or not yours.');
     redirect('../../profile.php');
 }
 
-$uploadDir = dirname(__DIR__) . '/../uploads/';
-if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0775, true);
+
+$COOLDOWN  = 300;
+$MAX_EDITS = 2;
+$now       = time();
+
+$picKey = 'pic_' . $pid;
+$state = $_SESSION['edit_pic_rate'][$picKey] ?? [
+    'window_start'  => 0,
+    'count'         => 0,
+    'blocked_until' => 0,
+];
+
+if ($state['blocked_until'] > $now) {
+    $remaining = $state['blocked_until'] - $now;
+    $mins      = max(1, ceil($remaining / 60));
+
+    set_flash(
+        'err',
+        'You edited this post too many times. Please wait about ' . $mins . ' minute(s) before editing again.'
+    );
+    redirect('../../edit_picture.php?id=' . $pid);
 }
 
+if ($now - $state['window_start'] > $COOLDOWN) {
+    $state['window_start'] = $now;
+    $state['count']        = 0;
+}
+
+$state['count']++;
+
+if ($state['count'] > $MAX_EDITS) {
+    $state['blocked_until'] = $now + $COOLDOWN;
+    $_SESSION['edit_pic_rate'][$picKey] = $state;
+
+    $mins = ceil($COOLDOWN / 60);
+    set_flash(
+        'err',
+        'You reached the limit of ' . $MAX_EDITS . ' edits in 5 minutes. Please wait about ' . $mins . ' minute(s).'
+    );
+    redirect('../../edit_picture.php?id=' . $pid);
+}
+
+$_SESSION['edit_pic_rate'][$picKey] = $state;
+
+$title       = trim($_POST['title'] ?? '');
+$desc        = trim($_POST['desc'] ?? '');
+$category_id = (int)($_POST['category_id'] ?? 0);
+$resetImage  = trim($_POST['reset_image'] ?? '');
+
+if ($title === '' || $category_id <= 0) {
+    set_flash('err', 'Title and category are required.');
+    redirect('../../edit_picture.php?id=' . $pid);
+}
+
+$file        = $_FILES['photo'] ?? null;
 $newFilename = null;
 
-if ($reset && empty($_FILES['photo']['name'])) {
-    if ($old && is_file($uploadDir . $old)) {
-        @unlink($uploadDir . $old);
-    }
-    $repo->updateOwned($pid, $me, $title, $desc, null, $catId);
-    set_flash('ok', 'Picture updated.');
-    redirect('../../profile.php');
-}
-
-if (!empty($_FILES['photo']['name'])) {
-    $file = $_FILES['photo'];
-
-    $finfo = new finfo(FILEINFO_MIME_TYPE);
-    $mime  = $finfo->file($file['tmp_name']);
-
-    $allowed = ['image/jpeg','image/png','image/gif','image/webp'];
-
-    if (!in_array($mime, $allowed, true)) {
-        set_flash('err', 'Only JPG/PNG/GIF/WEBP allowed.');
-        redirect("../../edit_picture.php?id=$pid");
+if ($file && !empty($file['name'])) {
+    if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
+        set_flash('err', 'Upload failed. Please try again.');
+        redirect('../../edit_picture.php?id=' . $pid);
     }
 
-    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-        set_flash('err', 'Upload failed.');
-        redirect("../../edit_picture.php?id=$pid");
+    if (!empty($file['size']) && $file['size'] > 10 * 1024 * 1024) {
+        set_flash('err', 'Max 10MB.');
+        redirect('../../edit_picture.php?id=' . $pid);
     }
 
-    if (($file['size'] ?? 0) > 10 * 1024 * 1024) {
-        set_flash('err', 'Max size is 10MB.');
-        redirect("../../edit_picture.php?id=$pid");
-    }
-
-    $extMap = [
+    $allowed = [
         'image/jpeg' => 'jpg',
         'image/png'  => 'png',
         'image/gif'  => 'gif',
         'image/webp' => 'webp',
     ];
 
-    $ext  = $extMap[$mime] ?? pathinfo($file['name'], PATHINFO_EXTENSION);
-    $name = time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-    $dest = $uploadDir . $name;
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime  = $finfo->file($file['tmp_name']);
 
-    if (!move_uploaded_file($file['tmp_name'], $dest)) {
-        set_flash('err', 'Could not save file.');
-        redirect("../../edit_picture.php?id=$pid");
+    if (!isset($allowed[$mime])) {
+        set_flash('err', 'Use JPG/PNG/WEBP/GIF.');
+        redirect('../../edit_picture.php?id=' . $pid);
     }
 
-    if ($old && is_file($uploadDir . $old)) {
-        @unlink($uploadDir . $old);
+    $ext   = $allowed[$mime];
+    $dir   = dirname(__DIR__) . '/../uploads/';
+    if (!is_dir($dir)) {
+        mkdir($dir, 0775, true);
     }
 
-    $newFilename = $name;
+    $newFilename = "picture_{$me}_" . time() . '.' . $ext;
+    $target      = $dir . $newFilename;
+
+    if (!move_uploaded_file($file['tmp_name'], $target)) {
+        set_flash('err', 'Upload failed.');
+        redirect('../../edit_picture.php?id=' . $pid);
+    }
+
+    @chmod($target, 0644);
 }
 
-$repo->updateOwned($pid, $me, $title, $desc, $newFilename, $catId);
+if ($resetImage === '1' && $newFilename === null) {
+    $pictures->clearImage($pid, $me);
+    $filenameToSave = null;
+} elseif ($newFilename !== null) {
+    $filenameToSave = $newFilename;
+} else {
+    $filenameToSave = null;
+}
 
-set_flash('ok', 'Picture updated.');
+
+$pictures->updateOwned($pid, $me, $title, $desc, $filenameToSave, $category_id);
+
+set_flash('ok', 'Post updated.');
 redirect('../../profile.php');

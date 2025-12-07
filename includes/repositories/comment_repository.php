@@ -92,8 +92,7 @@ class CommentRepository extends BaseRepository
         if (!$stmt) {
             throw new RuntimeException("prepare failed: " . $mysqli->error);
         }
-
-        // i = int profile_id, i = int minutes
+        
         $stmt->bind_param('ii', $profileId, $minutes);
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc() ?: ['c' => 0];
@@ -102,10 +101,27 @@ class CommentRepository extends BaseRepository
         return (int)$row['c'];
     }
 
-    public function delete(int $commentId): void {
-        $st = $this->db->prepare("DELETE FROM comments WHERE comment_id = ?");
+   public function delete(int $commentId): void
+{
+    $db = DB::get();
+    $db->begin_transaction();
+
+    try {
+        $st = $db->prepare("DELETE FROM comments WHERE parent_comment_id = ?");
         $st->bind_param('i', $commentId);
         $st->execute();
         $st->close();
+
+        $st = $db->prepare("DELETE FROM comments WHERE comment_id = ?");
+        $st->bind_param('i', $commentId);
+        $st->execute();
+        $st->close();
+
+        $db->commit();
+    } catch (\mysqli_sql_exception $e) {
+        $db->rollback();
+        throw $e;
     }
+}
+
 }

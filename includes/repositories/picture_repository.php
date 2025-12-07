@@ -205,13 +205,50 @@ class PictureRepository extends BaseRepository
         return $row;
     }
 
-    public function deleteById(int $pictureId): void
-    {
-        $stmt = DB::get()->prepare("DELETE FROM pictures WHERE picture_id = ?");
-        $stmt->bind_param('i', $pictureId);
+    public function deleteById(int $id): bool
+{
+    $db = DB::get();
+    $db->begin_transaction();
+
+    try {
+        $stmt = $db->prepare("
+            DELETE FROM comments
+            WHERE picture_id = ?
+              AND parent_comment_id IS NOT NULL
+        ");
+        $stmt->bind_param('i', $id);
         $stmt->execute();
         $stmt->close();
+
+        $stmt = $db->prepare("
+            DELETE FROM comments
+            WHERE picture_id = ?
+              AND parent_comment_id IS NULL
+        ");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $stmt->close();
+
+        $stmt = $db->prepare("DELETE FROM likes WHERE picture_id = ?");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $stmt->close();
+
+        $stmt = $db->prepare("DELETE FROM pictures WHERE picture_id = ?");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $ok = ($stmt->affected_rows === 1);
+        $stmt->close();
+
+        $db->commit();
+        return $ok;
+    } catch (\mysqli_sql_exception $e) {
+        $db->rollback();
+        return false;
     }
+}
+
+
 
     public function getUrlIfOwned(int $pictureId, int $ownerId): ?string
     {

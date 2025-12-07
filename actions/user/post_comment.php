@@ -27,8 +27,8 @@ if ($pictureId <= 0) {
 
 $redirect = '../../picture.php?id=' . $pictureId;
 
-if ($content === '') {
-    set_flash('err', 'Please write a comment.');
+if (mb_strlen($content) < 5) {
+    set_flash('err', 'Comment is too short (min 5 characters).');
     redirect($redirect);
 }
 

@@ -1,5 +1,9 @@
 <?php
 require_once __DIR__ . '/../includes/init.php';
+
+$captchaA = random_int(1, 9);
+$captchaB = random_int(1, 9);
+$_SESSION['register_captcha_answer'] = $captchaA + $captchaB;
 ?>
 <!doctype html>
 <html lang="en">
@@ -7,11 +11,7 @@ require_once __DIR__ . '/../includes/init.php';
   <meta charset="utf-8">
   <title>Sign Up · Picturesque</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <!-- Main CSS -->
   <link rel="stylesheet" href="../public/css/main.css?v=2">
 </head>
 <body>
@@ -33,18 +33,21 @@ require_once __DIR__ . '/../includes/init.php';
           <div class="flash ok"><?= htmlspecialchars($m) ?></div>
         <?php endif; ?>
 
-        <form method="post" action="../actions/auth/post_register.php" autocomplete="off">
+        <form
+          id="registerForm"
+          method="post"
+          action="../actions/auth/post_register.php"
+          autocomplete="off"
+        >
           <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token()) ?>">
+          <input type="hidden" name="register_captcha" id="registerCaptchaHidden">
 
-          <!-- EMAIL -->
           <label class="label">Email (login)</label>
-          <input class="input" type="email" name="login_email" required>
+          <input class="input" type="email" name="login_email" required maxlength="255">
 
-          <!-- DISPLAY NAME -->
           <label class="label">Display name</label>
-          <input class="input" type="text" name="display_name" required>
-
-          <!-- PASSWORD -->
+          <input class="input" type="text" name="display_name" required maxlength="50">
+          
           <label class="label">Password</label>
           <div class="password-field">
             <input
@@ -76,10 +79,28 @@ require_once __DIR__ . '/../includes/init.php';
         </form>
       </div>
     </div>
-
   </div>
 
-  <!-- PASSWORD TOGGLE JS -->
+  <div class="captcha-modal-backdrop" id="captchaModalBackdrop"></div>
+  <div class="captcha-modal" id="captchaModal" aria-hidden="true">
+    <div class="captcha-modal__card">
+      <h2 class="captcha-modal__title">Are you human?</h2>
+      <p class="p-muted">Please solve this quick question to continue.</p>
+      <p class="captcha-question">What is <?= $captchaA ?> + <?= $captchaB ?> ?</p>
+      <input
+        class="input"
+        type="number"
+        id="captchaInput"
+        placeholder="Answer"
+      >
+      <div class="captcha-error" id="captchaError">Please enter the answer.</div>
+      <div class="captcha-actions">
+        <button type="button" class="btn-secondary" id="captchaCancel">Cancel</button>
+        <button type="button" class="btn btn-primary" id="captchaConfirm">Verify &amp; Sign Up</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".password-toggle").forEach(btn => {
@@ -98,6 +119,64 @@ require_once __DIR__ . '/../includes/init.php';
           }
         });
       });
+
+      const form          = document.getElementById("registerForm");
+      if (!form) return;
+
+      const modal         = document.getElementById("captchaModal");
+      const backdrop      = document.getElementById("captchaModalBackdrop");
+      const captchaInput  = document.getElementById("captchaInput");
+      const captchaHidden = document.getElementById("registerCaptchaHidden");
+      const captchaError  = document.getElementById("captchaError");
+      const btnConfirm    = document.getElementById("captchaConfirm");
+      const btnCancel     = document.getElementById("captchaCancel");
+
+      function openModal() {
+        modal.classList.add("is-open");
+        backdrop.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        captchaError.style.display = "none";
+        captchaInput.value = "";
+        setTimeout(() => captchaInput.focus(), 50);
+      }
+
+      function closeModal() {
+        modal.classList.remove("is-open");
+        backdrop.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+      }
+
+      form.addEventListener("submit", (e) => {
+        if (captchaHidden.value) {
+          return;
+        }
+        e.preventDefault();
+        openModal();
+      });
+
+      btnCancel.addEventListener("click", () => {
+        closeModal();
+      });
+
+      btnConfirm.addEventListener("click", () => {
+        const val = captchaInput.value.trim();
+        if (!val) {
+          captchaError.style.display = "block";
+          return;
+        }
+        captchaError.style.display = "none";
+        captchaHidden.value = val;
+        closeModal();
+        form.submit();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && modal.classList.contains("is-open")) {
+          closeModal();
+        }
+      });
+
+      backdrop.addEventListener("click", closeModal);
     });
   </script>
 

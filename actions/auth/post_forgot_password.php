@@ -34,15 +34,12 @@ if (!$user) {
     redirect('../../auth/forgot_password.php');
 }
 
-// Create token
 $token = bin2hex(random_bytes(32));
 $resets = new PasswordResetRepository();
-$resets->createToken((int)$user['profile_id'], $token, 3600); // it is valid for 1 hour
+$resets->createToken((int)$user['profile_id'], $token, 3600); 
 
 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 
-// If you have BASE_PATH set in env.php (e.g. https://picturesque.dk), use it;
-// otherwise fall back to localhost development URL.
 if (defined('BASE_PATH') && BASE_PATH !== '') {
     $base = rtrim(BASE_PATH, '/');
 } else {

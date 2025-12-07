@@ -821,22 +821,67 @@ img.c-avatar {
     margin: 10px 0 18px;
 }
 
-.pills {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin: 10px 0 18px;
+.pills-wrapper {
+  flex: 1;          
+  min-width: 0;
 }
-
+/* Normal pill */
 .pill {
     padding: 8px 12px;
     border: 1px solid var(--line);
     border-radius: 999px;
     font-size: 12px;
-    background: #fff;
-    color: #374151;
-    box-shadow: 0 1px 0 rgba(0, 0, 0, .02);
+    background: #ffffff;
+    color: #374151;              /* neutral gray */
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.02);
 }
+
+/* On hover */
+.pill:hover {
+  background: #f3f4f6;        
+}
+
+/* Selected pill */
+.pill.is-selected {
+    background: #e8f0fe;         
+    border-color: #93c5fd;
+    color: #000000;             
+    font-weight: 500;
+}
+
+
+/* main pills row (merged both definitions) */
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0 6px;
+  max-height: 34px;    
+  overflow: hidden;
+}
+
+
+.pills.is-expanded {
+  max-height: 500px;         
+}
+
+/* “See more” link under the pills, left aligned */
+.pill-more {
+    border: none;
+    background: none;
+    padding: 0 2px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #374151;          
+}
+
+.pill-more:hover {
+    color: #111827;         
+    text-decoration: underline;
+}
+
 
 .filter-btn {
     display: inline-flex;
@@ -994,13 +1039,20 @@ img.c-avatar {
    4) FORMS (Create, shared)
    ========================================================= */
 .form-card {
-    max-width: 740px;
+    max-width: 800px;
     margin: 22px auto;
     background: #fff;
     border: 1px solid var(--line);
     border-radius: 16px;
     padding: 16px;
 }
+
+.settings-wrap .form-card {
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+}
+
 
 .form-row {
     margin: 18px 0;
@@ -1484,8 +1536,8 @@ img.c-avatar {
 }
 
 .settings-wrap {
-    max-width: 920px;
-    margin: 20px auto;
+    max-width: 800px;      
+    margin: 20px auto 40px;
 }
 
 .sub {
@@ -2680,5 +2732,849 @@ body.sidebar-open .sidebar-backdrop{
 .field-counter.at-limit {
   color: #ef4444;
   font-weight: 500;
+}
+
+.cat-add-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cat-add-row .input {
+  flex: 1;
+}
+
+.cat-add-btn {
+  margin-top: 0; 
+  white-space: nowrap; 
+}
+
+.cats-table td:last-child {
+  text-align: right;
+  white-space: nowrap;
+  width: 1%;
+}
+
+.cats-table form {
+  display: inline-flex;
+  margin-left: 4px;
+}
+
+/* ===== About page polish ===== */
+
+/* Header + layout */
+.about {
+  max-width: 900px;
+  margin: 2.5rem auto 3rem;
+}
+
+.about-header {
+  text-align: left;
+  margin-bottom: 1.75rem;
+}
+
+.about-header h1 {
+  font-size: 1.75rem;
+  margin: 0 0 .35rem;
+}
+
+.about-header .lead {
+  font-size: .98rem;
+  color: #6b7280;
+}
+
+/* Hero image */
+.about-image-wrap {
+  margin-bottom: 1.75rem;
+}
+
+.about-image {
+  width: 100%;
+  display: block;
+  border-radius: 16px;
+  box-shadow: 0 16px 30px rgba(15,23,42,.18);
+}
+
+/* Content card */
+.about-card {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 12px 30px rgba(15,23,42,.06);
+  padding: 24px 28px;
+}
+
+/* Typography inside admin content */
+.about-body {
+  font-size: .95rem;
+  line-height: 1.7;
+  color: #374151;
+}
+
+/* Section titles (Our Mission, Core Values, etc.) */
+.about-body h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  margin: 0 0 .4rem;
+}
+
+.about-body h2:not(:first-child) {
+  margin-top: 1.8rem;
+  padding-top: 1.3rem;
+  border-top: 1px dashed #e5e7eb;
+}
+
+/* Subheadings like Creativity, Community… */
+.about-body h3 {
+  font-size: .95rem;
+  font-weight: 600;
+  margin: 1rem 0 .2rem;
+}
+
+/* Paragraph spacing */
+.about-body p {
+  margin: .15rem 0 .6rem;
+}
+
+/* Links */
+.about-body a {
+  color: #7dbad6;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.about-body a:hover {
+  text-decoration: underline;
+}
+
+/* Mobile tweaks */
+@media (max-width: 700px) {
+  .about {
+    margin: 1.5rem 1rem 2.5rem;
+  }
+
+  .about-card {
+    padding: 18px 16px;
+    border-radius: 16px;
+  }
+
+  .about-header h1 {
+    font-size: 1.5rem;
+  }
+}
+
+
+/* --- User settings dropdown --- */
+.user-settings {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-menu-toggle {
+  border: none;
+  background:#8ec6df ;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 9px;
+  color: #fff;
+}
+
+.user-menu-toggle:hover {
+  background:#3eb1d4;
+}
+
+.user-menu {
+  position: absolute;
+  right: 0;
+  top: 120%;
+  min-width: 180px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+  padding: 10px;
+  display: none;
+  z-index: 50;
+}
+
+.user-menu.open {
+  display: block;
+}
+
+.user-menu-section + .user-menu-section {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.user-menu-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #888;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.user-menu-item {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 4px 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.user-menu-item:hover {
+  background: #f3f4f6;
+}
+
+/* --- Font sizes --- */
+body.font-small   { font-size: 14px; }
+body.font-medium  { font-size: 16px; }
+body.font-large   { font-size: 18px; }
+
+
+/* =======================================================
+   TOPBAR — LIGHT MODE
+======================================================= */
+.topbar-userbox {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 8px 0 12px;
+  margin-left: auto;
+}
+
+.userbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #333;               /* light mode color */
+}
+
+.userbox-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid #e0e0e0;
+  flex-shrink: 0;
+}
+
+/* =======================================================
+  TOPBAR — DARK MODE FIX
+======================================================= */
+body.theme-dark .userbox,
+body.theme-dark .userbox-name,
+body.theme-dark .topbar-userbox a {
+  color: #e5e7eb !important;
+}
+
+body.theme-dark .avatar {
+  border-color: #334155 !important; /* dark blue-gray border */
+}
+
+
+/* ============================
+   THEME: LIGHT / DARK
+   ============================ */
+
+/* Light theme (default) */
+body.theme-light {
+  background: #f5f5f5;
+  color: #111827;
+}
+
+/* Dark theme base */
+body.theme-dark {
+  background: #020617;      
+  color: #e5e7eb;   
+  border: #1e293b;
+}
+
+/* Main layout areas */
+body.theme-dark .layout,
+body.theme-dark .content {
+  background: #020617;
+}
+
+/* ============================
+   CARDS & FEED
+   ============================ */
+
+body.theme-dark .card,
+body.theme-dark .hot-card {
+  background: #111b32;         /* dark slate */
+  color: #e5e7eb;
+  border-radius: 16px;
+  border: 1px solid #1e293b;
+}
+
+body.theme-dark .card-title,
+body.theme-dark .card-title a {
+  color: #f1f5f9;
+}
+
+body.theme-dark .card-desc {
+  color: #d1d5db;
+}
+
+body.theme-dark .author-name,
+body.theme-dark .author-link span {
+  color: #e5e7eb;
+}
+
+body.theme-dark .counts,
+body.theme-dark .counts a,
+body.theme-dark .muted,
+body.theme-dark .meta span,
+body.theme-dark .card .muted {
+  color: #cbd5e1;
+}
+
+body.theme-dark .hot-card span {
+  color: #f1f5f9;
+}
+
+/* ============================
+   SEARCH, FILTERS & PILLS
+   ============================ */
+
+body.theme-dark .search,
+body.theme-dark .filter-select {
+  background: #020617;
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+}
+
+body.theme-dark .search::placeholder {
+  color: #6b7280;
+}
+
+body.theme-dark .filter-select-wrap {
+  background: #020617;
+  border-radius: 999px;
+}
+
+body.theme-dark .pill {
+  background: #020617;
+  border: 1px solid #1f2937;
+  color: #e5e7eb;
+}
+
+body.theme-dark .pill.is-selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #e5e7eb;
+}
+
+body.theme-dark .filter-label {
+  color: #e5e7eb;
+}
+
+/* datalist suggestions */
+body.theme-dark option {
+  background: #020617;
+  color: #e5e7eb;
+}
+
+/* ============================
+   BUTTONS
+   ============================ */
+
+body.theme-dark .btn-primary,
+body.theme-dark .search-btn {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #e5e7eb;
+}
+
+body.theme-dark .btn-primary:hover,
+body.theme-dark .search-btn:hover {
+  background: var(--primary);
+}
+
+/* ============================
+   FLASH MESSAGES
+   ============================ */
+
+body.theme-dark .flash {
+  background: #0f172a;
+  color: #e5e7eb;
+  border: 1px solid #1e293b;
+}
+
+body.theme-dark .flash-ok {
+  border-left: 4px solid #22c55e;
+}
+
+body.theme-dark .flash-err {
+  border-left: 4px solid #f97373;
+}
+
+/* ============================
+   DROPDOWN (DISPLAY SETTINGS)
+   ============================ */
+
+body.theme-dark .user-menu {
+  background: #111b32;
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+}
+
+body.theme-dark .user-menu-title,
+body.theme-dark .user-menu-item {
+  color: #e5e7eb;
+}
+
+body.theme-dark .user-menu-item:hover {
+  background: #111b32;
+}
+
+/* ============================
+   SIDENAV (LEFT MENU)
+   ============================ */
+
+body.theme-dark .sidenav {
+  background: #111b32;
+  color: #e5e7eb;
+  border: 1px solid #1e293b;
+
+}
+
+/* all text & links */
+body.theme-dark .sidenav *,
+body.theme-dark .sidenav a,
+body.theme-dark .sidenav button {
+  color: #e5e7eb;
+}
+
+/* nav links normal */
+body.theme-dark .sidenav a {
+  background: transparent;
+}
+
+/* hover & active */
+body.theme-dark .sidenav a:hover,
+body.theme-dark .sidenav a.active {
+  background: #0b1120;
+  color: #ffffff;
+}
+
+/* icons in sidenav */
+body.theme-dark .sidenav svg path,
+body.theme-dark .sidenav svg line,
+body.theme-dark .sidenav svg polyline,
+body.theme-dark .sidenav svg circle {
+  fill: #e5e7eb !important;
+  stroke: #e5e7eb !important;
+}
+
+/* remove any halo/shadow on icons */
+body.theme-dark .sidenav a svg {
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+/* "Create" button at top of sidenav */
+body.theme-dark .sidenav .create-btn {
+  background: #3eb1d4;
+  color: #ffffff;
+  border: none;
+}
+
+body.theme-dark .sidenav .create-btn:hover {
+  filter: brightness(1.1);
+}
+
+/* ============================
+   TOP-RIGHT USER BOX ("Mada")
+   ============================ */
+
+/* make everything in the user-settings area light */
+body.theme-dark .user-settings,
+body.theme-dark .user-settings * {
+  color: #e5e7eb !important;
+}
+
+/* just in case the name has its own special class */
+body.theme-dark .userbox-name,
+body.theme-dark .topbar-userbox span {
+  color: #e5e7eb !important;
+}
+
+/* the small "Theme / Font size" labels in the dropdown */
+body.theme-dark .section-title {
+  color: #e5e7eb;
+}
+
+/* =========================================
+   SETTINGS PAGE – GENERAL LAYOUT
+   ========================================= */
+
+.content-top {
+  padding: 16px 0 8px;
+}
+
+.top-actions{
+  display:flex;
+  align-items:center;
+
+  gap:8px;
+}
+
+/* Avatar + name + blue settings button */
+.user-settings {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* kill the inline margin from render_topbar_userbox */
+.user-settings .topbar {
+  margin: 0 !important;
+}
+
+/* Dropdown */
+.user-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;         /* align under the blue icon on the right */
+  margin-top: 8px;
+  display: none;
+  z-index: 20;
+}
+
+.user-menu.open {
+  display: block;
+}
+
+/* =========================================
+   SETTINGS PAGE – DARK MODE
+   ========================================= */
+
+/* Card wrapper */
+body.theme-dark .form-card {
+  background: #111b32;
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+}
+
+/* Titles + subtitles */
+body.theme-dark .page-title,
+body.theme-dark .section-title {
+  color: #e5e7eb !important;
+}
+
+body.theme-dark .label,
+body.theme-dark .settings-wrap .sub {
+  color: #cbd5e1 !important;
+}
+
+/* Tables + inputs */
+body.theme-dark .input,
+body.theme-dark .textarea,
+body.theme-dark input.input,
+body.theme-dark textarea.input,
+body.theme-dark .cats-table,
+body.theme-dark .cats-table th,
+body.theme-dark .cats-table td {
+  background: #020617;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+body.theme-dark .input::placeholder,
+body.theme-dark .textarea::placeholder {
+  color: #6b7280 !important;
+}
+
+/* Help text */
+body.theme-dark .help {
+  color: #9ca3af !important;
+}
+
+/* File input button */
+body.theme-dark .filebar {
+  background: transparent !important;
+}
+
+body.theme-dark .filebtn {
+  background: #0b1120 !important;
+  color: #e5e7eb !important;
+  border: 1px solid #1e293b !important;
+}
+
+body.theme-dark .filebtn:hover {
+  background: #1e293b !important;
+}
+
+/* Primary buttons inside settings cards */
+body.theme-dark .form-card .btn-primary {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+body.theme-dark .form-card .btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+.content-spacer {
+    flex: 1;
+}
+
+/* ===== Rules / About page — Dark mode ===== */
+
+body.theme-dark .about-header h1,
+body.theme-dark .about-header .lead {
+  color: #e5e7eb;
+}
+
+body.theme-dark .about-card {
+  background: #111b32;
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+}
+
+body.theme-dark .about-body {
+  color: #e5e7eb;
+}
+
+/* links inside rules content */
+body.theme-dark .about-body a {
+  color: var(--primary);
+}
+
+/* Contact page — dark mode */
+
+body.theme-dark .contact-pane h1,
+body.theme-dark .contact-pane .sub,
+body.theme-dark .contact-label {
+  color: #e5e7eb;
+}
+
+body.theme-dark .contact-input,
+body.theme-dark .contact-textarea {
+  background: #020617;
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+}
+
+body.theme-dark .contact-input::placeholder,
+body.theme-dark .contact-textarea::placeholder {
+  color: #6b7280;
+}
+
+body.theme-dark .contact-media {
+  background: #020617;
+}
+
+/* About page — dark mode card & text */
+body.theme-dark .about-card {
+  background: #111b32;
+  border: 1px solid #1e293b;
+  color: #e5e7eb;
+}
+
+body.theme-dark .about-header h1 {
+  color: #e5e7eb;
+}
+
+body.theme-dark .about-body {
+  color: #e5e7eb;
+}
+
+/* ============================
+   ADMIN PAGE – DARK MODE
+   ============================ */
+
+body.theme-dark .admin-subtitle {
+  color: #cbd5e1;
+}
+
+body.theme-dark .admin-item {
+  background: #020617;              /* same dark bg as layout */
+  border: 1px solid #1e293b;
+  box-shadow: 0 10px 25px rgba(15,23,42,0.45);
+}
+
+body.theme-dark .ai-name {
+  color: #e5e7eb;
+}
+
+body.theme-dark .ai-sub {
+  color: #94a3b8;
+}
+
+/* status + role badges */
+body.theme-dark .status-badge {
+  background: #020617;
+  border-color: #1e293b;
+  color: #e5e7eb;
+}
+
+body.theme-dark .status-active {
+  background: #022c22;
+  border-color: #16a34a;
+  color: #bbf7d0;
+}
+
+body.theme-dark .status-blocked {
+  background: #451a03;
+  border-color: #f97316;
+  color: #fed7aa;
+}
+
+body.theme-dark .status-banned {
+  background: #450a0a;
+  border-color: #ef4444;
+  color: #fecaca;
+}
+
+body.theme-dark .role-badge {
+  background: #020617;
+  border-color: #1d4ed8;
+  color: #bfdbfe;
+}
+
+/* ============================
+   PROFILE – DARK MODE
+   ============================ */
+
+body.theme-dark .profile-cover {
+  background: #020617;
+}
+
+body.theme-dark .profile-hero {
+  background: #111b32;
+  border-color: #1e293b;
+}
+
+body.theme-dark .profile-name {
+  color: #e5e7eb;
+}
+
+body.theme-dark .profile-email {
+  color: #cbd5e1;
+}
+
+body.theme-dark .profile-stats {
+  color: #94a3b8;
+}
+
+/* optional: tweak the small cover buttons */
+body.theme-dark .profile-cover .btn-ghost.small {
+  background: #020617;
+  border-color: #1e293b;
+  color: #e5e7eb;
+}
+
+/* ===========================
+   UNIVERSAL INPUT DARK MODE FIX
+   =========================== */
+
+body.theme-dark input,
+body.theme-dark textarea,
+body.theme-dark select {
+  background: #020617 !important;
+  border: 1px solid #1e293b !important;
+  color: #e5e7eb !important;
+}
+
+body.theme-dark input::placeholder,
+body.theme-dark textarea::placeholder {
+  color: #6b7280 !important;
+}
+
+/* Smaller input variant (profile edit) */
+body.theme-dark .input-sm,
+body.theme-dark input.input-sm {
+  background: #020617 !important;
+  border: 1px solid #1e293b !important;
+  color: #e5e7eb !important;
+}
+
+/* File input button */
+body.theme-dark .file-input {
+  background: #0b1120 !important;
+  color: #e5e7eb !important;
+  border: 1px solid #1e293b !important;
+}
+
+/* Dropzone */
+body.theme-dark .dropzone {
+  background: #0b1120 !important;
+  border: 2px dashed #1e293b !important;
+}
+
+body.theme-dark .dz-empty,
+body.theme-dark .dz-preview {
+  background: #020617 !important;
+  color: #e5e7eb !important;
+}
+
+/* Labels */
+body.theme-dark .label-sm,
+body.theme-dark .label {
+  color: #cbd5e1 !important;
+}
+
+/* =========================================================
+   TRUE FIX — Dark Mode Create Form Container
+   ========================================================= */
+body.theme-dark .create-form {
+    background: #111b32 !important;
+    border: 1px solid #0b1120 !important;
+    box-shadow: none !important;
+}
+
+/* Make text readable */
+body.theme-dark .create-form * {
+    color: #e5e7eb !important;
+}
+
+/* Fix label text */
+body.theme-dark .create-form .label,
+body.theme-dark .create-form .label-row label {
+    color: #cbd5e1 !important;
+}
+
+/* Fix placeholder */
+body.theme-dark .create-form input::placeholder,
+body.theme-dark .create-form textarea::placeholder {
+    color: #6b7280 !important;
+}
+
+/* ===== Dark mode fix for ghost buttons ===== */
+
+body.theme-dark .btn-ghost {
+  background: #0f172a !important;     /* dark slate */
+  color: #e5e7eb !important;          /* light text */
+  border: 1px solid #334155 !important;
+}
+
+body.theme-dark .btn-ghost:hover {
+  background: #1e293b !important;     /* slightly lighter on hover */
+  color: #ffffff !important;
+}
+
+.admin-topbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
 }
 

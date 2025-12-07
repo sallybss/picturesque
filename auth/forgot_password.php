@@ -3,6 +3,7 @@ require_once __DIR__ . '/../includes/init.php';
 ?>
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>Forgot Password · Picturesque</title>
@@ -11,6 +12,7 @@ require_once __DIR__ . '/../includes/init.php';
 
   <link rel="stylesheet" href="../public/css/main.css?v=2">
 </head>
+
 <body>
   <div class="auth-wrap">
     <div class="auth-left" style="--auth-bg:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80');"></div>
@@ -39,7 +41,7 @@ require_once __DIR__ . '/../includes/init.php';
             name="login_email"
             placeholder="you@example.com"
             required
-          >
+            maxlength="255">
 
           <button class="btn btn-primary" type="submit">Send reset link</button>
 
@@ -53,4 +55,5 @@ require_once __DIR__ . '/../includes/init.php';
     </div>
   </div>
 </body>
+
 </html>

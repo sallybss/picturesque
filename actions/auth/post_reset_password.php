@@ -34,7 +34,6 @@ if (strlen($password) < 8 || strlen($password) > 32) {
     redirect('../../auth/reset_password.php?token=' . urlencode($token));
 }
 
-// Validate token
 $resets = new PasswordResetRepository();
 $row = $resets->findValidByToken($token);
 
@@ -45,7 +44,6 @@ if (!$row) {
 
 $userId = (int)$row['user_id'];
 
-// Update password in DB
 $hash = password_hash($password, PASSWORD_DEFAULT);
 
 $mysqli = DB::get();
@@ -54,7 +52,6 @@ $stmt->bind_param('si', $hash, $userId);
 $stmt->execute();
 $stmt->close();
 
-// Mark token as used
 $resets->markUsed((int)$row['id']);
 
 set_flash('ok', 'Your password has been reset. You can now sign in.');
