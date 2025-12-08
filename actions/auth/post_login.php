@@ -97,6 +97,8 @@ if (($user['status'] ?? '') !== 'active') {
 
 unset($_SESSION['login_lock_email'], $_SESSION['login_lock_until']);
 
+session_regenerate_id(true);
+
 $_SESSION['profile_id']   = (int)$user['profile_id'];
 $_SESSION['display_name'] = (string)$user['display_name'];
 $_SESSION['role']         = (string)$user['role'];
