@@ -825,25 +825,23 @@ img.c-avatar {
   flex: 1;          
   min-width: 0;
 }
-/* Normal pill */
+
 .pill {
     padding: 8px 12px;
     border: 1px solid var(--line);
     border-radius: 999px;
     font-size: 12px;
     background: #ffffff;
-    color: #374151;              /* neutral gray */
+    color: #374151;      
     text-decoration: none;
     display: inline-block;
     box-shadow: 0 1px 0 rgba(0,0,0,0.02);
 }
 
-/* On hover */
 .pill:hover {
   background: #f3f4f6;        
 }
 
-/* Selected pill */
 .pill.is-selected {
     background: #e8f0fe;         
     border-color: #93c5fd;
@@ -851,8 +849,6 @@ img.c-avatar {
     font-weight: 500;
 }
 
-
-/* main pills row (merged both definitions) */
 .pills {
   display: flex;
   flex-wrap: wrap;
@@ -862,12 +858,10 @@ img.c-avatar {
   overflow: hidden;
 }
 
-
 .pills.is-expanded {
   max-height: 500px;         
 }
 
-/* “See more” link under the pills, left aligned */
 .pill-more {
     border: none;
     background: none;
@@ -1252,7 +1246,6 @@ img.c-avatar {
     margin-top: 10px;
 }
 
-/* Cover */
 .profile-cover {
     position: relative;
     height: 200px;
@@ -1420,7 +1413,6 @@ img.c-avatar {
     border: 1px solid #c7d2fe;
 }
 
-/* --- Admin page mobile polish --- */
 
 @media (max-width: 800px) {
   .content-top { 
@@ -2388,7 +2380,6 @@ body.guest-locked {
   .layout{ grid-template-columns:1fr; margin-top:56px; }
 }
 
-/* Profile cards – compact buttons on mobile */
 @media (max-width: 1000px) {
   .feed .card .meta {
     display: flex;
@@ -2439,7 +2430,7 @@ body.guest-locked {
 }
 
 
-/* ===== Sidebar Close Button (for mobile) ===== */
+/* ===== Sidebar Close Button  ===== */
 .close-btn {
   display: none;
   position: absolute;
@@ -2574,7 +2565,6 @@ body.guest-locked {
       padding: 10px 14px
     }
 
-    /* Guest page: responsive shell */
 @media (max-width: 1000px){
   .guest-main{
     grid-template-columns: 1fr; 
@@ -2762,7 +2752,6 @@ body.sidebar-open .sidebar-backdrop{
 
 /* ===== About page polish ===== */
 
-/* Header + layout */
 .about {
   max-width: 900px;
   margin: 2.5rem auto 3rem;
@@ -2849,7 +2838,6 @@ body.sidebar-open .sidebar-backdrop{
   text-decoration: underline;
 }
 
-/* Mobile tweaks */
 @media (max-width: 700px) {
   .about {
     margin: 1.5rem 1rem 2.5rem;
@@ -2864,7 +2852,6 @@ body.sidebar-open .sidebar-backdrop{
     font-size: 1.5rem;
   }
 }
-
 
 /* --- User settings dropdown --- */
 .user-settings {
@@ -2956,7 +2943,7 @@ body.font-large   { font-size: 18px; }
   align-items: center;
   gap: 10px;
   text-decoration: none;
-  color: #333;               /* light mode color */
+  color: #333;             
 }
 
 .userbox-name {
@@ -2984,7 +2971,7 @@ body.theme-dark .topbar-userbox a {
 }
 
 body.theme-dark .avatar {
-  border-color: #334155 !important; /* dark blue-gray border */
+  border-color: #334155 !important; 
 }
 
 
@@ -3017,7 +3004,7 @@ body.theme-dark .content {
 
 body.theme-dark .card,
 body.theme-dark .hot-card {
-  background: #111b32;         /* dark slate */
+  background: #111b32;        
   color: #e5e7eb;
   border-radius: 16px;
   border: 1px solid #1e293b;
@@ -3085,7 +3072,6 @@ body.theme-dark .filter-label {
   color: #e5e7eb;
 }
 
-/* datalist suggestions */
 body.theme-dark option {
   background: #020617;
   color: #e5e7eb;
@@ -3167,14 +3153,12 @@ body.theme-dark .sidenav a {
   background: transparent;
 }
 
-/* hover & active */
 body.theme-dark .sidenav a:hover,
 body.theme-dark .sidenav a.active {
   background: #0b1120;
   color: #ffffff;
 }
 
-/* icons in sidenav */
 body.theme-dark .sidenav svg path,
 body.theme-dark .sidenav svg line,
 body.theme-dark .sidenav svg polyline,
@@ -3183,7 +3167,6 @@ body.theme-dark .sidenav svg circle {
   stroke: #e5e7eb !important;
 }
 
-/* remove any halo/shadow on icons */
 body.theme-dark .sidenav a svg {
   filter: none !important;
   box-shadow: none !important;
@@ -3200,23 +3183,20 @@ body.theme-dark .sidenav .create-btn:hover {
   filter: brightness(1.1);
 }
 
-/* ============================
-   TOP-RIGHT USER BOX ("Mada")
-   ============================ */
+/* =====================
+   TOP-RIGHT USER BOX 
+   ====================*/
 
-/* make everything in the user-settings area light */
 body.theme-dark .user-settings,
 body.theme-dark .user-settings * {
   color: #e5e7eb !important;
 }
 
-/* just in case the name has its own special class */
 body.theme-dark .userbox-name,
 body.theme-dark .topbar-userbox span {
   color: #e5e7eb !important;
 }
 
-/* the small "Theme / Font size" labels in the dropdown */
 body.theme-dark .section-title {
   color: #e5e7eb;
 }
@@ -3244,7 +3224,6 @@ body.theme-dark .section-title {
   gap: 12px;
 }
 
-/* kill the inline margin from render_topbar_userbox */
 .user-settings .topbar {
   margin: 0 !important;
 }
@@ -3253,7 +3232,7 @@ body.theme-dark .section-title {
 .user-menu {
   position: absolute;
   top: 100%;
-  right: 0;         /* align under the blue icon on the right */
+  right: 0;        
   margin-top: 8px;
   display: none;
   z-index: 20;
@@ -3408,7 +3387,7 @@ body.theme-dark .admin-subtitle {
 }
 
 body.theme-dark .admin-item {
-  background: #020617;              /* same dark bg as layout */
+  background: #020617;            
   border: 1px solid #1e293b;
   box-shadow: 0 10px 25px rgba(15,23,42,0.45);
 }
@@ -3477,7 +3456,6 @@ body.theme-dark .profile-stats {
   color: #94a3b8;
 }
 
-/* optional: tweak the small cover buttons */
 body.theme-dark .profile-cover .btn-ghost.small {
   background: #020617;
   border-color: #1e293b;
@@ -3485,7 +3463,7 @@ body.theme-dark .profile-cover .btn-ghost.small {
 }
 
 /* ===========================
-   UNIVERSAL INPUT DARK MODE FIX
+   UNIVERSAL INPUT DARK MODE 
    =========================== */
 
 body.theme-dark input,
@@ -3501,7 +3479,6 @@ body.theme-dark textarea::placeholder {
   color: #6b7280 !important;
 }
 
-/* Smaller input variant (profile edit) */
 body.theme-dark .input-sm,
 body.theme-dark input.input-sm {
   background: #020617 !important;
@@ -3543,33 +3520,28 @@ body.theme-dark .create-form {
     box-shadow: none !important;
 }
 
-/* Make text readable */
 body.theme-dark .create-form * {
     color: #e5e7eb !important;
 }
 
-/* Fix label text */
 body.theme-dark .create-form .label,
 body.theme-dark .create-form .label-row label {
     color: #cbd5e1 !important;
 }
 
-/* Fix placeholder */
 body.theme-dark .create-form input::placeholder,
 body.theme-dark .create-form textarea::placeholder {
     color: #6b7280 !important;
 }
 
-/* ===== Dark mode fix for ghost buttons ===== */
-
 body.theme-dark .btn-ghost {
-  background: #0f172a !important;     /* dark slate */
-  color: #e5e7eb !important;          /* light text */
+  background: #0f172a !important;     
+  color: #e5e7eb !important;          
   border: 1px solid #334155 !important;
 }
 
 body.theme-dark .btn-ghost:hover {
-  background: #1e293b !important;     /* slightly lighter on hover */
+  background: #1e293b !important;    
   color: #ffffff !important;
 }
 

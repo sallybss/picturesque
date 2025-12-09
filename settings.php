@@ -15,7 +15,7 @@ if (!$isAdmin) {
 }
 
 $MAX_CATEGORIES = 10;
-$catsRepo       = new CategoriesRepository();   // 👈 NEW
+$catsRepo       = new CategoriesRepository();  
 
 $basePath = strtok($_SERVER['REQUEST_URI'], '?');
 

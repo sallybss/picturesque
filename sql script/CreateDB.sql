@@ -34,11 +34,11 @@ CREATE TABLE categories (
 -- Table: pictures
 CREATE TABLE pictures (
     picture_id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    profile_id          BIGINT UNSIGNED NOT NULL, -- FK to profiles
+    profile_id          BIGINT UNSIGNED NOT NULL, 
     picture_title       VARCHAR(150) NOT NULL,
     picture_description TEXT NULL,
     picture_url         VARCHAR(255) NOT NULL,
-    category_id         INT UNSIGNED NULL, -- FK to categories
+    category_id         INT UNSIGNED NULL, 
     likes_count         INT UNSIGNED NOT NULL DEFAULT '0',
     visibility          ENUM('public','hidden') NOT NULL DEFAULT 'public',
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -51,9 +51,9 @@ CREATE TABLE pictures (
 -- Table: comments
 CREATE TABLE comments ( 
     comment_id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    picture_id          BIGINT UNSIGNED NOT NULL, -- FK to pictures
-    profile_id          BIGINT UNSIGNED NOT NULL, -- FK to profiles
-    parent_comment_id   BIGINT UNSIGNED DEFAULT NULL, -- Self-referencing FK for replies
+    picture_id          BIGINT UNSIGNED NOT NULL, 
+    profile_id          BIGINT UNSIGNED NOT NULL, 
+    parent_comment_id   BIGINT UNSIGNED DEFAULT NULL, 
     comment_content     TEXT NOT NULL,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -65,11 +65,11 @@ CREATE TABLE comments (
 -- Table: likes 
 CREATE TABLE likes (
     like_id             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    picture_id          BIGINT UNSIGNED NOT NULL, -- FK
-    profile_id          BIGINT UNSIGNED NOT NULL, -- FK
+    picture_id          BIGINT UNSIGNED NOT NULL, 
+    profile_id          BIGINT UNSIGNED NOT NULL, 
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    UNIQUE ux_likes_unique (picture_id, profile_id), -- Ensures a user can only like a picture once
+    UNIQUE ux_likes_unique (picture_id, profile_id),
     FOREIGN KEY (picture_id) REFERENCES pictures (picture_id),
     FOREIGN KEY (profile_id) REFERENCES profiles (profile_id)
 );
@@ -77,9 +77,9 @@ CREATE TABLE likes (
 -- Table: featured_pictures
 CREATE TABLE featured_pictures (
     id                  BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    picture_id          BIGINT UNSIGNED NOT NULL, -- FK
+    picture_id          BIGINT UNSIGNED NOT NULL, 
     week_start          DATE NOT NULL,
-    created_by          BIGINT UNSIGNED NOT NULL, -- FK to admin profile
+    created_by          BIGINT UNSIGNED NOT NULL, 
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     UNIQUE uk_picture_week (picture_id, week_start),
@@ -89,8 +89,8 @@ CREATE TABLE featured_pictures (
 
 -- Table: picture_category 
 CREATE TABLE picture_category (
-    picture_id          BIGINT UNSIGNED NOT NULL, -- FK part of PK
-    category_id         INT UNSIGNED NOT NULL, -- FK part of PK
+    picture_id          BIGINT UNSIGNED NOT NULL,
+    category_id         INT UNSIGNED NOT NULL, 
 
     PRIMARY KEY (picture_id, category_id),
     FOREIGN KEY (picture_id) REFERENCES pictures (picture_id),
@@ -100,7 +100,7 @@ CREATE TABLE picture_category (
 -- Table: contact_messages
 CREATE TABLE contact_messages (
     id                  BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    profile_id          BIGINT UNSIGNED DEFAULT NULL, -- Optional FK to profiles
+    profile_id          BIGINT UNSIGNED DEFAULT NULL, 
     name                VARCHAR(120) NOT NULL,
     email               VARCHAR(190) NOT NULL,
     company             VARCHAR(190) DEFAULT NULL,
@@ -128,7 +128,7 @@ CREATE TABLE pages (
     title               VARCHAR(200) NOT NULL,
     content             MEDIUMTEXT NOT NULL,
     image_path          VARCHAR(255) DEFAULT NULL,
-    updated_by          BIGINT UNSIGNED DEFAULT NULL, -- FK to profiles
+    updated_by          BIGINT UNSIGNED DEFAULT NULL,
     updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     FOREIGN KEY (updated_by) REFERENCES profiles (profile_id)
@@ -137,7 +137,7 @@ CREATE TABLE pages (
 -- Table: password_resets
 CREATE TABLE password_resets (
     id                  BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    user_id             BIGINT UNSIGNED NOT NULL, -- FK to profiles
+    user_id             BIGINT UNSIGNED NOT NULL, 
     token_hash          CHAR(64) NOT NULL,
     expires_at          DATETIME NOT NULL,
     used_at             DATETIME DEFAULT NULL,
@@ -155,7 +155,7 @@ CREATE TABLE app_settings (
 
 -- 2. TRIGGERS 
 
--- Trigger: trg_likes_after_insert (Updates likes_count on picture insert)
+-- Trigger 1: trg_likes_after_insert (Updates likes_count on picture insert)
 DELIMITER $$
 CREATE TRIGGER trg_likes_after_insert
 AFTER INSERT ON likes FOR EACH ROW
@@ -167,7 +167,7 @@ END$$
 DELIMITER ;
 
 
--- Trigger: trg_likes_after_delete (Updates likes_count on picture delete/unlike)
+-- Trigger 2: trg_likes_after_delete (Updates likes_count on picture delete/unlike)
 DELIMITER $$
 CREATE TRIGGER trg_likes_after_delete
 AFTER DELETE ON likes FOR EACH ROW
@@ -178,7 +178,7 @@ BEGIN
 END$$
 DELIMITER ;
 
--- Trigger: trg_profiles_after_update (Hides pictures when profile is blocked/banned)
+-- Trigger 3: trg_profiles_after_update (Hides pictures when profile is blocked/banned)
 DELIMITER $$
 CREATE TRIGGER trg_profiles_after_update
 AFTER UPDATE ON profiles FOR EACH ROW

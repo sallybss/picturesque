@@ -48,10 +48,6 @@ $ip   = $_SERVER['REMOTE_ADDR'] ?? null;
 $repo = new ContactRepository();
 $repo->create($me, $name, $email, $company, $subject, $message, $ip);
 
-// ---------------------------
-// Send email with PHPMailer 
-// ---------------------------
-
 $smtpHost  = $mailConfig['smtp_host']  ?? '';
 $smtpUser  = $mailConfig['smtp_user']  ?? '';
 $smtpPass  = $mailConfig['smtp_pass']  ?? '';
