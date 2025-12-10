@@ -52,7 +52,7 @@ CREATE TABLE pictures (
 CREATE TABLE comments ( 
     comment_id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     picture_id          BIGINT UNSIGNED NOT NULL, 
-    profile_id          BIGINT UNSIGNED NOT NULL, 
+    profile_id          BIGINT UNSIGNED NOT NULL,
     parent_comment_id   BIGINT UNSIGNED DEFAULT NULL, 
     comment_content     TEXT NOT NULL,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -65,11 +65,11 @@ CREATE TABLE comments (
 -- Table: likes 
 CREATE TABLE likes (
     like_id             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    picture_id          BIGINT UNSIGNED NOT NULL, 
-    profile_id          BIGINT UNSIGNED NOT NULL, 
+    picture_id          BIGINT UNSIGNED NOT NULL,
+    profile_id          BIGINT UNSIGNED NOT NULL,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    UNIQUE ux_likes_unique (picture_id, profile_id),
+    UNIQUE ux_likes_unique (picture_id, profile_id), 
     FOREIGN KEY (picture_id) REFERENCES pictures (picture_id),
     FOREIGN KEY (profile_id) REFERENCES profiles (profile_id)
 );
@@ -77,7 +77,7 @@ CREATE TABLE likes (
 -- Table: featured_pictures
 CREATE TABLE featured_pictures (
     id                  BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    picture_id          BIGINT UNSIGNED NOT NULL, 
+    picture_id          BIGINT UNSIGNED NOT NULL,
     week_start          DATE NOT NULL,
     created_by          BIGINT UNSIGNED NOT NULL, 
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -89,7 +89,7 @@ CREATE TABLE featured_pictures (
 
 -- Table: picture_category 
 CREATE TABLE picture_category (
-    picture_id          BIGINT UNSIGNED NOT NULL,
+    picture_id          BIGINT UNSIGNED NOT NULL, 
     category_id         INT UNSIGNED NOT NULL, 
 
     PRIMARY KEY (picture_id, category_id),
@@ -128,7 +128,7 @@ CREATE TABLE pages (
     title               VARCHAR(200) NOT NULL,
     content             MEDIUMTEXT NOT NULL,
     image_path          VARCHAR(255) DEFAULT NULL,
-    updated_by          BIGINT UNSIGNED DEFAULT NULL,
+    updated_by          BIGINT UNSIGNED DEFAULT NULL, 
     updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     FOREIGN KEY (updated_by) REFERENCES profiles (profile_id)
@@ -153,9 +153,94 @@ CREATE TABLE app_settings (
 );
 
 
--- 2. TRIGGERS 
+-- 2. EXTRA INDEXES (from production DB)
 
--- Trigger 1: trg_likes_after_insert (Updates likes_count on picture insert)
+ALTER TABLE login_attempts
+  ADD KEY idx_email_created (email, created_at),
+  ADD KEY idx_ip_created (ip_address, created_at);
+
+-- profiles (for searching names/usernames)
+ALTER TABLE profiles
+  ADD FULLTEXT KEY ft_name (display_name, username);
+
+ALTER TABLE comments
+  ADD KEY ix_comments_picture (picture_id),
+  ADD KEY ix_comments_profile (profile_id),
+  ADD KEY idx_comments_parent (parent_comment_id);
+
+ALTER TABLE contact_messages
+  ADD KEY idx_cm_profile (profile_id);
+
+ALTER TABLE featured_pictures
+  ADD KEY idx_week (week_start),
+  ADD KEY fk_fp_admin (created_by);
+
+ALTER TABLE likes
+  ADD KEY ix_likes_profile (profile_id);
+
+
+
+-- 3. TEST DATA 
+
+INSERT INTO profiles (
+    profile_id, login_email, password_hash, display_name, username,
+    profile_info, profile_bio, avatar_photo, cover_photo, email,
+    role, status
+) VALUES
+    (1, 'sali_3006@abv.bg',
+     '$2y$12$DLqQEhl8f4Pd7csudVVzdewTbIw9D7lRUn2j5p0MNf2AdtJrTqucS',
+     'salinkaa', 'salinkaa',
+     NULL, NULL, NULL, NULL, NULL,
+     'admin', 'active'),
+
+    (2, 'katy@maill.com',
+     '$2y$12$cD8PbLM7SqRsOEmczytq6.TxVYmDv3kpkhqrpKxlXE1iYDsLv60g6',
+     'katy', 'katy',
+     NULL, NULL, NULL, NULL, NULL,
+     'user', 'active');
+
+
+-- Categories (2 test categories)
+INSERT INTO categories (category_id, category_name, slug, active) VALUES
+    (1, 'Landscape', 'landscape', 1),
+    (2, 'Urban', 'urban', 1);
+
+
+-- Test pictures
+INSERT INTO pictures (
+    picture_id, profile_id, picture_title, picture_description,
+    picture_url, category_id, likes_count, visibility, created_at
+) VALUES
+    (1, 1, 'Sunset Over Mountains',
+     'Warm evening light over the mountain ridge.',
+     '/uploads/test_sunset.jpg', 1, 0, 'public', NOW()),
+
+    (2, 1, 'Forest Path',
+     'A quiet path surrounded by tall green trees.',
+     '/uploads/test_forest.jpg', 2, 0, 'public', NOW()),
+
+    (3, 2, 'Ocean Waves',
+     'Blue waves rolling towards the shore.',
+     '/uploads/test_ocean.jpg', 1, 0, 'public', NOW());
+
+
+-- Test comments
+INSERT INTO comments (
+    comment_id, picture_id, profile_id, parent_comment_id, comment_content, created_at
+) VALUES
+    (1, 1, 2, NULL, 'Beautiful photo, Sali! Love the colors.', NOW());
+
+
+-- Test likes
+INSERT INTO likes (
+    like_id, picture_id, profile_id, created_at
+) VALUES
+    (1, 1, 2, NOW());
+
+
+-- 4. TRIGGERS 
+
+-- Trigger: trg_likes_after_insert 
 DELIMITER $$
 CREATE TRIGGER trg_likes_after_insert
 AFTER INSERT ON likes FOR EACH ROW
@@ -167,7 +252,7 @@ END$$
 DELIMITER ;
 
 
--- Trigger 2: trg_likes_after_delete (Updates likes_count on picture delete/unlike)
+-- Trigger: trg_likes_after_delete 
 DELIMITER $$
 CREATE TRIGGER trg_likes_after_delete
 AFTER DELETE ON likes FOR EACH ROW
@@ -178,7 +263,7 @@ BEGIN
 END$$
 DELIMITER ;
 
--- Trigger 3: trg_profiles_after_update (Hides pictures when profile is blocked/banned)
+-- Trigger: trg_profiles_after_update 
 DELIMITER $$
 CREATE TRIGGER trg_profiles_after_update
 AFTER UPDATE ON profiles FOR EACH ROW
@@ -193,7 +278,7 @@ END$$
 DELIMITER ;
 
 
--- 3. VIEWS 
+-- 5. VIEWS 
 
 -- View: view_active_profiles
 CREATE VIEW view_active_profiles AS 
